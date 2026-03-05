@@ -1,37 +1,63 @@
-# Projeto Integrador III — Grupo 10
+# Nome do App
 
-Monorepo do **Projeto Integrador III** do Grupo 10.
+{Descrição do app} desenvolvido como Projeto Integrador III — UNIVESP,  Grupo 10.
+
+## Tecnologias
+
+| Camada       | Tecnologia                          |
+|--------------|-------------------------------------|
+| Frontend     | Angular 21 + TypeScript + SCSS       |
+| Backend      | Node.js + Vercel Serverless Functions |
+| Banco de dados | PostgreSQL                          |
+| Deploy       | Vercel                              |
+| Controle de versão | GitHub                        |
 
 ## Estrutura do repositório
 
-Este repositório está organizado como um **monorepo**, centralizado em um único repositório Git com múltiplos módulos independentes.
-
 ```
-projeto-integrador-III/
-├── docs/        # Documentação do projeto
-├── api/         # Backend em Node.js com Vercel Functions
-├── database/    # Scripts SQL, migrations, seeds e configurações de banco de dados
-└── frontend/    # Aplicação Angular (frontend)
+/
+├── api/          # Vercel Serverless Functions (rotas do backend)
+├── frontend/     # Aplicação Angular
+├── database/     # Migrações SQL
+├── docs/         # Documentação do projeto
+└── vercel.json   # Configuração de build e roteamento
 ```
 
-## Pastas
+## Como executar localmente
 
-### `/docs`
-Centraliza toda a documentação do projeto: diagramas (UML, ER), especificação de requisitos, atas de reuniões e guias de uso/instalação.
+### Pré-requisitos
 
-### `/api`
-Backend da aplicação desenvolvido em **Node.js** e implantado como **Vercel Functions** (serverless). Contém as rotas da API REST e utilitários do servidor.
+- Node.js >= 24
+- npm >= 10
 
-### `/database`
-Reúne os arquivos relacionados ao banco de dados: scripts de criação de tabelas, migrations para versionamento do esquema, seeds com dados iniciais e configurações de conexão.
+### Frontend
 
-### `/frontend`
-Aplicação web desenvolvida com o framework **Angular**. Responsável pela interface do usuário e comunicação com a API.
+```bash
+cd frontend
+npm install
+npm start
+```
 
-## Como começar
+Acesse `http://localhost:4200`.
 
-Consulte o `README.md` de cada pasta para instruções específicas de configuração e execução de cada módulo.
+### Backend (Vercel Functions)
+
+```bash
+npm install -g vercel
+vercel dev
+```
+
+As funções ficam disponíveis em `http://localhost:3000/api/*`.
+
+## Variáveis de ambiente
+
+Crie um arquivo `.env` na raiz com base no `.env.example`:
+
+```env
+DATABASE_URL=
+JWT_SECRET=
+```
 
 ## Equipe
 
-Grupo 10 — Projeto Integrador III.
+Projeto Integrador III — UNIVESP | Grupo 10
