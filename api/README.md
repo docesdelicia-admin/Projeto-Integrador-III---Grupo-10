@@ -1,34 +1,36 @@
-# API — Backend (Node.js + Vercel Functions)
+# API - Backend (Node.js + Vercel Functions)
 
-Esta pasta contém o backend do projeto, desenvolvido em **Node.js** e implantado via **Vercel Functions** (serverless).
+Esta pasta contem o backend do projeto, usando funcoes serverless da Vercel.
 
-## Tecnologias
+## Estrutura atual
 
-- **Node.js** — ambiente de execução JavaScript no servidor
-- **Vercel Functions** — funções serverless para as rotas da API
-
-## Estrutura sugerida
-
-```
+```text
 api/
-├── api/              # Funções serverless (cada arquivo = uma rota)
-│   ├── users.js      # Exemplo: GET /api/users
-│   └── ...
-├── lib/              # Utilitários e helpers compartilhados
-├── package.json      # Dependências e scripts do projeto
-└── vercel.json       # Configuração de deploy na Vercel
+|- _lib/
+|  |- db.ts
+|  |- types.ts
+|- clientes/
+|  |- index.ts    # /api/clientes
+|- package.json
+|- tsconfig.json
 ```
 
-## Como executar localmente
+## Como validar localmente
 
 ```bash
-# Instalar dependências
-npm install
+# instalar dependencias da API
+npm install --prefix api
 
-# Iniciar servidor de desenvolvimento
-npm run dev
+# validar tipos TypeScript
+npx tsc --noEmit -p api/tsconfig.json
 ```
 
-## Deploy
+## Execucao local integrada (frontend + api)
 
-O deploy é realizado automaticamente pela Vercel ao fazer push para a branch principal.
+Use o comando abaixo na raiz do repositorio para rodar o ambiente local da Vercel:
+
+```bash
+vercel dev
+```
+
+As rotas da API ficam disponiveis em /api/*.

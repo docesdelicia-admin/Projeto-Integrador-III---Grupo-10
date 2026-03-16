@@ -1,38 +1,39 @@
-# Frontend — Aplicação Angular
+# Frontend - Doces Delicia
 
-Esta pasta contém o frontend do projeto, desenvolvido com o framework **Angular**.
+Aplicacao frontend do projeto, desenvolvida em Angular 21.
 
-## Tecnologias
+## Scripts principais
 
-- **Angular** — framework para desenvolvimento de aplicações web SPA (Single Page Application)
-- **TypeScript** — linguagem principal para o desenvolvimento dos componentes
-- **HTML / SCSS** — estrutura e estilização das interfaces
+```bash
+# desenvolvimento local
+npm start
 
-## Estrutura sugerida
+# build de producao
+npm run build
 
+# testes
+npm test
 ```
+
+## Estrutura principal
+
+```text
 frontend/
-├── src/
-│   ├── app/          # Módulos, componentes, serviços e rotas
-│   ├── assets/       # Imagens, fontes e outros recursos estáticos
-│   └── environments/ # Configurações de ambiente (dev/prod)
-├── angular.json      # Configuração do projeto Angular
-├── package.json      # Dependências e scripts
-└── tsconfig.json     # Configuração do TypeScript
+|- src/
+|  |- app/
+|  |- index.html
+|  |- main.ts
+|- public/
+|- angular.json
+|- package.json
 ```
 
-## Como executar localmente
+## Build para Vercel
 
-```bash
-# Instalar dependências
-npm install
+O deploy usa o build gerado em:
 
-# Iniciar servidor de desenvolvimento (http://localhost:4200)
-ng serve
+```text
+frontend/dist/doces-delicia/browser
 ```
 
-## Build para produção
-
-```bash
-ng build --configuration production
-```
+Essa saida ja esta integrada no `vercel.json` da raiz do repositorio.
