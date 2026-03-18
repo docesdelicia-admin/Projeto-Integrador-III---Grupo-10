@@ -12,6 +12,11 @@ api/dist/
 .env
 .env.local
 .env.*.local
+.env.development
+api/.env
+api/.env.local
+api/.env.*.local
+api/.env.development
 
 # Arquivos de log
 npm-debug.log*
