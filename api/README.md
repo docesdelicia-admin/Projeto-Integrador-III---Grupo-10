@@ -38,59 +38,25 @@ npm install --prefix api
 npx tsc --noEmit -p api/tsconfig.json
 ```
 
-## Variaveis de ambiente (Neon)
+## Comandos de banco (migrations)
 
-Use o arquivo `api/.env.development` para desenvolvimento local (ignorado no Git por segurança).
+Comandos executados a partir da raiz do repositorio:
 
-Variaveis obrigatorias:
+```bash
+# aplica migrations pendentes em Development
+npm run db:migrate:dev --prefix api
 
-- `DATABASE_URL` (connection string do Neon com `sslmode=require`)
-- `JWT_SECRET`
+# aplica migrations pendentes em Production
+npm run db:migrate:prod --prefix api
 
-Variaveis opcionais de pool:
+# cria/atualiza usuario base em Development
+npm run db:user:dev --prefix api -- --email "email-oficial@seudominio.com" --password "SENHA_FORTE_DEV"
 
-- `DB_POOL_MAX` (padrao: `10`)
-- `DB_IDLE_TIMEOUT_MS` (padrao: `30000`)
-- `DB_CONNECT_TIMEOUT_MS` (padrao: `10000`)
-- `JWT_EXPIRES_IN` (padrao: `8h`)
-- `BCRYPT_SALT_ROUNDS` (padrao: `12`)
+# cria/atualiza usuario base em Production
+npm run db:user:prod --prefix api -- --email "email-oficial@seudominio.com" --password "SENHA_FORTE_PROD"
+```
 
-## Rotas de autenticacao
-
-- `POST /api/auth/login` -> retorna token JWT Bearer
-- `GET /api/auth/me` -> valida token e retorna dados do usuario logado
-
-## Rotas de usuarios
-
-### Listagem (requer admin)
-
-- `GET /api/usuarios` -> lista todos os usuarios (requer autenticacao + admin)
-
-### Criar (requer admin)
-
-- `POST /api/usuarios/criar` -> cria um novo usuario (requer autenticacao + admin)
-
-### Buscar (requer autenticacao)
-
-- `GET /api/usuarios/:id` -> busca um usuario por ID
-  - Admin pode buscar qualquer usuario
-  - Operador pode buscar apenas a si mesmo
-
-### Editar (requer autenticacao)
-
-- `PUT /api/usuarios/editar/:id` -> edita dados de um usuario
-  - Admin pode editar qualquer usuario (todos os campos)
-  - Operador pode editar apenas a si mesmo (exceto tipo_usuario)
-
-### Deletar (requer admin)
-
-- `DELETE /api/usuarios/deletar/:id` -> exclui um usuario (requer autenticacao + admin)
-
-## Observacao de acesso publico
-
-- Atualmente, todas as rotas de negocio exigem autenticacao JWT.
-- A unica rota publica da API continua sendo `POST /api/auth/login` por necessidade tecnica (obter token).
-- A visualizacao publica de produtos sera adicionada futuramente em rota especifica de produtos.
+Observacao: para criar novas tabelas/colunas, adicione um novo arquivo SQL em `database/migrations` com prefixo numerico (exemplo: `002_nova_tabela.sql`) e rode `db:migrate:dev`.
 
 ## Execucao local integrada (frontend + api)
 

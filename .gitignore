@@ -11,6 +11,8 @@ api/dist/
 # Variáveis de ambiente
 .env
 .env.local
+.env.development
+.env.production
 .env.*.local
 .env.development
 api/.env
@@ -34,3 +36,5 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+.vercel
+.env*.local

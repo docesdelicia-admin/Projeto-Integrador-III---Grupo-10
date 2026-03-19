@@ -1,24 +1,57 @@
-# Database — Banco de Dados
+# Database - Banco de Dados
 
-Esta pasta contém todos os arquivos relacionados ao banco de dados do projeto.
+Esta pasta guarda as migrations SQL versionadas do projeto.
 
-## Conteúdo esperado
-
-- **Scripts SQL** — scripts de criação e configuração das tabelas e demais objetos do banco.
-- **Migrations** — arquivos de migração para versionamento do esquema do banco de dados.
-- **Seeds** — dados iniciais (fixtures) para popular o banco em ambiente de desenvolvimento e testes.
-- **Configurações** — arquivos de configuração de conexão e variáveis de ambiente relacionadas ao banco.
-
-## Estrutura sugerida
+## Estrutura atual
 
 ```
 database/
-├── migrations/       # Scripts de migração (versionados)
-├── seeds/            # Dados iniciais para desenvolvimento/testes
-├── scripts/          # Scripts SQL utilitários (backup, limpeza, etc.)
-└── config/           # Configurações de conexão com o banco
+|- migrations/
+|  |- 001_tabela_usuarios.sql
+|- README.md
 ```
 
-## Tecnologias
+## Objetivo
 
-O banco de dados utilizado será definido pela equipe. Exemplos comuns: **PostgreSQL**, **MySQL** ou **SQLite**.
+Facilitar criacao e alteracao de tabelas em Development e Production com os mesmos comandos.
+
+## Fluxo recomendado
+
+1. Criar uma nova migration em `database/migrations` com prefixo numerico.
+2. Rodar `db:migrate:dev` para aplicar todas as migrations pendentes no Development.
+3. Validar no ambiente de desenvolvimento.
+4. Rodar `db:migrate:prod` para aplicar as mesmas migrations pendentes no Production.
+
+Exemplo de nome de migration:
+
+- `002_adicionar_coluna_telefone_usuarios.sql`
+
+## Comandos
+
+A partir da raiz do repositorio:
+
+```bash
+npm install --prefix api
+
+# Aplica pendencias em Development
+npm run db:migrate:dev --prefix api
+
+# Aplica pendencias em Production
+npm run db:migrate:prod --prefix api
+
+# Cria/atualiza usuario base por email
+npm run db:user:dev --prefix api -- --email "email-oficial@seudominio.com" --password "SENHA_FORTE_DEV"
+npm run db:user:prod --prefix api -- --email "email-oficial@seudominio.com" --password "SENHA_FORTE_PROD"
+```
+
+## Como funciona internamente
+
+- O script de migration aplica apenas arquivos pendentes que seguem o padrao `NNN_nome.sql`.
+- O historico de execucao fica salvo na tabela `schema_migrations`.
+- O script utilitario `db:run-sql` continua disponivel para executar um arquivo SQL especifico.
+
+## Scripts de suporte
+
+- `api/scripts/db-migrate-all.mjs`
+- `api/scripts/db-run-sql.mjs`
+- `api/scripts/db-upsert-base-user.mjs`
