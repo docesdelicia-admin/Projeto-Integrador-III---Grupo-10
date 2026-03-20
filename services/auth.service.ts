@@ -1,8 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { AuthError, gerarAccessToken } from '../_lib/auth';
-import pool from '../_lib/db';
-import { validarSenha } from '../_lib/password';
-import type { TipoUsuario } from '../_lib/types';
+import { AuthError, autenticarRequisicao, gerarAccessToken } from '../api/_lib/auth';
+import { validarSenha } from '../api/_lib/password';
+import type { TipoUsuario } from '../api/_lib/types';
 
 interface LoginBody {
   email?: string;
@@ -40,26 +39,23 @@ function validarEntradaLogin(body: LoginBody): { email: string; senha: string } 
 
   const email = body.email.trim().toLowerCase();
   const senha = body.senha.trim();
-  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!email || !senha) {
     throw new AuthError('Email e senha sao obrigatorios.', 400);
   }
 
-  if (!EMAIL_REGEX.test(email)) {
+  if (!emailRegex.test(email)) {
     throw new AuthError('Email invalido.', 400);
   }
 
   return { email, senha };
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ erro: 'Metodo nao permitido' });
-  }
-
+export async function autenticarLogin(req: VercelRequest, res: VercelResponse) {
   try {
+    const { default: pool } = await import('../api/_lib/db');
+
     const body = obterBody(req);
     const { email, senha } = validarEntradaLogin(body);
 
@@ -107,5 +103,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     return res.status(500).json({ erro: 'Erro interno ao autenticar usuario.Tente novamente mais tarde.' });
+  }
+}
+
+export async function obterSessaoAutenticada(req: VercelRequest, res: VercelResponse) {
+  try {
+    const usuario = autenticarRequisicao(req);
+
+    return res.status(200).json({ usuario });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return res.status(error.statusCode).json({ erro: error.message });
+    }
+
+    return res.status(500).json({ erro: 'Erro interno ao validar token.' });
   }
 }
