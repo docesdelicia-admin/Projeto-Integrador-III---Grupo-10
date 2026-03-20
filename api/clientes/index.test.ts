@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockReq, createMockRes } from '../tests/http-mocks';
 
 const mockedAutenticarRequisicao = vi.hoisted(() => vi.fn());
+const mockedPoolQuery = vi.hoisted(() => vi.fn());
 
 vi.mock('../_lib/auth', async () => {
   const actual = await vi.importActual<typeof import('../_lib/auth')>('../_lib/auth');
@@ -11,6 +12,12 @@ vi.mock('../_lib/auth', async () => {
     autenticarRequisicao: mockedAutenticarRequisicao,
   };
 });
+
+vi.mock('../_lib/db', () => ({
+  default: {
+    query: mockedPoolQuery,
+  },
+}));
 
 describe('GET /api/clientes', () => {
   beforeEach(() => {
@@ -22,23 +29,36 @@ describe('GET /api/clientes', () => {
   it('retorna 405 quando o metodo nao e GET', async () => {
     const { default: handler } = await import('./index');
     const { res, state } = createMockRes();
-    const req = createMockReq({ method: 'POST' });
+    const req = createMockReq({ method: 'OPTIONS' });
 
     await handler(req, res);
 
     expect(state.statusCode).toBe(405);
-    expect(state.headers.Allow).toBe('GET');
+    expect(state.headers.Allow).toBe('GET, POST, PUT, DELETE');
   });
 
-  it('retorna mensagem com usuario autenticado', async () => {
+  it('retorna lista de clientes quando autenticado', async () => {
     const { default: handler } = await import('./index');
 
     mockedAutenticarRequisicao.mockReturnValue({
-      sub: '2',
-      id: 2,
-      nome: 'Operador',
-      email: 'operador@teste.com',
-      tipo_usuario: 'operador',
+      sub: '1',
+      id: 1,
+      nome: 'Admin',
+      email: 'admin@teste.com',
+      tipo_usuario: 'admin',
+    });
+
+    mockedPoolQuery.mockResolvedValueOnce({
+      rows: [
+        {
+          id: 'uuid-1',
+          nome: 'Cliente 1',
+          telefone: '1234567890',
+          observacoes: 'Cliente importante',
+          criado_em: '2024-03-20T10:00:00Z',
+        },
+      ],
+      rowCount: 1,
     });
 
     const { res, state } = createMockRes();
@@ -48,14 +68,16 @@ describe('GET /api/clientes', () => {
 
     expect(state.statusCode).toBe(200);
     expect(state.jsonBody).toEqual({
-      mensagem: 'API de clientes em construcao',
-      usuarioLogado: {
-        sub: '2',
-        id: 2,
-        nome: 'Operador',
-        email: 'operador@teste.com',
-        tipo_usuario: 'operador',
-      },
+      total: 1,
+      clientes: [
+        {
+          id: 'uuid-1',
+          nome: 'Cliente 1',
+          telefone: '1234567890',
+          observacoes: 'Cliente importante',
+          criado_em: '2024-03-20T10:00:00Z',
+        },
+      ],
     });
   });
 

@@ -1,30 +1,25 @@
 /**
- * Endpoint de clientes (em construcao)
+ * Endpoint de clientes
  * Requer autenticacao com JWT Bearer token
- * Demonstra como proteger rotas com validacao de token
+ * Admin: criar, editar, deletar clientes
+ * Operador: criar, editar clientes
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { AuthError, autenticarRequisicao } from '../_lib/auth';
+import { listarClientes, criarCliente, editarCliente, deletarCliente } from '../../services/clientes.service';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'GET') {
-    res.setHeader('Allow', 'GET');
-    return res.status(405).json({ erro: 'Metodo nao permitido' });
-  }
-
-  try {
-    const usuario = autenticarRequisicao(req);
-
-    return res.status(200).json({
-      mensagem: 'API de clientes em construcao',
-      usuarioLogado: usuario,
-    });
-  } catch (error) {
-    if (error instanceof AuthError) {
-      return res.status(error.statusCode).json({ erro: error.message });
-    }
-
-    return res.status(500).json({ erro: 'Erro interno ao validar token' });
+  switch (req.method) {
+    case 'GET':
+      return await listarClientes(req, res);
+    case 'POST':
+      return await criarCliente(req, res);
+    case 'PUT':
+      return await editarCliente(req, res);
+    case 'DELETE':
+      return await deletarCliente(req, res);
+    default:
+      res.setHeader('Allow', 'GET, POST, PUT, DELETE');
+      return res.status(405).json({ erro: 'Metodo nao permitido' });
   }
 }
