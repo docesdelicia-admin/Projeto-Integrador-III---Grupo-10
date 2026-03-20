@@ -17,22 +17,22 @@ vi.mock('../_lib/auth', async () => {
   };
 });
 
-describe('GET /api/usuarios', () => {
+describe('/api/usuarios', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
     process.env.JWT_SECRET = 'test-secret';
   });
 
-  it('retorna 405 quando o metodo nao e GET', async () => {
+  it('retorna 405 quando o metodo nao e suportado', async () => {
     const { default: handler } = await import('./index');
     const { res, state } = createMockRes();
-    const req = createMockReq({ method: 'POST' });
+    const req = createMockReq({ method: 'OPTIONS' });
 
     await handler(req, res);
 
     expect(state.statusCode).toBe(405);
-    expect(state.headers.Allow).toBe('GET');
+    expect(state.headers.Allow).toBe('GET, POST, PUT, DELETE');
     expect(state.jsonBody).toEqual({ erro: 'Metodo nao permitido' });
   });
 
