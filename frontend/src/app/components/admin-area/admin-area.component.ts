@@ -13,14 +13,19 @@ export class AdminAreaComponent {
   @Input() rotulo = 'Area administrativa';
 
   carregando = false;
+  sessaoAtiva = false;
 
   constructor(
     private readonly router: Router,
     private readonly authApiService: AuthApiService,
-  ) {}
+  ) {
+    this.authApiService.validarSessao().subscribe((autenticado) => {
+      this.sessaoAtiva = autenticado;
+    });
+  }
 
   temSessaoAtiva(): boolean {
-    return this.authApiService.possuiToken();
+    return this.sessaoAtiva;
   }
 
   irParaLogin(): void {
@@ -33,11 +38,13 @@ export class AdminAreaComponent {
     this.authApiService.logout().subscribe({
       next: () => {
         this.carregando = false;
+        this.sessaoAtiva = false;
         void this.router.navigateByUrl('/');
       },
       error: () => {
         this.carregando = false;
         this.authApiService.removerToken();
+        this.sessaoAtiva = false;
         void this.router.navigateByUrl('/');
       },
     });

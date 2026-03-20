@@ -55,8 +55,6 @@ describe('LoginPage', () => {
 
   it('envia login e redireciona para dashboard quando autenticado', () => {
     const resposta: LoginResponse = {
-      token: 'token-valido',
-      tipo_token: 'Bearer',
       expira_em: '8h',
       usuario: {
         id: 1,

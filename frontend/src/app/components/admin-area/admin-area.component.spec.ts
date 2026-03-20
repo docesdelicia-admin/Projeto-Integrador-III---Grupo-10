@@ -9,7 +9,7 @@ describe('AdminAreaComponent', () => {
   let fixture: ComponentFixture<AdminAreaComponent>;
   let component: AdminAreaComponent;
   let authApiServiceSpy: {
-    possuiToken: ReturnType<typeof vi.fn>;
+    validarSessao: ReturnType<typeof vi.fn>;
     logout: ReturnType<typeof vi.fn>;
     removerToken: ReturnType<typeof vi.fn>;
   };
@@ -19,7 +19,7 @@ describe('AdminAreaComponent', () => {
 
   beforeEach(async () => {
     authApiServiceSpy = {
-      possuiToken: vi.fn(),
+      validarSessao: vi.fn(),
       logout: vi.fn(),
       removerToken: vi.fn(),
     };
@@ -40,7 +40,7 @@ describe('AdminAreaComponent', () => {
   });
 
   it('mostra botao de login quando nao ha sessao', () => {
-    authApiServiceSpy.possuiToken.mockReturnValue(false);
+    authApiServiceSpy.validarSessao.mockReturnValue(of(false));
 
     fixture.detectChanges();
 
@@ -49,7 +49,7 @@ describe('AdminAreaComponent', () => {
   });
 
   it('navega para login ao clicar no botao de login', () => {
-    authApiServiceSpy.possuiToken.mockReturnValue(false);
+    authApiServiceSpy.validarSessao.mockReturnValue(of(false));
 
     fixture.detectChanges();
 
@@ -60,7 +60,7 @@ describe('AdminAreaComponent', () => {
   });
 
   it('executa logout e redireciona para home quando ha sessao', () => {
-    authApiServiceSpy.possuiToken.mockReturnValue(true);
+    authApiServiceSpy.validarSessao.mockReturnValue(of(true));
     authApiServiceSpy.logout.mockReturnValue(of({ mensagem: 'Logout realizado com sucesso.' }));
 
     fixture.detectChanges();

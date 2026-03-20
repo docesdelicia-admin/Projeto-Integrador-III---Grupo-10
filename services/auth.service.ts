@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { AuthError, autenticarRequisicao, gerarAccessToken } from '../api/_lib/auth';
+import { AuthError, autenticarRequisicao, criarCookieSessao, criarCookieSessaoEncerrada, gerarAccessToken } from '../api/_lib/auth';
 import { validarSenha } from '../api/_lib/password';
 import type { TipoUsuario } from '../api/_lib/types';
 
@@ -82,9 +82,9 @@ export async function autenticarLogin(req: VercelRequest, res: VercelResponse) {
       tipo_usuario: usuario.tipo_usuario,
     });
 
+    res.setHeader('Set-Cookie', criarCookieSessao(token));
+
     return res.status(200).json({
-      token,
-      tipo_token: 'Bearer',
       expira_em: process.env.JWT_EXPIRES_IN ?? '8h',
       usuario: {
         id: usuario.id,
@@ -121,15 +121,6 @@ export async function obterSessaoAutenticada(req: VercelRequest, res: VercelResp
 }
 
 export async function logout(req: VercelRequest, res: VercelResponse) {
-  try {
-    autenticarRequisicao(req);
-
-    return res.status(200).json({ mensagem: 'Logout realizado com sucesso.' });
-  } catch (error) {
-    if (error instanceof AuthError) {
-      return res.status(error.statusCode).json({ erro: error.message });
-    }
-
-    return res.status(500).json({ erro: 'Erro interno ao realizar logout.' });
-  }
+  res.setHeader('Set-Cookie', criarCookieSessaoEncerrada());
+  return res.status(200).json({ mensagem: 'Logout realizado com sucesso.' });
 }
