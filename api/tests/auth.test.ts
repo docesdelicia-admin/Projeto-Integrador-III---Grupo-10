@@ -61,6 +61,30 @@ describe('auth utils', () => {
 		expect(usuario.tipo_usuario).toBe('operador');
 	});
 
+	it('autentica requisicao a partir do cookie de sessao', async () => {
+		const { autenticarRequisicao, criarCookieSessao, gerarAccessToken } = await import('../_lib/auth');
+
+		const token = gerarAccessToken({
+			id: 3,
+			nome: 'Admin Cookie',
+			email: 'cookie@teste.com',
+			tipo_usuario: 'admin',
+		});
+
+		const cookieHeader = criarCookieSessao(token).split(';')[0];
+
+		const req = createMockReq({
+			headers: {
+				cookie: cookieHeader,
+			},
+		});
+
+		const usuario = autenticarRequisicao(req);
+
+		expect(usuario.id).toBe(3);
+		expect(usuario.email).toBe('cookie@teste.com');
+	});
+
 	it('valida permissao de admin e acesso ao proprio usuario', async () => {
 		const { verificarAdminAutorizado, verificarPermissaoAcesso } = await import('../_lib/auth');
 
