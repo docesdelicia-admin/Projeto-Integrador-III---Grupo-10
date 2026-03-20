@@ -12,7 +12,7 @@ interface UsuarioLoginRow {
   id: number;
   nome: string;
   email: string;
-  senha: string;
+  senha_hash: string;
   tipo_usuario: TipoUsuario;
 }
 
@@ -60,7 +60,7 @@ export async function autenticarLogin(req: VercelRequest, res: VercelResponse) {
     const { email, senha } = validarEntradaLogin(body);
 
     const resultado = await pool.query<UsuarioLoginRow>(
-      'SELECT id, nome, email, senha, tipo_usuario FROM usuarios WHERE email = $1 LIMIT 1',
+      'SELECT id, nome, email, senha_hash, tipo_usuario FROM usuarios WHERE email = $1 LIMIT 1',
       [email],
     );
 
@@ -69,7 +69,7 @@ export async function autenticarLogin(req: VercelRequest, res: VercelResponse) {
     }
 
     const usuario = resultado.rows[0];
-    const senhaValida = await validarSenha(senha, usuario.senha);
+    const senhaValida = await validarSenha(senha, usuario.senha_hash);
 
     if (!senhaValida) {
       throw new AuthError('Credenciais invalidas.');
