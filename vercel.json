@@ -3,7 +3,25 @@
   "buildCommand": "npm run build --prefix frontend",
   "outputDirectory": "frontend/dist/doces-delicia/browser",
   "functions": {
-    "api/**/*.ts": {
+    "api/auth/index.ts": {
+      "runtime": "@vercel/node@5.1.4"
+    },
+    "api/clientes/index.ts": {
+      "runtime": "@vercel/node@5.1.4"
+    },
+    "api/insumos/index.ts": {
+      "runtime": "@vercel/node@5.1.4"
+    },
+    "api/estoque_insumos/index.ts": {
+      "runtime": "@vercel/node@5.1.4"
+    },
+    "api/pedidos/index.ts": {
+      "runtime": "@vercel/node@5.1.4"
+    },
+    "api/produtos/index.ts": {
+      "runtime": "@vercel/node@5.1.4"
+    },
+    "api/usuarios/index.ts": {
       "runtime": "@vercel/node@5.1.4"
     }
   },
