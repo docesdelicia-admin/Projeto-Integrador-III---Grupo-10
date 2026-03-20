@@ -3,9 +3,11 @@ import { createMockReq, createMockRes } from '../tests/http-mocks';
 
 const mockedAutenticarLogin = vi.hoisted(() => vi.fn());
 const mockedObterSessaoAutenticada = vi.hoisted(() => vi.fn());
+const mockedLogout = vi.hoisted(() => vi.fn());
 
 vi.mock('../../services/auth.service', () => ({
   autenticarLogin: mockedAutenticarLogin,
+  logout: mockedLogout,
   obterSessaoAutenticada: mockedObterSessaoAutenticada,
 }));
 
@@ -16,6 +18,7 @@ describe('/api/auth', () => {
 
     mockedAutenticarLogin.mockResolvedValue(undefined);
     mockedObterSessaoAutenticada.mockResolvedValue(undefined);
+    mockedLogout.mockResolvedValue(undefined);
   });
 
   it('retorna 405 quando metodo nao e suportado', async () => {
@@ -26,9 +29,10 @@ describe('/api/auth', () => {
     await handler(req, res);
 
     expect(state.statusCode).toBe(405);
-    expect(state.headers.Allow).toBe('GET, POST');
+    expect(state.headers.Allow).toBe('GET, POST, DELETE');
     expect(state.jsonBody).toEqual({ erro: 'Metodo nao permitido' });
     expect(mockedAutenticarLogin).not.toHaveBeenCalled();
+    expect(mockedLogout).not.toHaveBeenCalled();
     expect(mockedObterSessaoAutenticada).not.toHaveBeenCalled();
   });
 
@@ -54,5 +58,19 @@ describe('/api/auth', () => {
     expect(mockedObterSessaoAutenticada).toHaveBeenCalledTimes(1);
     expect(mockedObterSessaoAutenticada).toHaveBeenCalledWith(req, res);
     expect(mockedAutenticarLogin).not.toHaveBeenCalled();
+    expect(mockedLogout).not.toHaveBeenCalled();
+  });
+
+  it('delega DELETE para logout', async () => {
+    const { default: handler } = await import('./index');
+    const { res } = createMockRes();
+    const req = createMockReq({ method: 'DELETE' });
+
+    await handler(req, res);
+
+    expect(mockedLogout).toHaveBeenCalledTimes(1);
+    expect(mockedLogout).toHaveBeenCalledWith(req, res);
+    expect(mockedAutenticarLogin).not.toHaveBeenCalled();
+    expect(mockedObterSessaoAutenticada).not.toHaveBeenCalled();
   });
 });

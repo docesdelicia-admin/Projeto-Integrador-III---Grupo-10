@@ -1,0 +1,12 @@
+<header class="app-header">
+  <a class="brand" routerLink="/">{{ titulo }}</a>
+
+  @if (exibirBusca) {
+  <label class="search-box" for="search-input" aria-label="Buscar produtos">
+    <span>Buscar</span>
+    <input id="search-input" type="search" [placeholder]="placeholderBusca" />
+  </label>
+  }
+
+  <app-admin-area></app-admin-area>
+</header>
