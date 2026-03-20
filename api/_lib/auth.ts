@@ -103,10 +103,16 @@ export function verificarAdminAutorizado(usuario: JwtUsuarioPayload): void {
 
 export function verificarPermissaoAcesso(usuario: JwtUsuarioPayload, usuarioIdSolicitado: number): void {
   if (usuario.tipo_usuario === 'admin') {
-    return; 
+    return;
   }
 
   if (usuario.id !== usuarioIdSolicitado) {
     throw new AuthError('Acesso Restrito a Administradores.', 403);
+  }
+}
+
+export function verificarPermissaoDeletar(usuario: JwtUsuarioPayload): void {
+  if (usuario.tipo_usuario !== 'admin') {
+    throw new AuthError('Apenas administradores podem deletar dados.', 403);
   }
 }
