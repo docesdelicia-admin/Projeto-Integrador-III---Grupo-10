@@ -1,0 +1,197 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 15% 20%, #ffd6b3 0%, transparent 35%),
+    radial-gradient(circle at 80% 10%, #ffd9e7 0%, transparent 30%),
+    linear-gradient(135deg, #fff6e8 0%, #fffaf4 55%, #ffeede 100%);
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+}
+
+.login-page {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.brand-panel,
+.form-panel {
+  border-radius: 1.5rem;
+  padding: 2.25rem;
+  box-shadow: 0 20px 45px rgba(103, 58, 29, 0.12);
+}
+
+.brand-panel {
+  background: linear-gradient(160deg, #fff0d9 0%, #ffd7ad 100%);
+  color: #5b2f16;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.tag {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  font-size: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.brand-panel h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  line-height: 1.15;
+  font-family: 'Space Grotesk', 'Poppins', sans-serif;
+}
+
+.description {
+  margin-top: 1rem;
+  max-width: 34ch;
+  line-height: 1.6;
+}
+
+.form-panel {
+  background: #ffffff;
+  color: #2f2a24;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.form-panel h2 {
+  margin: 0;
+  font-size: 2rem;
+  font-family: 'Space Grotesk', 'Poppins', sans-serif;
+}
+
+.subtitle {
+  margin: 0.5rem 0 1.5rem;
+  color: #6a6055;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+label {
+  font-weight: 600;
+  margin-top: 0.35rem;
+}
+
+input {
+  border: 1px solid #dfd3c4;
+  border-radius: 0.75rem;
+  padding: 0.8rem 0.9rem;
+  font-size: 1rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.senha-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.senha-field input {
+  width: 100%;
+  padding-right: 2.9rem;
+}
+
+.senha-toggle {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  border: 0;
+  border-radius: 0.55rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: #6a6055;
+  cursor: pointer;
+}
+
+.senha-toggle svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.senha-toggle:hover {
+  background: rgba(217, 111, 53, 0.12);
+}
+
+input:focus {
+  outline: none;
+  border-color: #db8f4c;
+  box-shadow: 0 0 0 3px rgba(219, 143, 76, 0.2);
+}
+
+.submit-button {
+  margin-top: 1rem;
+  border: 0;
+  border-radius: 0.85rem;
+  padding: 0.9rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, #d96f35, #bf3b2b);
+  color: #fff;
+  transition:
+    transform 0.15s ease,
+    filter 0.2s ease;
+}
+
+.submit-button:hover:enabled {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.submit-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #bf3b2b;
+  min-height: 1.1rem;
+}
+
+.feedback {
+  margin-top: 0.85rem;
+  font-weight: 600;
+}
+
+.feedback.success {
+  color: #216c3f;
+}
+
+.feedback.error {
+  color: #bf3b2b;
+}
+
+@media (max-width: 900px) {
+  .login-page {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .brand-panel,
+  .form-panel {
+    padding: 1.5rem;
+  }
+}
