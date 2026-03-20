@@ -2,12 +2,23 @@
   "name": "vercel-functions-api",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit -p tsconfig.json",
+    "db:run-sql": "node ./scripts/db-run-sql.mjs",
+    "db:migrate:dev": "node ./scripts/db-migrate-all.mjs --env ../.env.development",
+    "db:migrate:prod": "node ./scripts/db-migrate-all.mjs --env ../.env.production",
+    "db:user:dev": "node ./scripts/db-upsert-base-user.mjs --env ../.env.development",
+    "db:user:prod": "node ./scripts/db-upsert-base-user.mjs --env ../.env.production"
+  },
   "engines": {
     "node": "22.x"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.3",
+    "@neondatabase/serverless": "^1.0.1",
     "pg": "^8.13.3"
   },
   "devDependencies": {
@@ -15,6 +26,7 @@
     "@types/node": "^22.0.0",
     "@types/pg": "^8.11.10",
     "@vercel/node": "^5.1.4",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.8"
   }
 }
