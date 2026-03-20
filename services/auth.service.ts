@@ -119,3 +119,17 @@ export async function obterSessaoAutenticada(req: VercelRequest, res: VercelResp
     return res.status(500).json({ erro: 'Erro interno ao validar token.' });
   }
 }
+
+export async function logout(req: VercelRequest, res: VercelResponse) {
+  try {
+    autenticarRequisicao(req);
+
+    return res.status(200).json({ mensagem: 'Logout realizado com sucesso.' });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return res.status(error.statusCode).json({ erro: error.message });
+    }
+
+    return res.status(500).json({ erro: 'Erro interno ao realizar logout.' });
+  }
+}
