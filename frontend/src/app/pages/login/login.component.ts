@@ -3,7 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
-import { AuthApiService, LoginResponse } from '../../services/auth-api.service';
+import { AuthService, LoginResponse } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -15,7 +15,7 @@ import { AuthApiService, LoginResponse } from '../../services/auth-api.service';
 export class LoginPage {
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
-  readonly authApiService = inject(AuthApiService);
+  readonly authService = inject(AuthService);
 
   readonly loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -44,7 +44,7 @@ export class LoginPage {
 
     this.carregando = true;
 
-    this.authApiService
+    this.authService
       .login(email, senha)
       .pipe(finalize(() => (this.carregando = false)))
       .subscribe({

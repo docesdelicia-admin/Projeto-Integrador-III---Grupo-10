@@ -85,6 +85,7 @@ export async function autenticarLogin(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Set-Cookie', criarCookieSessao(token));
 
     return res.status(200).json({
+      token,
       expira_em: process.env.JWT_EXPIRES_IN ?? '8h',
       usuario: {
         id: usuario.id,

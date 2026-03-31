@@ -2,13 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { AuthApiService, LoginResponse } from '../../services/auth-api.service';
+import { AuthService, LoginResponse } from '../../services/auth.service';
 import { LoginPage } from './login.component';
 
 describe('LoginPage', () => {
   let fixture: ComponentFixture<LoginPage>;
   let component: LoginPage;
-  let authApiServiceSpy: {
+  let AuthServiceSpy: {
     login: ReturnType<typeof vi.fn>;
   };
   let routerSpy: {
@@ -16,7 +16,7 @@ describe('LoginPage', () => {
   };
 
   beforeEach(async () => {
-    authApiServiceSpy = {
+    AuthServiceSpy = {
       login: vi.fn(),
     };
     routerSpy = {
@@ -26,7 +26,7 @@ describe('LoginPage', () => {
     await TestBed.configureTestingModule({
       imports: [LoginPage],
       providers: [
-        { provide: AuthApiService, useValue: authApiServiceSpy as unknown as AuthApiService },
+        { provide: AuthService, useValue: AuthServiceSpy as unknown as AuthService },
         { provide: Router, useValue: routerSpy as unknown as Router },
       ],
     }).compileComponents();
@@ -40,7 +40,7 @@ describe('LoginPage', () => {
 
     component.enviarLogin();
 
-    expect(authApiServiceSpy.login).not.toHaveBeenCalled();
+    expect(AuthServiceSpy.login).not.toHaveBeenCalled();
   });
 
   it('alterna visibilidade da senha ao clicar no olho', () => {
@@ -64,17 +64,17 @@ describe('LoginPage', () => {
       },
     };
 
-    authApiServiceSpy.login.mockReturnValue(of(resposta));
+    AuthServiceSpy.login.mockReturnValue(of(resposta));
     component.loginForm.setValue({ email: 'admin@doces.com', senha: '123456' });
 
     component.enviarLogin();
 
-    expect(authApiServiceSpy.login).toHaveBeenCalledWith('admin@doces.com', '123456');
+    expect(AuthServiceSpy.login).toHaveBeenCalledWith('admin@doces.com', '123456');
     expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/dashboard');
   });
 
   it('exibe mensagem de erro quando login falha', () => {
-    authApiServiceSpy.login.mockReturnValue(throwError(() => new Error('Credenciais invalidas.')));
+    AuthServiceSpy.login.mockReturnValue(throwError(() => new Error('Credenciais invalidas.')));
     component.loginForm.setValue({ email: 'admin@doces.com', senha: 'errada' });
 
     component.enviarLogin();

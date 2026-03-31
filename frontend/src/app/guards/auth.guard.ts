@@ -1,14 +1,24 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
-import { AuthApiService } from '../services/auth-api.service';
+import { AuthService } from '../services/auth.service';
 
 export const authGuard: CanActivateFn = () => {
-  const authApiService = inject(AuthApiService);
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  return authApiService.validarSessao().pipe(
+  return authService.validarSessao().pipe(
     map((autenticado) => (autenticado ? true : router.createUrlTree(['/login']))),
     catchError(() => of(router.createUrlTree(['/login']))),
+  );
+};
+
+export const loginGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  return authService.validarSessao().pipe(
+    map((autenticado) => (autenticado ? router.createUrlTree(['/dashboard']) : true)),
+    catchError(() => of(true)),
   );
 };

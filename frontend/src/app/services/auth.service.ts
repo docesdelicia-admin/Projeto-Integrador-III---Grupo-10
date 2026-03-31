@@ -22,7 +22,7 @@ interface ErroApiResponse {
 @Injectable({
   providedIn: 'root',
 })
-export class AuthApiService {
+export class AuthService {
   private readonly apiUrl = '/api/auth';
   private sessaoAtiva = false;
 
