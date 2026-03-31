@@ -23,6 +23,7 @@ describe('AdminAreaComponent', () => {
       logout: vi.fn(),
       removerToken: vi.fn(),
     };
+    AuthServiceSpy.validarSessao.mockReturnValue(of(false));
     routerSpy = {
       navigateByUrl: vi.fn(),
     };
@@ -62,6 +63,7 @@ describe('AdminAreaComponent', () => {
   it('executa logout e redireciona para home quando ha sessao', () => {
     AuthServiceSpy.validarSessao.mockReturnValue(of(true));
     AuthServiceSpy.logout.mockReturnValue(of({ mensagem: 'Logout realizado com sucesso.' }));
+    component.sessaoAtiva = true;
 
     fixture.detectChanges();
 

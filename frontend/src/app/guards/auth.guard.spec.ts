@@ -1,9 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { Router, UrlTree } from '@angular/router';
-import { firstValueFrom, of } from 'rxjs';
+import { GuardResult, MaybeAsync, Router, UrlTree } from '@angular/router';
+import { firstValueFrom, isObservable, of } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { authGuard } from './auth.guard';
+
+async function resolverResultadoGuard(resultado: MaybeAsync<GuardResult>): Promise<GuardResult> {
+  if (isObservable(resultado)) {
+    return await firstValueFrom(resultado);
+  }
+
+  return await Promise.resolve(resultado);
+}
 
 describe('authGuard', () => {
   let AuthServiceSpy: {
@@ -32,7 +40,7 @@ describe('authGuard', () => {
   it('permite acesso quando ha sessao ativa', async () => {
     AuthServiceSpy.validarSessao.mockReturnValue(of(true));
 
-    const resultado = await firstValueFrom(
+    const resultado = await resolverResultadoGuard(
       TestBed.runInInjectionContext(() => authGuard({} as any, {} as any)),
     );
 
@@ -45,7 +53,7 @@ describe('authGuard', () => {
     AuthServiceSpy.validarSessao.mockReturnValue(of(false));
     routerSpy.createUrlTree.mockReturnValue(arvoreLogin);
 
-    const resultado = await firstValueFrom(
+    const resultado = await resolverResultadoGuard(
       TestBed.runInInjectionContext(() => authGuard({} as any, {} as any)),
     );
 
