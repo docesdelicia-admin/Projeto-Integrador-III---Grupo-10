@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthApiService } from '../../services/auth-api.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-admin-area',
@@ -17,9 +17,9 @@ export class AdminAreaComponent {
 
   constructor(
     private readonly router: Router,
-    private readonly authApiService: AuthApiService,
+    private readonly authService: AuthService,
   ) {
-    this.authApiService.validarSessao().subscribe((autenticado) => {
+    this.authService.validarSessao().subscribe((autenticado) => {
       this.sessaoAtiva = autenticado;
     });
   }
@@ -35,7 +35,7 @@ export class AdminAreaComponent {
   logout(): void {
     this.carregando = true;
 
-    this.authApiService.logout().subscribe({
+    this.authService.logout().subscribe({
       next: () => {
         this.carregando = false;
         this.sessaoAtiva = false;
@@ -43,7 +43,7 @@ export class AdminAreaComponent {
       },
       error: () => {
         this.carregando = false;
-        this.authApiService.removerToken();
+        this.authService.removerToken();
         this.sessaoAtiva = false;
         void this.router.navigateByUrl('/');
       },

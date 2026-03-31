@@ -2,13 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
-import { AuthApiService } from '../../services/auth-api.service';
+import { AuthService } from '../../services/auth.service';
 import { AdminAreaComponent } from './admin-area.component';
 
 describe('AdminAreaComponent', () => {
   let fixture: ComponentFixture<AdminAreaComponent>;
   let component: AdminAreaComponent;
-  let authApiServiceSpy: {
+  let AuthServiceSpy: {
     validarSessao: ReturnType<typeof vi.fn>;
     logout: ReturnType<typeof vi.fn>;
     removerToken: ReturnType<typeof vi.fn>;
@@ -18,7 +18,7 @@ describe('AdminAreaComponent', () => {
   };
 
   beforeEach(async () => {
-    authApiServiceSpy = {
+    AuthServiceSpy = {
       validarSessao: vi.fn(),
       logout: vi.fn(),
       removerToken: vi.fn(),
@@ -30,7 +30,7 @@ describe('AdminAreaComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AdminAreaComponent],
       providers: [
-        { provide: AuthApiService, useValue: authApiServiceSpy as unknown as AuthApiService },
+        { provide: AuthService, useValue: AuthServiceSpy as unknown as AuthService },
         { provide: Router, useValue: routerSpy as unknown as Router },
       ],
     }).compileComponents();
@@ -40,7 +40,7 @@ describe('AdminAreaComponent', () => {
   });
 
   it('mostra botao de login quando nao ha sessao', () => {
-    authApiServiceSpy.validarSessao.mockReturnValue(of(false));
+    AuthServiceSpy.validarSessao.mockReturnValue(of(false));
 
     fixture.detectChanges();
 
@@ -49,7 +49,7 @@ describe('AdminAreaComponent', () => {
   });
 
   it('navega para login ao clicar no botao de login', () => {
-    authApiServiceSpy.validarSessao.mockReturnValue(of(false));
+    AuthServiceSpy.validarSessao.mockReturnValue(of(false));
 
     fixture.detectChanges();
 
@@ -60,15 +60,15 @@ describe('AdminAreaComponent', () => {
   });
 
   it('executa logout e redireciona para home quando ha sessao', () => {
-    authApiServiceSpy.validarSessao.mockReturnValue(of(true));
-    authApiServiceSpy.logout.mockReturnValue(of({ mensagem: 'Logout realizado com sucesso.' }));
+    AuthServiceSpy.validarSessao.mockReturnValue(of(true));
+    AuthServiceSpy.logout.mockReturnValue(of({ mensagem: 'Logout realizado com sucesso.' }));
 
     fixture.detectChanges();
 
     const botao = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
     botao.click();
 
-    expect(authApiServiceSpy.logout).toHaveBeenCalled();
+    expect(AuthServiceSpy.logout).toHaveBeenCalled();
     expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/');
   });
 });

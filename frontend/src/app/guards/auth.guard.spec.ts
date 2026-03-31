@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
 import { firstValueFrom, of } from 'rxjs';
-import { AuthApiService } from '../services/auth-api.service';
+import { AuthService } from '../services/auth.service';
 import { authGuard } from './auth.guard';
 
 describe('authGuard', () => {
-  let authApiServiceSpy: {
+  let AuthServiceSpy: {
     validarSessao: ReturnType<typeof vi.fn>;
   };
   let routerSpy: {
@@ -14,7 +14,7 @@ describe('authGuard', () => {
   };
 
   beforeEach(() => {
-    authApiServiceSpy = {
+    AuthServiceSpy = {
       validarSessao: vi.fn(),
     };
     routerSpy = {
@@ -23,14 +23,14 @@ describe('authGuard', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        { provide: AuthApiService, useValue: authApiServiceSpy as unknown as AuthApiService },
+        { provide: AuthService, useValue: AuthServiceSpy as unknown as AuthService },
         { provide: Router, useValue: routerSpy as unknown as Router },
       ],
     });
   });
 
   it('permite acesso quando ha sessao ativa', async () => {
-    authApiServiceSpy.validarSessao.mockReturnValue(of(true));
+    AuthServiceSpy.validarSessao.mockReturnValue(of(true));
 
     const resultado = await firstValueFrom(
       TestBed.runInInjectionContext(() => authGuard({} as any, {} as any)),
@@ -42,7 +42,7 @@ describe('authGuard', () => {
 
   it('redireciona para login quando nao ha sessao', async () => {
     const arvoreLogin = {} as UrlTree;
-    authApiServiceSpy.validarSessao.mockReturnValue(of(false));
+    AuthServiceSpy.validarSessao.mockReturnValue(of(false));
     routerSpy.createUrlTree.mockReturnValue(arvoreLogin);
 
     const resultado = await firstValueFrom(

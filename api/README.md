@@ -60,7 +60,7 @@ api/
 ## Controle de Acesso (RBAC)
 
 ### Admin (tipo_usuario = "admin")
-- ✅ Criar, editar e excluir usuários
+- ✅ Criar, editar e **excluir** r usuários
 - ✅ Criar, editar e **excluir** produtos
 - ✅ Criar, editar e **excluir** insumos
 - ✅ Criar, editar e **excluir** clientes
