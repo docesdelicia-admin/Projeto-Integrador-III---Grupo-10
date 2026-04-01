@@ -1,6 +1,16 @@
 import type { VercelRequest } from '@vercel/node';
-import jwt, { type JwtPayload, type SignOptions } from 'jsonwebtoken';
+import type { JwtPayload, SignOptions } from 'jsonwebtoken';
 import type { JwtUsuarioPayload, TipoUsuario } from './types';
+
+interface JwtTokenClaims extends JwtUsuarioPayload {
+  sub: string;
+}
+
+const jwt = require('jsonwebtoken/index.js') as typeof import('jsonwebtoken');
+
+if (typeof jwt.sign !== 'function' || typeof jwt.verify !== 'function') {
+  throw new Error('Biblioteca jsonwebtoken indisponivel para assinatura/validacao de token.');
+}
 
 const jwtSecret: string = process.env.JWT_SECRET ?? '';
 
@@ -31,8 +41,8 @@ function isTipoUsuario(value: unknown): value is TipoUsuario {
  * Gera um token JWT com os dados do usuario
  * O token contem o ID, nome, email e tipo de usuario
  */
-export function gerarAccessToken(usuario: Omit<JwtUsuarioPayload, 'sub'>): string {
-  const payload: JwtUsuarioPayload = {
+export function gerarAccessToken(usuario: JwtUsuarioPayload): string {
+  const payload: JwtTokenClaims = {
     sub: String(usuario.id),
     ...usuario,
   };
@@ -137,17 +147,17 @@ export function verificarAccessToken(token: string): JwtUsuarioPayload {
     throw new AuthError('Payload do token invalido.');
   }
 
-  const id = typeof decoded.id === 'number' ? decoded.id : Number(decoded.sub);
+  const idRaw = decoded.id ?? decoded.sub;
+  const id = typeof idRaw === 'string' || typeof idRaw === 'number' ? String(idRaw).trim() : '';
   const nome = decoded.nome;
   const email = decoded.email;
   const tipoUsuario = decoded.tipo_usuario;
 
-  if (!Number.isFinite(id) || typeof nome !== 'string' || typeof email !== 'string' || !isTipoUsuario(tipoUsuario)) {
+  if (!id || typeof nome !== 'string' || typeof email !== 'string' || !isTipoUsuario(tipoUsuario)) {
     throw new AuthError('Token com payload invalido.');
   }
 
   return {
-    sub: String(decoded.sub ?? id),
     id,
     nome,
     email,
@@ -170,12 +180,12 @@ export function verificarAdminAutorizado(usuario: JwtUsuarioPayload): void {
   }
 }
 
-export function verificarPermissaoAcesso(usuario: JwtUsuarioPayload, usuarioIdSolicitado: number): void {
+export function verificarPermissaoAcesso(usuario: JwtUsuarioPayload, usuarioIdSolicitado: string | number): void {
   if (usuario.tipo_usuario === 'admin') {
     return;
   }
 
-  if (usuario.id !== usuarioIdSolicitado) {
+  if (usuario.id !== String(usuarioIdSolicitado)) {
     throw new AuthError('Acesso Restrito a Administradores.', 403);
   }
 }

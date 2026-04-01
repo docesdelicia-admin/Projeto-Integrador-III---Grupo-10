@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockReq, createMockRes } from '../tests/http-mocks';
+import { gerarSenhaHash } from '../_lib/password';
 
 const mockedDb = vi.hoisted(() => ({ query: vi.fn() }));
 const mockedAutenticarRequisicao = vi.hoisted(() => vi.fn());
@@ -115,6 +116,60 @@ describe('/api/usuarios', () => {
           criado_em: '2026-01-02T00:00:00.000Z',
         },
       ],
+    });
+  });
+
+  it('atualiza os dados do proprio usuario com senha atual', async () => {
+    const { default: handler } = await import('./index');
+
+    const senhaHash = await gerarSenhaHash('senhaAtual123');
+
+    mockedAutenticarRequisicao.mockReturnValue({
+      sub: '1',
+      id: '1',
+      nome: 'Administrador',
+      email: 'admin@teste.com',
+      tipo_usuario: 'admin',
+    });
+
+    mockedDb.query
+      .mockResolvedValueOnce({ rowCount: 1, rows: [{ senha_hash: senhaHash }] })
+      .mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [
+          {
+            id: '1',
+            nome: 'Administrador Atualizado',
+            email: 'admin.novo@teste.com',
+            tipo_usuario: 'admin',
+            criado_em: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      });
+
+    const { res, state } = createMockRes();
+    const req = createMockReq({
+      method: 'PUT',
+      query: { id: '1' },
+      body: {
+        nome: 'Administrador Atualizado',
+        email: 'admin.novo@teste.com',
+        senha_atual: 'senhaAtual123',
+      },
+    });
+
+    await handler(req, res);
+
+    expect(state.statusCode).toBe(200);
+    expect(state.jsonBody).toEqual({
+      mensagem: 'Usuario atualizado com sucesso.',
+      usuario: {
+        id: '1',
+        nome: 'Administrador Atualizado',
+        email: 'admin.novo@teste.com',
+        tipo_usuario: 'admin',
+        criado_em: '2026-01-01T00:00:00.000Z',
+      },
     });
   });
 });

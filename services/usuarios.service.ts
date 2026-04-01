@@ -6,7 +6,7 @@ import {
   verificarPermissaoAcesso,
 } from '../api/_lib/auth';
 import pool from '../api/_lib/db';
-import { gerarSenhaHash } from '../api/_lib/password';
+import { gerarSenhaHash, validarSenha } from '../api/_lib/password';
 import type { CriarUsuarioInput, JwtUsuarioPayload, TipoUsuario, Usuario } from '../api/_lib/types';
 
 interface CriarUsuarioBody {
@@ -21,22 +21,23 @@ interface EditarUsuarioBody {
   email?: string;
   senha?: string;
   tipo_usuario?: TipoUsuario;
+  senha_atual?: string;
 }
 
-function extrairIdDaUrl(req: VercelRequest): number {
+function extrairIdDaUrl(req: VercelRequest): string {
   const { id } = req.query;
 
   if (!id || Array.isArray(id)) {
     throw new AuthError('ID invalido.', 400);
   }
 
-  const parsed = Number(id);
+  const valor = String(id).trim();
 
-  if (!Number.isFinite(parsed)) {
-    throw new AuthError('ID deve ser um numero valido.', 400);
+  if (!valor) {
+    throw new AuthError('ID invalido.', 400);
   }
 
-  return parsed;
+  return valor;
 }
 
 function obterBodyCriacao(req: VercelRequest): CriarUsuarioBody {
@@ -223,6 +224,26 @@ export async function editarUsuario(req: VercelRequest, res: VercelResponse) {
     }
 
     const body = obterBodyEdicao(req);
+    const editandoProprioUsuario = usuarioLogado.id === String(id);
+
+    if (editandoProprioUsuario) {
+      if (typeof body.senha_atual !== 'string' || !body.senha_atual.trim()) {
+        return res.status(400).json({ erro: 'senha_atual e obrigatoria para alterar seus dados.' });
+      }
+
+      const resultadoSenha = await pool.query<{ senha_hash: string }>(
+        'SELECT senha_hash FROM usuarios WHERE id = $1 LIMIT 1',
+        [id],
+      );
+
+      if (resultadoSenha.rowCount !== 1) {
+        return res.status(404).json({ erro: 'Usuario nao encontrado.' });
+      }
+
+      if (!(await validarSenha(body.senha_atual.trim(), resultadoSenha.rows[0].senha_hash))) {
+        return res.status(400).json({ erro: 'Senha atual incorreta.' });
+      }
+    }
 
     const campos: { chave: string; valor: unknown }[] = [];
 
@@ -267,7 +288,7 @@ export async function editarUsuario(req: VercelRequest, res: VercelResponse) {
     const valores = campos.map((campo) => campo.valor);
 
     const resultado = await pool.query<Omit<Usuario, 'senha'>>(
-      `UPDATE usuarios SET ${setClauses} WHERE id = $${campos.length + 1} RETURNING id, nome, email, tipo_usuario, criado_em`,
+      `UPDATE usuarios SET ${setClauses}, atualizado_em = NOW() WHERE id = $${campos.length + 1} RETURNING id, nome, email, tipo_usuario, criado_em`,
       [...valores, id],
     );
 

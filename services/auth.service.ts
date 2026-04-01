@@ -9,7 +9,7 @@ interface LoginBody {
 }
 
 interface UsuarioLoginRow {
-  id: number;
+  id: string;
   nome: string;
   email: string;
   senha_hash: string;
@@ -111,7 +111,10 @@ export async function obterSessaoAutenticada(req: VercelRequest, res: VercelResp
   try {
     const usuario = autenticarRequisicao(req);
 
-    return res.status(200).json({ usuario });
+    return res.status(200).json({
+      expira_em: process.env.JWT_EXPIRES_IN ?? '8h',
+      usuario,
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       return res.status(error.statusCode).json({ erro: error.message });
