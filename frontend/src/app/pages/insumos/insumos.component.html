@@ -1,0 +1,24 @@
+<div class="pagina-shell">
+  <app-header [modoBusca]="'campo'"></app-header>
+
+  <div class="pagina-layout">
+    <app-sidebar></app-sidebar>
+
+    <main class="pagina-main">
+      <h1>Insumos</h1>
+      <p class="descricao">Gerenciar insumos em estoque.</p>
+
+      <div class="tabela-wrapper">
+        @if (carregando) {
+        <p>Carregando insumos...</p>
+        } @else if (linhas.length > 0) {
+        <app-tabela [colunas]="colunasTabela" [linhas]="linhas" [acaoEditar]="acaoEditarInsumo"
+          [acaoExcluir]="acaoExcluirInsumo">
+        </app-tabela>
+        } @else {
+        <p class="sem-dados">Nenhum insumo encontrado.</p>
+        }
+      </div>
+    </main>
+  </div>
+</div>

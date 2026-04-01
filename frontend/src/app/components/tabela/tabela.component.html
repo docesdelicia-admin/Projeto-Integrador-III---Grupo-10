@@ -13,13 +13,26 @@
     <tbody>
       @if (linhas.length === 0) {
       <tr>
-        <td class="sem-dados" [attr.colspan]="colunas.length + 2">{{ mensagemSemDados }}</td>
+        <td class="sem-dados" [attr.colspan]="colunas.length + 2">{{
+          mensagemSemDados }}</td>
       </tr>
       } @else {
       @for (linha of linhas; track rastrearLinha($index, linha)) {
       <tr>
         @for (coluna of colunas; track coluna.chave) {
-        <td>{{ obterValorCelula(linha, coluna) }}</td>
+        <td>
+          @if (coluna.chave === 'descricao') {
+          @if (deveMostrarLerMais(linha, coluna)) {
+          <button type="button" class="botao-ver-descricao" (click)="abrirModalDescricao(linha, coluna)">Ler</button>
+          } @else if (possuiDescricao(linha, coluna)) {
+          {{ obterDescricaoCurta(linha, coluna) }}
+          } @else {
+          -
+          }
+          } @else {
+          {{ obterValorCelula(linha, coluna) }}
+          }
+        </td>
         }
         <td>
           <button type="button" class="botao acao-editar" (click)="editar(linha)">Editar</button>
@@ -36,3 +49,18 @@
     </tbody>
   </table>
 </div>
+
+@if (modalDescricaoAberto) {
+<div class="modal-overlay" role="presentation" (click)="fecharModalDescricao()">
+  <section class="modal-descricao" role="dialog" aria-modal="true" aria-label="Descricao"
+    (click)="$event.stopPropagation()">
+    <header>
+      <h3>Descricao</h3>
+    </header>
+    <p>{{ textoDescricaoModal }}</p>
+    <footer>
+      <button type="button" class="botao acao-editar" (click)="fecharModalDescricao()">Fechar</button>
+    </footer>
+  </section>
+</div>
+}

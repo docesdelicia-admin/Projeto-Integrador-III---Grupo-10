@@ -1,0 +1,24 @@
+<div class="pagina-shell">
+  <app-header [modoBusca]="'campo'"></app-header>
+
+  <div class="pagina-layout">
+    <app-sidebar></app-sidebar>
+
+    <main class="pagina-main">
+      <h1>Pedidos</h1>
+      <p class="descricao">Gerenciar pedidos realizados.</p>
+
+      <div class="tabela-wrapper">
+        @if (carregando) {
+        <p>Carregando pedidos...</p>
+        } @else if (linhas.length > 0) {
+        <app-tabela [colunas]="colunasTabela" [linhas]="linhas" [acaoEditar]="acaoEditarPedido"
+          [acaoExcluir]="acaoExcluirPedido">
+        </app-tabela>
+        } @else {
+        <p class="sem-dados">Nenhum pedido encontrado.</p>
+        }
+      </div>
+    </main>
+  </div>
+</div>

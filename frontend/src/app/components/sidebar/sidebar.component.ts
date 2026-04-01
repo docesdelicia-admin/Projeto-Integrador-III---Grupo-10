@@ -30,14 +30,40 @@ export class SidebarComponent implements OnInit {
   ];
 
   ehAdmin = false;
+  nomeUsuario = '';
+  tipoUsuario = '';
+
+  get saudacaoUsuario(): string {
+    if (!this.nomeUsuario || !this.tipoUsuario) {
+      return 'Seja bem-vindo';
+    }
+
+    return `Seja bem-vindo, ${this.tipoUsuario} ${this.nomeUsuario}`;
+  }
 
   get itensVisiveis(): SidebarItem[] {
     return this.itens.filter((item) => !item.apenasAdmin || this.ehAdmin);
   }
 
   ngOnInit(): void {
+    const sessaoInicial = this.authService.obterSessaoAutenticada();
+    if (sessaoInicial) {
+      this.nomeUsuario = sessaoInicial.nome;
+      this.tipoUsuario = sessaoInicial.tipo_usuario === 'admin' ? 'Admin' : 'Operador(a)';
+    }
+
     this.authService.validarSessao().subscribe((autenticado) => {
       this.ehAdmin = autenticado && this.authService.ehAdmin();
+
+      if (!autenticado) {
+        this.nomeUsuario = '';
+        this.tipoUsuario = '';
+        return;
+      }
+
+      const sessao = this.authService.obterSessaoAutenticada();
+      this.nomeUsuario = sessao?.nome ?? '';
+      this.tipoUsuario = sessao?.tipo_usuario === 'admin' ? 'Admin' : 'Operador(a)';
     });
   }
 }

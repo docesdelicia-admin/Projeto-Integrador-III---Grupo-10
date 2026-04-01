@@ -7,6 +7,9 @@ describe('ProdutosService', () => {
   let service: ProdutosService;
   let httpMock: HttpTestingController;
 
+  const chaveCacheLista = 'docesdelicia.produtos.lista';
+  const chaveCacheListaPublica = 'docesdelicia.produtos.lista-publica';
+
   const produtoMock: Produto = {
     id: '1',
     nome: 'Bolo Chocolate',
@@ -19,6 +22,8 @@ describe('ProdutosService', () => {
   };
 
   beforeEach(() => {
+    window.localStorage.clear();
+
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [ProdutosService],
@@ -30,6 +35,7 @@ describe('ProdutosService', () => {
 
   afterEach(() => {
     httpMock.verify();
+    window.localStorage.clear();
   });
 
   it('lista todos os produtos', () => {
@@ -84,6 +90,47 @@ describe('ProdutosService', () => {
     expect(segundaResposta?.produtos[0].nome).toBe('Bolo Chocolate');
   });
 
+  it('persiste cache de produtos no localStorage por uma nova instancia', () => {
+    let primeiraResposta: { total: number; produtos: Produto[] } | undefined;
+
+    service.listar().subscribe((resposta) => {
+      primeiraResposta = resposta;
+    });
+
+    const req = httpMock.expectOne('/api/produtos');
+    req.flush({ total: 1, produtos: [produtoMock] });
+
+    expect(window.localStorage.getItem(chaveCacheLista)).not.toBeNull();
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [ProdutosService],
+    });
+
+    service = TestBed.inject(ProdutosService);
+    httpMock = TestBed.inject(HttpTestingController);
+
+    let segundaResposta: { total: number; produtos: Produto[] } | undefined;
+    service.listar().subscribe((resposta) => {
+      segundaResposta = resposta;
+    });
+
+    httpMock.expectNone('/api/produtos');
+
+    expect(primeiraResposta?.total).toBe(1);
+    expect(segundaResposta?.produtos[0].nome).toBe('Bolo Chocolate');
+  });
+
+  it('persiste cache publico no localStorage', () => {
+    service.listarPublico().subscribe();
+
+    const req = httpMock.expectOne('/api/produtos?publico=1');
+    req.flush({ total: 1, produtos: [produtoMock] });
+
+    expect(window.localStorage.getItem(chaveCacheListaPublica)).not.toBeNull();
+  });
+
   it('cria novo produto', () => {
     const novoProduto: ProdutoPayload = {
       nome: 'Novo Bolo',
@@ -116,6 +163,8 @@ describe('ProdutosService', () => {
     const reqListagem = httpMock.expectOne('/api/produtos');
     reqListagem.flush({ total: 1, produtos: [produtoMock] });
 
+    expect(window.localStorage.getItem(chaveCacheLista)).not.toBeNull();
+
     service.criar({
       nome: 'Novo Bolo',
       categoria: 'Bolos personalizados',
@@ -130,6 +179,9 @@ describe('ProdutosService', () => {
       mensagem: 'Produto criado com sucesso.',
       produto: { ...produtoMock, nome: 'Novo Bolo' },
     });
+
+    expect(window.localStorage.getItem(chaveCacheLista)).toBeNull();
+    expect(window.localStorage.getItem(chaveCacheListaPublica)).toBeNull();
 
     service.listar().subscribe();
     const reqRecarregamento = httpMock.expectOne('/api/produtos');

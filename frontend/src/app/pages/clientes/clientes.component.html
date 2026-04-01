@@ -1,0 +1,24 @@
+<div class="pagina-shell">
+  <app-header [modoBusca]="'campo'"></app-header>
+
+  <div class="pagina-layout">
+    <app-sidebar></app-sidebar>
+
+    <main class="pagina-main">
+      <h1>Clientes</h1>
+      <p class="descricao">Gerenciar clientes cadastrados.</p>
+
+      <div class="tabela-wrapper">
+        @if (carregando) {
+        <p>Carregando clientes...</p>
+        } @else if (linhas.length > 0) {
+        <app-tabela [colunas]="colunasTabela" [linhas]="linhas" [acaoEditar]="acaoEditarCliente"
+          [acaoExcluir]="acaoExcluirCliente">
+        </app-tabela>
+        } @else {
+        <p class="sem-dados">Nenhum cliente encontrado.</p>
+        }
+      </div>
+    </main>
+  </div>
+</div>

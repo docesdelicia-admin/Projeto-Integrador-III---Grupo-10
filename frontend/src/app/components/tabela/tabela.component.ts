@@ -26,6 +26,9 @@ export class TabelaComponent {
   @Input() acaoExcluir: (linha: TabelaLinha) => void = () => undefined;
   @Input() excluirDesabilitado: (linha: TabelaLinha) => boolean = () => false;
 
+  modalDescricaoAberto = false;
+  textoDescricaoModal = '';
+
   rastrearLinha(index: number, linha: TabelaLinha): string | number {
     const id = linha['id'];
     if (typeof id === 'string' || typeof id === 'number') {
@@ -63,5 +66,31 @@ export class TabelaComponent {
     }
 
     this.acaoExcluir(linha);
+  }
+
+  possuiDescricao(linha: TabelaLinha, coluna: TabelaColuna): boolean {
+    const valor = linha[coluna.chave];
+    return typeof valor === 'string' && valor.trim().length > 0;
+  }
+
+  deveMostrarLerMais(linha: TabelaLinha, coluna: TabelaColuna): boolean {
+    const valor = linha[coluna.chave];
+    return typeof valor === 'string' && valor.trim().length > 20;
+  }
+
+  obterDescricaoCurta(linha: TabelaLinha, coluna: TabelaColuna): string {
+    const valor = linha[coluna.chave];
+    return typeof valor === 'string' && valor.trim() ? valor.trim() : '-';
+  }
+
+  abrirModalDescricao(linha: TabelaLinha, coluna: TabelaColuna): void {
+    const valor = linha[coluna.chave];
+    this.textoDescricaoModal = typeof valor === 'string' && valor.trim() ? valor : 'Descricao nao informada.';
+    this.modalDescricaoAberto = true;
+  }
+
+  fecharModalDescricao(): void {
+    this.modalDescricaoAberto = false;
+    this.textoDescricaoModal = '';
   }
 }
