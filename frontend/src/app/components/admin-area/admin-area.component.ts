@@ -53,7 +53,7 @@ export class AdminAreaComponent {
   }
 
   estaNaAreaAdministrativa(): boolean {
-    return this.router.url.startsWith('/dashboard');
+    return (this.router.url ?? '').startsWith('/dashboard');
   }
 
   obterIdentificacaoUsuario(): string {

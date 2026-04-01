@@ -1,6 +1,6 @@
 {
   "name": "doces-delicia-workspace",
-  "version": "1.0.0-rc.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "install-all": "npm install --ignore-scripts && npm --prefix api install --ignore-scripts && npm --prefix database install --ignore-scripts && npm --prefix frontend install --ignore-scripts",
