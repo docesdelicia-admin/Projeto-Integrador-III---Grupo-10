@@ -2,6 +2,11 @@
 
 Esta pasta centraliza toda a documentação do projeto.
 
+## Documentos atuais
+
+- Guia de versionamento: [versionamento.md](versionamento.md)
+- Fluxo de Git: [fluxo-git.md](fluxo-git.md)
+
 ## Conteúdo esperado
 
 - **Diagramas** — diagramas de caso de uso, classes, entidade-relacionamento (ER), sequência, etc.
@@ -18,3 +23,11 @@ docs/
 ├── reunioes/         # Atas e anotações de reuniões
 └── guias/            # Guias de uso e instalação
 ```
+
+## Publicacao de versoes
+
+Para iniciar e manter o versionamento do projeto:
+
+1. Atualize o changelog na raiz: [../CHANGELOG.md](../CHANGELOG.md)
+2. Siga as regras de SemVer descritas em [versionamento.md](versionamento.md)
+3. Crie tag anotada da release no repositorio

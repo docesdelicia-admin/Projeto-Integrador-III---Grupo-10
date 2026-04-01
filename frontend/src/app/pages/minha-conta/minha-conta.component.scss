@@ -1,0 +1,347 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(circle at 80% 10%, #ffe2c1 0%, transparent 35%),
+    linear-gradient(160deg, #fff8ec 0%, #ffeedd 100%);
+}
+
+.conta-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.conta-layout {
+  flex: 1;
+  width: min(78rem, 100%);
+  margin: 0 auto;
+  padding: 1.4rem 1rem 2.2rem;
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  gap: 1rem;
+}
+
+.conta-main {
+  border: 1px solid #e5c6a9;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.78);
+  padding: 1.1rem;
+}
+
+h1 {
+  margin: 0;
+  color: #4f2a17;
+}
+
+.descricao,
+.perfil {
+  margin: 0.45rem 0 0;
+  color: #6f5037;
+}
+
+form {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.55rem;
+  max-width: 28rem;
+}
+
+.senha-bloco {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #e5c6a9;
+  border-radius: 0.9rem;
+  background: #fffaf4;
+  border: 0;
+  display: grid;
+  gap: 0.75rem;
+  max-width: 28rem;
+}
+
+.senha-bloco h2 {
+  margin: 0;
+  color: #4f2a17;
+  font-size: 1.1rem;
+}
+
+.senha-bloco form {
+  margin-top: 0;
+}
+
+.campo-senha {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.campo-senha input {
+  width: 100%;
+  padding-right: 2.9rem;
+}
+
+.botao-olho {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: #6a6055;
+  display: grid;
+  place-items: center;
+}
+
+.botao-olho svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.botao-olho:hover {
+  background: rgba(217, 111, 53, 0.12);
+}
+
+.botao-alterar-senha {
+  margin-top: 0.5rem;
+  width: fit-content;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #bf3b2b;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.botao-alterar-senha:hover {
+  text-decoration: underline;
+}
+
+label {
+  color: #5a3a21;
+  font-weight: 600;
+}
+
+input {
+  border: 1px solid #dfd3c4;
+  border-radius: 0.75rem;
+  padding: 0.8rem 0.9rem;
+  font-size: 1rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: #db8f4c;
+  box-shadow: 0 0 0 3px rgba(219, 143, 76, 0.2);
+}
+
+.submit-button {
+  margin-top: 1rem;
+  width: fit-content;
+  border: 0;
+  border-radius: 0.85rem;
+  padding: 0.9rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, #d96f35, #bf3b2b);
+  color: #fff;
+  transition:
+    transform 0.15s ease,
+    filter 0.2s ease;
+}
+
+.submit-button:hover:enabled {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.submit-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.mensagem {
+  margin: 0.8rem 0 0;
+  color: #246742;
+  font-weight: 600;
+}
+
+.tabela-wrapper {
+  margin-top: 1.5rem;
+  overflow-x: auto;
+}
+
+.tabela-wrapper h2 {
+  margin: 0 0 0.8rem;
+  color: #4f2a17;
+  font-size: 1.2rem;
+}
+
+.tabela-dados {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.tabela-dados thead {
+  background: #f5ede2;
+  border-bottom: 2px solid #e5c6a9;
+}
+
+.tabela-dados th {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: #5f3d27;
+  font-size: 0.9rem;
+}
+
+.tabela-dados td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f0e6d8;
+  color: #6b4a31;
+}
+
+.tabela-dados tbody tr:hover {
+  background: #faf6f1;
+}
+
+.formulario-senha {
+  margin-top: 1rem;
+  padding: 1.2rem;
+  background: #fef9f3;
+  border: 1px solid #e5c6a9;
+  border-radius: 0.8rem;
+}
+
+.formulario-senha h3 {
+  margin: 0 0 1rem 0;
+  color: #4f2a17;
+  font-size: 1.05rem;
+}
+
+.formulario-senha-campos {
+  display: grid;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.formulario-senha-acoes {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-start;
+}
+
+.formulario-senha-acoes button {
+  margin-top: 0;
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+}
+
+.formulario-senha-acoes button.cancelar {
+  background: linear-gradient(135deg, #999, #777);
+}
+
+.formulario-senha-acoes button.confirmar {
+  background: linear-gradient(135deg, #4caf50, #388e3c);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(34, 20, 10, 0.52);
+  padding: 1rem;
+  z-index: 20;
+}
+
+.modal-senha {
+  width: min(28rem, 100%);
+  border-radius: 1rem;
+  border: 1px solid #e5c6a9;
+  background: #fffdf9;
+  padding: 1.2rem;
+  box-shadow: 0 18px 50px rgba(52, 28, 14, 0.2);
+}
+
+.modal-senha h3 {
+  margin: 0;
+  color: #4f2a17;
+}
+
+.modal-senha p {
+  margin: 0.45rem 0 1rem;
+  color: #6f5037;
+}
+
+.modal-senha form {
+  margin-top: 0;
+  max-width: none;
+}
+
+.modal-acoes {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
+.modal-acoes button {
+  border: 0;
+  border-radius: 0.8rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    filter 0.2s ease;
+}
+
+.modal-acoes button:hover:enabled {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.modal-acoes button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.botao-secundario {
+  background: linear-gradient(135deg, #999, #777);
+}
+
+.botao-principal {
+  background: linear-gradient(135deg, #d96f35, #bf3b2b);
+}
+
+@media (max-width: 900px) {
+  .conta-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-acoes {
+    justify-content: stretch;
+    flex-direction: column;
+  }
+
+  .modal-acoes button {
+    width: 100%;
+  }
+}

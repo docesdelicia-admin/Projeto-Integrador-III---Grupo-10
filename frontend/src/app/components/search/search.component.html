@@ -1,0 +1,18 @@
+@if (modo === 'campo') {
+<label class="search-box" for="search-input" aria-label="Buscar produtos">
+  <input
+    id="search-input"
+    type="search"
+    [placeholder]="placeholder"
+    [disabled]="desabilitado"
+    (input)="onInputBusca($any($event.target).value)"
+  />
+</label>
+} @else {
+<button type="button" class="search-icon" aria-label="Busca em breve" [disabled]="desabilitado" (click)="onAcionarBusca()">
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="11" cy="11" r="6"></circle>
+    <line x1="15.5" y1="15.5" x2="21" y2="21"></line>
+  </svg>
+</button>
+}

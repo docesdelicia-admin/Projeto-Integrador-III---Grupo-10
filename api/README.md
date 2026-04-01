@@ -2,6 +2,13 @@
 
 Esta pasta contem o backend do projeto, usando funcoes serverless da Vercel.
 
+## Versao da API
+
+- Versao atual do pacote: `1.0.0-rc.0` (ver `api/package.json`)
+- Versionamento de release do produto: tags no repositorio raiz (ex.: `v1.0.0-rc.0`)
+
+Antes de release, registre mudancas de API em [CHANGELOG.md](../CHANGELOG.md).
+
 ## Estrutura atual
 
 ```text
@@ -37,7 +44,7 @@ api/
 - `GET /api/auth`: valida token e retorna sessao
 - `GET /api/usuarios`: lista usuarios (admin)
 - `POST /api/usuarios`: cria usuario (admin)
-- `PUT /api/usuarios?id=<id>`: edita usuario
+- `PUT /api/usuarios?id=<id>`: edita usuario; autoedicao exige `senha_atual`
 - `DELETE /api/usuarios?id=<id>`: remove usuario (admin)
 - `GET /api/clientes`: lista clientes (autenticado)
 - `POST /api/clientes`: cria cliente (admin)
@@ -56,6 +63,12 @@ api/
 - `POST /api/produtos`: cria produto (admin)
 - `PUT /api/produtos?id=<id>`: edita produto (autenticado)
 - `DELETE /api/produtos?id=<id>`: deleta produto (admin)
+
+## JWT e sessao
+
+- O token JWT usa o claim padrao `sub` para identificar o usuario.
+- O payload de sessao retornado pela API expõe `id`, `nome`, `email` e `tipo_usuario`.
+- O campo `sub` permanece interno ao token e nao e retornado no objeto de sessao.
 
 ## Controle de Acesso (RBAC)
 
@@ -134,3 +147,8 @@ vercel dev
 ```
 
 As rotas da API ficam disponiveis em /api/*.
+
+## Referencias
+
+- Guia de versionamento: [docs/versionamento.md](../docs/versionamento.md)
+- Changelog do projeto: [CHANGELOG.md](../CHANGELOG.md)

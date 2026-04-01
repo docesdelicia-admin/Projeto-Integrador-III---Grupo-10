@@ -12,6 +12,47 @@ Aplicacao web desenvolvida como Projeto Integrador III - UNIVESP, Grupo 10.
 | Deploy | Vercel |
 | Controle de versao | GitHub |
 
+## Versionamento e releases
+
+O projeto passa a adotar versionamento semantico para entregas publicadas por tag:
+
+- Padrao: SemVer (`MAJOR.MINOR.PATCH`)
+- Fase atual: pre-release `1.0.0-rc.0`
+- Release alvo: `v1.0.0`
+- Pre-release (RC): tags como `v1.0.0-rc.0`, `v1.0.0-rc.1`
+
+Regras praticas:
+
+1. `PATCH`: correcao sem nova funcionalidade
+2. `MINOR`: nova funcionalidade sem quebra
+3. `MAJOR`: quebra relevante em relacao a versao estavel vigente
+
+Fluxo minimo para publicar versao:
+
+1. Atualizar [CHANGELOG.md](CHANGELOG.md)
+2. Garantir testes/build verdes
+3. Criar tag anotada
+4. Publicar tag no remoto
+
+Exemplo:
+
+```bash
+git tag -a v1.0.0-rc.0 -m "release: v1.0.0-rc.0"
+git push origin v1.0.0-rc.0
+```
+
+Para detalhes completos, consulte [docs/versionamento.md](docs/versionamento.md).
+
+## Planejamento das ultimas alteracoes
+
+Para organizar commits e manter o Trello alinhado com o que foi entregue, consulte a pasta [planejamento](planejamento).
+
+- [ultimas-alteracoes.md](planejamento/ultimas-alteracoes.md): resumo do que foi feito e sugestao de commits
+- [documentacao-trello.md](planejamento/documentacao-trello.md): base para registrar os cartoes no Trello
+- [sugestoes-trello](planejamento/sugestoes-trello): novas tasks sugeridas com titulo e descricao
+
+O historico das entregas publicadas e registradas em [CHANGELOG.md](CHANGELOG.md).
+
 ## Estrutura do repositório
 
 ```
@@ -24,6 +65,13 @@ Aplicacao web desenvolvida como Projeto Integrador III - UNIVESP, Grupo 10.
 └── vercel.json   # Configuração de build e roteamento
 ```
 
+## Busca reutilizavel (status atual)
+
+- O frontend possui componente de busca reutilizavel em `frontend/src/app/components/search`.
+- O visual da busca esta padronizado entre area publica e area logada.
+- A logica de busca na area logada foi adiada para uma implementacao contextual (ha modulos alem de produtos).
+- Existem TODOs no componente para conectar os eventos quando a regra final de busca for definida.
+
 ## Como executar localmente
 
 ### Pré-requisitos
@@ -31,7 +79,37 @@ Aplicacao web desenvolvida como Projeto Integrador III - UNIVESP, Grupo 10.
 - Node.js >= 22
 - npm >= 10
 
-### Frontend (Angular)
+### Desenvolvimento integrado (recomendado)
+
+Na raiz do repositorio:
+
+```bash
+npm run install-all
+npm run dev
+```
+
+O comando `npm run install-all` na raiz executa automaticamente a instalacao de dependencias em:
+
+- raiz do projeto
+- `api/`
+- `database/`
+- `frontend/`
+
+Ordem executada pelo script:
+
+1. raiz
+2. `api/`
+3. `database/`
+4. `frontend/`
+
+O comando `npm run dev` sobe os dois servicos em paralelo:
+
+- Frontend Angular em `http://localhost:4200`
+- API local (Vercel dev) em `http://localhost:3000`
+
+As chamadas para `/api/*` feitas pelo frontend em `4200` sao encaminhadas pelo proxy para `3000`.
+
+### Frontend (execucao isolada)
 
 ```bash
 cd frontend
@@ -41,7 +119,7 @@ npm start
 
 Acesse http://localhost:4200.
 
-### Backend (Vercel Functions)
+### Backend (execucao isolada)
 
 ```bash
 cd api
@@ -52,7 +130,7 @@ cd ../database
 npm install
 cd ../api
 
-# Iniciar servidor local
+# Iniciar servidor local (porta 3000)
 vercel dev
 ```
 
@@ -102,7 +180,7 @@ O arquivo `vercel.json` na raiz ja define o fluxo de deploy para o monorepo:
 - `GET /api/produtos`: listar produtos
 - `GET /api/usuarios`: listar usuarios
 - `POST /api/usuarios`: criar usuario
-- `PUT /api/usuarios?id=<id>`: editar usuario
+- `PUT /api/usuarios?id=<id>`: editar usuario; para autoedicao exige `senha_atual`
 - `DELETE /api/usuarios?id=<id>`: remover usuario
 
 No painel da Vercel, configure o projeto com:

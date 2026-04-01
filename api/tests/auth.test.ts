@@ -12,7 +12,7 @@ describe('auth utils', () => {
 		const { gerarAccessToken, verificarAccessToken } = await import('../_lib/auth');
 
 		const token = gerarAccessToken({
-			id: 1,
+			id: '1',
 			nome: 'Administrador',
 			email: 'admin@teste.com',
 			tipo_usuario: 'admin',
@@ -20,8 +20,7 @@ describe('auth utils', () => {
 
 		const payload = verificarAccessToken(token);
 
-		expect(payload.id).toBe(1);
-		expect(payload.sub).toBe('1');
+		expect(payload.id).toBe('1');
 		expect(payload.nome).toBe('Administrador');
 		expect(payload.email).toBe('admin@teste.com');
 		expect(payload.tipo_usuario).toBe('admin');
@@ -43,7 +42,7 @@ describe('auth utils', () => {
 		const { autenticarRequisicao, gerarAccessToken } = await import('../_lib/auth');
 
 		const token = gerarAccessToken({
-			id: 2,
+			id: '2',
 			nome: 'Operador',
 			email: 'operador@teste.com',
 			tipo_usuario: 'operador',
@@ -57,7 +56,7 @@ describe('auth utils', () => {
 
 		const usuario = autenticarRequisicao(req);
 
-		expect(usuario.id).toBe(2);
+		expect(usuario.id).toBe('2');
 		expect(usuario.tipo_usuario).toBe('operador');
 	});
 
@@ -65,7 +64,7 @@ describe('auth utils', () => {
 		const { autenticarRequisicao, criarCookieSessao, gerarAccessToken } = await import('../_lib/auth');
 
 		const token = gerarAccessToken({
-			id: 3,
+			id: '3',
 			nome: 'Admin Cookie',
 			email: 'cookie@teste.com',
 			tipo_usuario: 'admin',
@@ -81,7 +80,7 @@ describe('auth utils', () => {
 
 		const usuario = autenticarRequisicao(req);
 
-		expect(usuario.id).toBe(3);
+		expect(usuario.id).toBe('3');
 		expect(usuario.email).toBe('cookie@teste.com');
 	});
 
@@ -90,8 +89,7 @@ describe('auth utils', () => {
 
 		expect(() =>
 			verificarAdminAutorizado({
-				sub: '1',
-				id: 1,
+				id: '1',
 				nome: 'Administrador',
 				email: 'admin@teste.com',
 				tipo_usuario: 'admin',
@@ -101,13 +99,12 @@ describe('auth utils', () => {
 		expect(() =>
 			verificarPermissaoAcesso(
 				{
-					sub: '2',
-					id: 2,
+					id: '2',
 					nome: 'Operador',
 					email: 'operador@teste.com',
 					tipo_usuario: 'operador',
 				},
-				2,
+				'2',
 			),
 		).not.toThrow();
 	});
@@ -118,13 +115,12 @@ describe('auth utils', () => {
 		expect(() =>
 			verificarPermissaoAcesso(
 				{
-					sub: '2',
-					id: 2,
+					id: '2',
 					nome: 'Operador',
 					email: 'operador@teste.com',
 					tipo_usuario: 'operador',
 				},
-				99,
+				'99',
 			),
 		).toThrow('Acesso Restrito a Administradores.');
 	});

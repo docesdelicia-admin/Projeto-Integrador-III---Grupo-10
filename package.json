@@ -1,0 +1,16 @@
+{
+  "name": "doces-delicia-workspace",
+  "version": "1.0.0-rc.0",
+  "private": true,
+  "scripts": {
+    "install-all": "npm install --ignore-scripts && npm --prefix api install --ignore-scripts && npm --prefix database install --ignore-scripts && npm --prefix frontend install --ignore-scripts",
+    "dev": "npx concurrently -k -n API,WEB -c yellow,cyan \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "npx dotenv -e .env.development -- npx vercel dev --cwd api --local --yes --listen 3000",
+    "dev:web": "npm --prefix frontend run start:proxy -- --port 4200"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "dotenv-cli": "^10.0.0",
+    "yarn": "^1.22.22"
+  }
+}
