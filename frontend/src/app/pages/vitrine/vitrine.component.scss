@@ -1,0 +1,118 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(circle at 12% 8%, #ffd7ea 0%, transparent 40%),
+    radial-gradient(circle at 92% 88%, #ffd3e7 0%, transparent 42%),
+    linear-gradient(150deg, #fff6fb 0%, #ffe7f2 100%);
+}
+
+.vitrine-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.vitrine-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2rem;
+  padding: 2rem 1rem 3rem;
+  width: min(75rem, 100%);
+  margin: 0 auto;
+}
+
+.vitrine-hero {
+  border: 1px solid #efc2d9;
+  border-radius: 1.15rem;
+  padding: 1.2rem;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 16px 38px rgba(170, 65, 112, 0.14);
+}
+
+.kicker {
+  margin: 0;
+  color: #af2e68;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.vitrine-hero h1 {
+  margin: 0.4rem 0;
+  font-family: 'Space Grotesk', 'Poppins', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  color: #8d1e54;
+}
+
+.vitrine-hero p {
+  margin: 0;
+  color: #6d3350;
+  line-height: 1.45;
+}
+
+.secoes-grid {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.estado-vitrine {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.2rem;
+  border: 1px solid #efc2d9;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: 0 14px 32px rgba(170, 65, 112, 0.1);
+}
+
+.estado-vitrine h2 {
+  margin: 0;
+  font-family: 'Space Grotesk', 'Poppins', sans-serif;
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  color: #8d1e54;
+}
+
+.estado-vitrine p {
+  margin: 0;
+  color: #6d3350;
+  line-height: 1.45;
+}
+
+.estado-erro {
+  border-color: #f0a8bf;
+  background: rgba(255, 245, 248, 0.88);
+}
+
+.secao-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #efc2d9;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 14px 32px rgba(170, 65, 112, 0.1);
+}
+
+.secao-header h2 {
+  margin: 0.25rem 0;
+  font-family: 'Space Grotesk', 'Poppins', sans-serif;
+  font-size: clamp(1.3rem, 2.5vw, 1.75rem);
+  color: #8d1e54;
+}
+
+.secao-header p {
+  margin: 0;
+  color: #6d3350;
+  line-height: 1.45;
+}
+
+@media (max-width: 560px) {
+  .vitrine-main {
+    padding: 1rem 0.8rem 2rem;
+  }
+}

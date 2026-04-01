@@ -2,6 +2,15 @@
 
 Esta pasta guarda as migrations SQL versionadas do projeto.
 
+## Versionamento do banco
+
+O banco usa dois niveis de versionamento:
+
+1. Versionamento estrutural por migration SQL (`NNN_nome.sql`)
+2. Versionamento de release do produto por tags Git (ex.: `v0.2.0`)
+
+Regra: toda mudanca de schema relevante para release deve estar registrada em migration e no [CHANGELOG.md](../CHANGELOG.md).
+
 ## Estrutura atual
 
 ```
@@ -18,6 +27,7 @@ database/
 |  |- db-migrate-all.mjs
 |  |- db-run-sql.mjs
 |  |- db-upsert-base-user.mjs
+|  |- db-populate-dev-products.mjs
 |- README.md
 ```
 
@@ -65,6 +75,17 @@ npm run db:user:prod --prefix api -- --email "email-oficial@seudominio.com" --pa
 - `database/scripts/db-migrate-all.mjs`
 - `database/scripts/db-run-sql.mjs`
 - `database/scripts/db-upsert-base-user.mjs`
+- `database/scripts/db-populate-dev-products.mjs`
+
+## Carga inicial de produtos no desenvolvimento
+
+O script abaixo insere ou atualiza o primeiro produto de cada categoria no banco de desenvolvimento, mantendo as fotos vazias por enquanto:
+
+```bash
+npm run db:populate:dev-products --prefix database
+```
+
+Por padrao, ele usa o arquivo `.env.development` na raiz do repositório.
 
 ## Estrutura inicial das tabelas
 
@@ -158,3 +179,8 @@ Obs:
 - pedidos -> itens_pedido
 - produtos -> itens_pedido
 - insumos -> estoque_insumos
+
+## Referencias
+
+- Guia de versionamento: [docs/versionamento.md](../docs/versionamento.md)
+- Changelog do projeto: [CHANGELOG.md](../CHANGELOG.md)

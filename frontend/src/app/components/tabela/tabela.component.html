@@ -1,0 +1,38 @@
+<div class="tabela-wrapper">
+  <table class="tabela" aria-label="Tabela administrativa">
+    <thead>
+      <tr>
+        @for (coluna of colunas; track coluna.chave) {
+        <th scope="col">{{ coluna.titulo }}</th>
+        }
+        <th scope="col" class="acoes-coluna">Editar</th>
+        <th scope="col" class="acoes-coluna">Excluir</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      @if (linhas.length === 0) {
+      <tr>
+        <td class="sem-dados" [attr.colspan]="colunas.length + 2">{{ mensagemSemDados }}</td>
+      </tr>
+      } @else {
+      @for (linha of linhas; track rastrearLinha($index, linha)) {
+      <tr>
+        @for (coluna of colunas; track coluna.chave) {
+        <td>{{ obterValorCelula(linha, coluna) }}</td>
+        }
+        <td>
+          <button type="button" class="botao acao-editar" (click)="editar(linha)">Editar</button>
+        </td>
+        <td>
+          <button type="button" class="botao acao-excluir" [disabled]="excluirDesabilitado(linha)"
+            (click)="excluir(linha)">
+            Excluir
+          </button>
+        </td>
+      </tr>
+      }
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,40 @@
+<div class="vitrine-shell">
+  <app-header></app-header>
+
+  <main class="vitrine-main">
+    <section class="vitrine-hero" aria-label="Apresentacao da marca">
+      <h1>{{ titulo }}</h1>
+      <p>
+        Vitrine de sabores organizada por categorias, com
+        opcoes para celebrar, presentear e transformar momentos em memoria afetiva.
+      </p>
+    </section>
+
+    @if (carregando) {
+    <section class="estado-vitrine" aria-live="polite">
+      <p class="kicker">Carregando</p>
+      <h2>Buscando produtos da vitrine</h2>
+    </section>
+    } @else if (erroCarregamento) {
+    <section class="estado-vitrine estado-erro" aria-live="assertive">
+      <p class="kicker">Erro</p>
+      <h2>Nao foi possivel carregar os produtos</h2>
+      <p>{{ erroCarregamento }}</p>
+    </section>
+    } @else {
+    <section class="secoes-grid" aria-label="Vitrine por categorias">
+      @for (categoria of categorias; track categoria.titulo) {
+      <article class="secao-card">
+        <div class="secao-header">
+          <p class="kicker">Categoria</p>
+          <h2>{{ categoria.titulo }}</h2>
+          <p>{{ categoria.descricao }}</p>
+        </div>
+
+        <app-produto-card [produto]="categoria.produto"></app-produto-card>
+      </article>
+      }
+    </section>
+    }
+  </main>
+</div>

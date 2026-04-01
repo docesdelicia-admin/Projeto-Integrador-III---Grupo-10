@@ -6,6 +6,7 @@ import type { JwtUsuarioPayload } from '../api/_lib/types';
 interface ProdutoListagem {
 	id: string;
 	nome: string;
+	categoria: string | null;
 	descricao: string | null;
 	preco: string;
 	fotos: string[];
@@ -17,6 +18,7 @@ interface Produto extends ProdutoListagem {}
 
 interface CriarProdutoBody {
 	nome?: string;
+	categoria?: string;
 	descricao?: string;
 	preco?: string | number;
 	fotos?: string[];
@@ -25,6 +27,7 @@ interface CriarProdutoBody {
 
 interface EditarProdutoBody {
 	nome?: string;
+	categoria?: string;
 	descricao?: string;
 	preco?: string | number;
 	fotos?: string[];
@@ -42,19 +45,25 @@ function extrairIdDaUrl(req: VercelRequest): string {
 }
 
 export async function listarProdutos(req: VercelRequest, res: VercelResponse) {
-	try {
-		autenticarRequisicao(req);
-	} catch (error) {
-		if (error instanceof AuthError) {
-			return res.status(error.statusCode).json({ erro: error.message });
-		}
+	const listagemPublica = String(req.query.publico ?? '').toLowerCase() === 'true' || req.query.publico === '1';
 
-		return res.status(401).json({ erro: 'Requer autenticacao.' });
+	if (!listagemPublica) {
+		try {
+			autenticarRequisicao(req);
+		} catch (error) {
+			if (error instanceof AuthError) {
+				return res.status(error.statusCode).json({ erro: error.message });
+			}
+
+			return res.status(401).json({ erro: 'Requer autenticacao.' });
+		}
 	}
 
-	const resultado = await pool.query<ProdutoListagem>(
-		'SELECT id, nome, descricao, preco, fotos, ativo, criado_em FROM produtos ORDER BY criado_em DESC',
-	);
+	const query = listagemPublica
+		? 'SELECT id, nome, categoria, descricao, preco, fotos, ativo, criado_em FROM produtos WHERE ativo = true ORDER BY criado_em DESC'
+		: 'SELECT id, nome, categoria, descricao, preco, fotos, ativo, criado_em FROM produtos ORDER BY criado_em DESC';
+
+	const resultado = await pool.query<ProdutoListagem>(query);
 
 	return res.status(200).json({
 		total: resultado.rowCount ?? 0,
@@ -80,19 +89,24 @@ export async function criarProduto(req: VercelRequest, res: VercelResponse) {
 			return res.status(400).json({ erro: 'Nome do produto eh obrigatorio.' });
 		}
 
+		if (body.categoria !== undefined && typeof body.categoria !== 'string') {
+			return res.status(400).json({ erro: 'Categoria deve ser uma string.' });
+		}
+
 		if (typeof body.preco !== 'string' && typeof body.preco !== 'number') {
 			return res.status(400).json({ erro: 'Preco eh obrigatorio.' });
 		}
 
 		const nome = body.nome.trim();
+		const categoria = body.categoria ? body.categoria.trim() : null;
 		const descricao = body.descricao ? String(body.descricao).trim() : null;
 		const preco = String(body.preco);
 		const fotos = Array.isArray(body.fotos) ? body.fotos : [];
 		const ativo = body.ativo !== false;
 
 		const resultado = await pool.query<Produto>(
-			'INSERT INTO produtos (nome, descricao, preco, fotos, ativo) VALUES ($1, $2, $3, $4, $5) RETURNING id, nome, descricao, preco, fotos, ativo, criado_em',
-			[nome, descricao, preco, fotos, ativo],
+			'INSERT INTO produtos (nome, categoria, descricao, preco, fotos, ativo) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, nome, categoria, descricao, preco, fotos, ativo, criado_em',
+			[nome, categoria, descricao, preco, fotos, ativo],
 		);
 
 		if (resultado.rowCount !== 1) {
@@ -140,6 +154,11 @@ export async function editarProduto(req: VercelRequest, res: VercelResponse) {
 			campos.push({ chave: 'nome', valor: body.nome.trim() });
 		}
 
+		if (body.categoria !== undefined) {
+			const categoria = body.categoria ? String(body.categoria).trim() : null;
+			campos.push({ chave: 'categoria', valor: categoria });
+		}
+
 		if (body.descricao !== undefined) {
 			const desc = body.descricao ? String(body.descricao).trim() : null;
 			campos.push({ chave: 'descricao', valor: desc });
@@ -167,7 +186,7 @@ export async function editarProduto(req: VercelRequest, res: VercelResponse) {
 		const valores = campos.map((campo) => campo.valor);
 
 		const resultado = await pool.query<Produto>(
-			`UPDATE produtos SET ${setClauses} WHERE id = $${campos.length + 1} RETURNING id, nome, descricao, preco, fotos, ativo, criado_em`,
+			`UPDATE produtos SET ${setClauses} WHERE id = $${campos.length + 1} RETURNING id, nome, categoria, descricao, preco, fotos, ativo, criado_em`,
 			[...valores, id],
 		);
 

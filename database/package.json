@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "db:populate:dev-products": "node ./scripts/db-populate-dev-products.mjs"
+  },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
     "dotenv": "^17.3.1",

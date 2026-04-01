@@ -1,0 +1,13 @@
+<aside class="sidebar" aria-label="Navegacao interna">
+  <nav>
+    <ul>
+      @for (item of itensVisiveis; track item.path) {
+      <li>
+        <a [routerLink]="item.path" routerLinkActive="ativo" [routerLinkActiveOptions]="{ exact: true }">
+          {{ item.label }}
+        </a>
+      </li>
+      }
+    </ul>
+  </nav>
+</aside>
