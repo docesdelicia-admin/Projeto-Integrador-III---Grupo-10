@@ -1,8 +1,9 @@
 {
   "name": "vercel-functions-api",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.0",
   "private": true,
   "scripts": {
+    "build": "tsc --noEmit -p tsconfig.json && node -e \"require('fs').mkdirSync('public',{recursive:true})\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit -p tsconfig.json",
@@ -16,9 +17,10 @@
     "node": "22.x"
   },
   "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "jsonwebtoken": "^9.0.3",
     "@neondatabase/serverless": "^1.0.1",
+    "bcryptjs": "^3.0.3",
+    "doces-delicia-workspace": "file:..",
+    "jsonwebtoken": "^9.0.3",
     "pg": "^8.13.3"
   },
   "devDependencies": {

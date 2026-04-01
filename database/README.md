@@ -7,7 +7,7 @@ Esta pasta guarda as migrations SQL versionadas do projeto.
 O banco usa dois niveis de versionamento:
 
 1. Versionamento estrutural por migration SQL (`NNN_nome.sql`)
-2. Versionamento de release do produto por tags Git (ex.: `v0.2.0`)
+2. Versionamento de release do produto por tags Git (ex.: `v1.0.0-rc.0`)
 
 Regra: toda mudanca de schema relevante para release deve estar registrada em migration e no [CHANGELOG.md](../CHANGELOG.md).
 
