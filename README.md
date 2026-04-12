@@ -72,6 +72,32 @@ O historico das entregas publicadas e registradas em [CHANGELOG.md](CHANGELOG.md
 - A logica de busca na area logada foi adiada para uma implementacao contextual (ha modulos alem de produtos).
 - Existem TODOs no componente para conectar os eventos quando a regra final de busca for definida.
 
+## Confirmacao por senha
+
+- O frontend possui um componente reutilizavel de confirmacao por senha em `frontend/src/app/components/password-confirm-modal`.
+- Esse componente e usado tanto na troca de senha da pagina Minha Conta quanto na exclusao de registros no admin.
+- A regra de exclusao no backend exige senha de confirmacao do administrador.
+
+## Testes
+
+### API
+
+```bash
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/doces_delicia npm --prefix api test
+npm --prefix api run type-check
+```
+
+Observacao: os testes da API que importam a camada de autenticacao dependem de `DATABASE_URL` definido no ambiente.
+
+### Frontend
+
+```bash
+npm --prefix frontend run test -- --watch=false
+npm --prefix frontend run build
+```
+
+Observacao: a suite do frontend foi atualizada para o fluxo com Signals e leitura de cache em memoria.
+
 ## Como executar localmente
 
 ### Pré-requisitos

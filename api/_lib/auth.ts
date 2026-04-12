@@ -1,6 +1,8 @@
 import type { VercelRequest } from '@vercel/node';
 import type { JwtPayload, SignOptions } from 'jsonwebtoken';
 import type { JwtUsuarioPayload, TipoUsuario } from './types';
+import pool from './db';
+import { validarSenha } from './password';
 
 interface JwtTokenClaims extends JwtUsuarioPayload {
   sub: string;
@@ -190,8 +192,72 @@ export function verificarPermissaoAcesso(usuario: JwtUsuarioPayload, usuarioIdSo
   }
 }
 
-export function verificarPermissaoDeletar(usuario: JwtUsuarioPayload): void {
+export function extrairIdDaUrl(req: VercelRequest): string {
+  const { id } = req.query;
+
+  if (!id || Array.isArray(id)) {
+    throw new AuthError('ID invalido.', 400);
+  }
+
+  const valor = String(id).trim();
+
+  if (!valor) {
+    throw new AuthError('ID invalido.', 400);
+  }
+
+  return valor;
+}
+
+function obterSenhaConfirmacaoAdmin(req: VercelRequest): string {
+  const body = typeof req.body === 'string'
+    ? JSON.parse(req.body)
+    : (typeof req.body === 'object' && req.body !== null ? req.body : {});
+
+  const senhaBruta =
+    (typeof (body as Record<string, unknown>)['senha_atual'] === 'string' && (body as Record<string, string>)['senha_atual']) ||
+    (typeof (body as Record<string, unknown>)['senha_admin'] === 'string' && (body as Record<string, string>)['senha_admin']) ||
+    (typeof (body as Record<string, unknown>)['senha'] === 'string' && (body as Record<string, string>)['senha']) ||
+    '';
+
+  const senha = senhaBruta.trim();
+
+  if (!senha) {
+    throw new AuthError('Senha de confirmacao do administrador eh obrigatoria para excluir.', 400);
+  }
+
+  return senha;
+}
+
+export async function verificarPermissaoDeletar(
+  req: VercelRequest,
+  usuario: JwtUsuarioPayload,
+): Promise<void> {
   if (usuario.tipo_usuario !== 'admin') {
     throw new AuthError('Apenas administradores podem deletar dados.', 403);
+  }
+
+  let senhaConfirmacao: string;
+  try {
+    senhaConfirmacao = obterSenhaConfirmacaoAdmin(req);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new AuthError('Corpo da requisicao invalido.', 400);
+    }
+    throw error;
+  }
+
+  const resultado = await pool.query<{ senha_hash: string }>(
+    'SELECT senha_hash FROM usuarios WHERE id = $1 LIMIT 1',
+    [usuario.id],
+  );
+
+  if (resultado.rowCount !== 1) {
+    throw new AuthError('Administrador autenticado nao encontrado.', 401);
+  }
+
+  const senhaValida = await validarSenha(senhaConfirmacao, resultado.rows[0].senha_hash);
+
+  if (!senhaValida) {
+    throw new AuthError('Senha de confirmacao invalida.', 403);
   }
 }

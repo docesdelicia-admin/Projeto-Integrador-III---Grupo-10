@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { AuthError, autenticarRequisicao } from '../api/_lib/auth';
+import { AuthError, autenticarRequisicao, extrairIdDaUrl, verificarPermissaoDeletar } from '../api/_lib/auth';
 import pool from '../api/_lib/db';
 
 interface PedidoListagem {
@@ -29,16 +29,6 @@ interface EditarPedidoBody {
 	observacoes?: string;
 }
 
-function extrairIdDaUrl(req: VercelRequest): string {
-	const { id } = req.query;
-
-	if (!id || Array.isArray(id)) {
-		throw new AuthError('ID invalido.', 400);
-	}
-
-	return id;
-}
-
 export async function listarPedidos(req: VercelRequest, res: VercelResponse) {
 	try {
 		autenticarRequisicao(req);
@@ -50,9 +40,40 @@ export async function listarPedidos(req: VercelRequest, res: VercelResponse) {
 		return res.status(401).json({ erro: 'Requer autenticacao.' });
 	}
 
+	const status = typeof req.query.status === 'string' ? req.query.status.trim().toLowerCase() : '';
+	const dataInicio = typeof req.query.data_inicio === 'string' ? req.query.data_inicio.trim() : '';
+	const dataFim = typeof req.query.data_fim === 'string' ? req.query.data_fim.trim() : '';
+
+	if (status && !['novo', 'em_producao', 'entregue', 'cancelado'].includes(status)) {
+		return res.status(400).json({ erro: 'Filtro de status invalido. Use: novo, em_producao, entregue, cancelado.' });
+	}
+
+	const filtros: string[] = [];
+	const valores: unknown[] = [];
+
+	if (status) {
+		filtros.push(`status = $${valores.length + 1}`);
+		valores.push(status);
+	}
+
+	if (dataInicio) {
+		filtros.push(`data_pedido >= $${valores.length + 1}`);
+		valores.push(dataInicio);
+	}
+
+	if (dataFim) {
+		filtros.push(`data_pedido <= $${valores.length + 1}`);
+		valores.push(dataFim);
+	}
+
+	const whereClause = filtros.length > 0 ? `WHERE ${filtros.join(' AND ')}` : '';
+
 	const resultado = await pool.query<PedidoListagem>(
-		'SELECT id, cliente_id, data_pedido, data_entrega, status, observacoes, criado_em FROM pedidos ORDER BY criado_em DESC',
+		`SELECT id, cliente_id, data_pedido, data_entrega, status, observacoes, criado_em FROM pedidos ${whereClause} ORDER BY criado_em DESC`,
+		valores,
 	);
+
+	res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
 
 	return res.status(200).json({
 		total: resultado.rowCount ?? 0,
@@ -74,11 +95,11 @@ export async function criarPedido(req: VercelRequest, res: VercelResponse) {
 		const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body as CriarPedidoBody);
 
 		if (typeof body.cliente_id !== 'string' || !body.cliente_id.trim()) {
-			return res.status(400).json({ erro: 'cliente_id eh obrigatorio.' });
+			return res.status(400).json({ erro: 'cliente_id é obrigatorio.' });
 		}
 
 		if (typeof body.data_pedido !== 'string' || !body.data_pedido.trim()) {
-			return res.status(400).json({ erro: 'data_pedido eh obrigatoria.' });
+			return res.status(400).json({ erro: 'data_pedido éobrigatoria.' });
 		}
 
 		const clienteId = body.cliente_id.trim();
@@ -194,11 +215,7 @@ export async function deletarPedido(req: VercelRequest, res: VercelResponse) {
 	try {
 		id = extrairIdDaUrl(req);
 		const usuarioLogado = autenticarRequisicao(req);
-		
-		// Apenas admin pode deletar
-		if (usuarioLogado.tipo_usuario !== 'admin') {
-			throw new AuthError('Apenas administradores podem deletar pedidos.', 403);
-		}
+		await verificarPermissaoDeletar(req, usuarioLogado);
 	} catch (error) {
 		if (error instanceof AuthError) {
 			return res.status(error.statusCode).json({ erro: error.message });

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { AuthError, autenticarRequisicao, verificarAdminAutorizado, verificarPermissaoDeletar } from '../api/_lib/auth';
+import { AuthError, autenticarRequisicao, extrairIdDaUrl, verificarPermissaoDeletar } from '../api/_lib/auth';
 import pool from '../api/_lib/db';
 
 interface ClienteListagem {
@@ -22,16 +22,6 @@ interface EditarClienteBody {
   nome?: string;
   telefone?: string;
   observacoes?: string;
-}
-
-function extrairIdDaUrl(req: VercelRequest): string {
-  const { id } = req.query;
-
-  if (!id || Array.isArray(id)) {
-    throw new AuthError('ID invalido.', 400);
-  }
-
-  return id;
 }
 
 export async function listarClientes(req: VercelRequest, res: VercelResponse) {
@@ -57,8 +47,7 @@ export async function listarClientes(req: VercelRequest, res: VercelResponse) {
 
 export async function criarCliente(req: VercelRequest, res: VercelResponse) {
   try {
-    const usuarioLogado = autenticarRequisicao(req);
-    verificarAdminAutorizado(usuarioLogado);
+    autenticarRequisicao(req);
   } catch (error) {
     if (error instanceof AuthError) {
       return res.status(error.statusCode).json({ erro: error.message });
@@ -70,7 +59,7 @@ export async function criarCliente(req: VercelRequest, res: VercelResponse) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body as CriarClienteBody);
 
     if (typeof body.nome !== 'string' || !body.nome.trim()) {
-      return res.status(400).json({ erro: 'Nome do cliente eh obrigatorio.' });
+      return res.status(400).json({ erro: 'Nome do cliente é obrigatorio.' });
     }
 
     const nome = body.nome.trim();
@@ -167,7 +156,7 @@ export async function deletarCliente(req: VercelRequest, res: VercelResponse) {
   try {
     id = extrairIdDaUrl(req);
     const usuarioLogado = autenticarRequisicao(req);
-    verificarPermissaoDeletar(usuarioLogado);
+    await verificarPermissaoDeletar(req, usuarioLogado);
   } catch (error) {
     if (error instanceof AuthError) {
       return res.status(error.statusCode).json({ erro: error.message });

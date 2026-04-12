@@ -7,7 +7,7 @@ describe('Database Connection', () => {
     }
   });
 
-  it('pool eh exportado como default', async () => {
+  it('pool éexportado como default', async () => {
     const dbModule = await import('../_lib/db');
     expect(dbModule.default).toBeDefined();
   });
@@ -22,7 +22,7 @@ describe('Database Connection', () => {
     expect(typeof dbModule.default.end).toBe('function');
   });
 
-  it('DATABASE_URL eh passada para Pool', async () => {
+  it('DATABASE_URL épassada para Pool', async () => {
     const originalUrl = process.env.DATABASE_URL;
     const testUrl = 'postgresql://test:pass@localhost/testdb';
     process.env.DATABASE_URL = testUrl;
@@ -40,7 +40,7 @@ describe('Database Connection', () => {
     expect(typeof pool.query).toBe('function');
   });
 
-  it('erro de conexao eh capturado', async () => {
+  it('erro de conexao écapturado', async () => {
     const dbModule = await import('../_lib/db');
     const pool = dbModule.default;
 
