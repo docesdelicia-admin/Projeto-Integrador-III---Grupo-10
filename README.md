@@ -17,9 +17,8 @@ Aplicacao web desenvolvida como Projeto Integrador III - UNIVESP, Grupo 10.
 O projeto passa a adotar versionamento semantico para entregas publicadas por tag:
 
 - Padrao: SemVer (`MAJOR.MINOR.PATCH`)
-- Fase atual: pre-release `1.0.0-rc.0`
-- Release alvo: `v1.0.0`
-- Pre-release (RC): tags como `v1.0.0-rc.0`, `v1.0.0-rc.1`
+- Fase atual: release `1.1.0`
+- Release atual: `v1.1.0`
 
 Regras praticas:
 
@@ -37,8 +36,8 @@ Fluxo minimo para publicar versao:
 Exemplo:
 
 ```bash
-git tag -a v1.0.0-rc.0 -m "release: v1.0.0-rc.0"
-git push origin v1.0.0-rc.0
+git tag -a v1.1.0 -m "release: v1.1.0"
+git push origin v1.1.0
 ```
 
 Para detalhes completos, consulte [docs/versionamento.md](docs/versionamento.md).

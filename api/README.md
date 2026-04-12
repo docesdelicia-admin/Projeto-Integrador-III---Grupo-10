@@ -4,8 +4,8 @@ Esta pasta contem o backend do projeto, usando funcoes serverless da Vercel.
 
 ## Versao da API
 
-- Versao atual do pacote: `1.0.0-rc.0` (ver `api/package.json`)
-- Versionamento de release do produto: tags no repositorio raiz (ex.: `v1.0.0-rc.0`)
+- Versao atual do pacote: `1.1.0` (ver `api/package.json`)
+- Versionamento de release do produto: tags no repositorio raiz (ex.: `v1.1.0`)
 
 Antes de release, registre mudancas de API em [CHANGELOG.md](../CHANGELOG.md).
 

@@ -4,8 +4,8 @@ Aplicacao frontend do projeto, desenvolvida em Angular 21.
 
 ## Versao do frontend
 
-- Versao atual: `1.0.0-rc.0` (ver `frontend/package.json`)
-- Releases oficiais sao controladas por tags no repositorio raiz (ex.: `v1.0.0-rc.0`)
+- Versao atual: `1.1.0` (ver `frontend/package.json`)
+- Releases oficiais sao controladas por tags no repositorio raiz (ex.: `v1.1.0`)
 
 ## Scripts principais
 
