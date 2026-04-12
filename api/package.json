@@ -19,8 +19,6 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
     "bcryptjs": "^3.0.3",
-    "doces-delicia": "file:../frontend",
-    "doces-delicia-workspace": "file:..",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.13.3"
   },

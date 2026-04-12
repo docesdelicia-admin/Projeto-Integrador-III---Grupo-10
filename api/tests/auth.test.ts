@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createMockReq } from './http-mocks';
+import { createMockReq } from './http-mocks.js';
 
 describe('auth utils', () => {
 	beforeEach(() => {
@@ -10,7 +10,7 @@ describe('auth utils', () => {
 	});
 
 	it('gera e valida token JWT com payload esperado', async () => {
-		const { gerarAccessToken, verificarAccessToken } = await import('../_lib/auth');
+		const { gerarAccessToken, verificarAccessToken } = await import('../_lib/auth.js');
 
 		const token = gerarAccessToken({
 			id: '1',
@@ -28,19 +28,19 @@ describe('auth utils', () => {
 	});
 
 	it('retorna erro ao extrair bearer token ausente', async () => {
-		const { extrairBearerToken } = await import('../_lib/auth');
+		const { extrairBearerToken } = await import('../_lib/auth.js');
 
 		expect(() => extrairBearerToken(undefined)).toThrow('Token nao enviado.');
 	});
 
 	it('retorna erro para formato de token invalido', async () => {
-		const { extrairBearerToken } = await import('../_lib/auth');
+		const { extrairBearerToken } = await import('../_lib/auth.js');
 
 		expect(() => extrairBearerToken('Basic abc')).toThrow('Formato do token invalido. Use: Bearer <token>.');
 	});
 
 	it('autentica requisicao a partir do header authorization', async () => {
-		const { autenticarRequisicao, gerarAccessToken } = await import('../_lib/auth');
+		const { autenticarRequisicao, gerarAccessToken } = await import('../_lib/auth.js');
 
 		const token = gerarAccessToken({
 			id: '2',
@@ -62,7 +62,7 @@ describe('auth utils', () => {
 	});
 
 	it('autentica requisicao a partir do cookie de sessao', async () => {
-		const { autenticarRequisicao, criarCookieSessao, gerarAccessToken } = await import('../_lib/auth');
+		const { autenticarRequisicao, criarCookieSessao, gerarAccessToken } = await import('../_lib/auth.js');
 
 		const token = gerarAccessToken({
 			id: '3',
@@ -86,7 +86,7 @@ describe('auth utils', () => {
 	});
 
 	it('valida permissao de admin e acesso ao proprio usuario', async () => {
-		const { verificarAdminAutorizado, verificarPermissaoAcesso } = await import('../_lib/auth');
+		const { verificarAdminAutorizado, verificarPermissaoAcesso } = await import('../_lib/auth.js');
 
 		expect(() =>
 			verificarAdminAutorizado({
@@ -111,7 +111,7 @@ describe('auth utils', () => {
 	});
 
 	it('nega acesso quando operador tenta acessar outro usuario', async () => {
-		const { verificarPermissaoAcesso } = await import('../_lib/auth');
+		const { verificarPermissaoAcesso } = await import('../_lib/auth.js');
 
 		expect(() =>
 			verificarPermissaoAcesso(

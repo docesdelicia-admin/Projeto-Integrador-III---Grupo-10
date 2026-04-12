@@ -1,8 +1,8 @@
 import type { VercelRequest } from '@vercel/node';
 import type { JwtPayload, SignOptions } from 'jsonwebtoken';
-import type { JwtUsuarioPayload, TipoUsuario } from './types';
-import pool from './db';
-import { validarSenha } from './password';
+import type { JwtUsuarioPayload, TipoUsuario } from './types.js';
+import pool from './db.js';
+import { validarSenha } from './password.js';
 
 interface JwtTokenClaims extends JwtUsuarioPayload {
   sub: string;

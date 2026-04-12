@@ -10,7 +10,6 @@
     "ignoreDeprecations": "5.0",
     "rootDir": "..",
     "outDir": "dist",
-    "baseUrl": "./",
     "paths": {
       "@vercel/node": ["./node_modules/@vercel/node"],
       "@neondatabase/serverless": ["./node_modules/@neondatabase/serverless"],

@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createMockReq, createMockRes } from '../tests/http-mocks';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { createMockReq, createMockRes } from '../tests/http-mocks.js';
 
 const mockedAutenticarLogin = vi.hoisted(() => vi.fn());
 const mockedObterSessaoAutenticada = vi.hoisted(() => vi.fn());
 const mockedLogout = vi.hoisted(() => vi.fn());
 
-vi.mock('../../services/auth.service', () => ({
+vi.mock('../../services/auth.service.js', () => ({
   autenticarLogin: mockedAutenticarLogin,
   logout: mockedLogout,
   obterSessaoAutenticada: mockedObterSessaoAutenticada,
@@ -22,7 +23,10 @@ describe('/api/auth', () => {
   });
 
   it('retorna 405 quando metodo nao e suportado', async () => {
-    const { default: handler } = await import('./index');
+    const handler = (await import('./index.js')).default as unknown as (
+      req: VercelRequest,
+      res: VercelResponse,
+    ) => Promise<unknown>;
     const { res, state } = createMockRes();
     const req = createMockReq({ method: 'OPTIONS' });
 
@@ -37,7 +41,10 @@ describe('/api/auth', () => {
   });
 
   it('delega POST para autenticarLogin', async () => {
-    const { default: handler } = await import('./index');
+    const handler = (await import('./index.js')).default as unknown as (
+      req: VercelRequest,
+      res: VercelResponse,
+    ) => Promise<unknown>;
     const { res } = createMockRes();
     const req = createMockReq({ method: 'POST', body: { email: 'admin@teste.com', senha: '123456' } });
 
@@ -49,7 +56,10 @@ describe('/api/auth', () => {
   });
 
   it('delega GET para obterSessaoAutenticada', async () => {
-    const { default: handler } = await import('./index');
+    const handler = (await import('./index.js')).default as unknown as (
+      req: VercelRequest,
+      res: VercelResponse,
+    ) => Promise<unknown>;
     const { res } = createMockRes();
     const req = createMockReq({ method: 'GET' });
 
@@ -62,7 +72,10 @@ describe('/api/auth', () => {
   });
 
   it('delega DELETE para logout', async () => {
-    const { default: handler } = await import('./index');
+    const handler = (await import('./index.js')).default as unknown as (
+      req: VercelRequest,
+      res: VercelResponse,
+    ) => Promise<unknown>;
     const { res } = createMockRes();
     const req = createMockReq({ method: 'DELETE' });
 

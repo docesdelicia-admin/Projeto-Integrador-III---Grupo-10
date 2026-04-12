@@ -5,7 +5,7 @@ import {
   editarUsuario,
   listarUsuarios,
   obterUsuarioPorId,
-} from '../../services/usuarios.service';
+} from '../../services/usuarios.service.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   switch (req.method) {

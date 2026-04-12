@@ -6,10 +6,10 @@ import {
   verificarAdminAutorizado,
   verificarPermissaoAcesso,
   verificarPermissaoDeletar,
-} from '../api/_lib/auth';
-import pool from '../api/_lib/db';
-import { gerarSenhaHash, validarSenha } from '../api/_lib/password';
-import type { CriarUsuarioInput, JwtUsuarioPayload, TipoUsuario, Usuario } from '../api/_lib/types';
+} from '../api/_lib/auth.js';
+import pool from '../api/_lib/db.js';
+import { gerarSenhaHash, validarSenha } from '../api/_lib/password.js';
+import type { CriarUsuarioInput, JwtUsuarioPayload, TipoUsuario, Usuario } from '../api/_lib/types.js';
 
 interface CriarUsuarioBody {
   nome?: string;

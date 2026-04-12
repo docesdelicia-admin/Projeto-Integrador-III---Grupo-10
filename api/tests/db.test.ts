@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
+type PoolLike = {
+  query: (...args: unknown[]) => unknown;
+  end: () => unknown;
+};
+
 describe('Database Connection', () => {
   beforeEach(() => {
     if (!process.env.DATABASE_URL) {
@@ -8,17 +13,17 @@ describe('Database Connection', () => {
   });
 
   it('pool éexportado como default', async () => {
-    const dbModule = await import('../_lib/db');
+    const dbModule = (await import('../_lib/db.js')) as unknown as { default: PoolLike };
     expect(dbModule.default).toBeDefined();
   });
 
   it('pool tem metodo query', async () => {
-    const dbModule = await import('../_lib/db');
+    const dbModule = (await import('../_lib/db.js')) as unknown as { default: PoolLike };
     expect(typeof dbModule.default.query).toBe('function');
   });
 
   it('pool tem metodo end', async () => {
-    const dbModule = await import('../_lib/db');
+    const dbModule = (await import('../_lib/db.js')) as unknown as { default: PoolLike };
     expect(typeof dbModule.default.end).toBe('function');
   });
 
@@ -33,7 +38,7 @@ describe('Database Connection', () => {
   });
 
   it('pool retorna resultados com rowCount e rows', async () => {
-    const dbModule = await import('../_lib/db');
+    const dbModule = (await import('../_lib/db.js')) as unknown as { default: PoolLike };
     const pool = dbModule.default;
 
     expect(pool).toBeDefined();
@@ -41,14 +46,14 @@ describe('Database Connection', () => {
   });
 
   it('erro de conexao écapturado', async () => {
-    const dbModule = await import('../_lib/db');
+    const dbModule = (await import('../_lib/db.js')) as unknown as { default: PoolLike };
     const pool = dbModule.default;
 
     expect(pool).toBeDefined();
   });
 
   it('multiplas queries podem ser executadas', async () => {
-    const dbModule = await import('../_lib/db');
+    const dbModule = (await import('../_lib/db.js')) as unknown as { default: PoolLike };
     const pool = dbModule.default;
 
     expect(typeof pool.query).toBe('function');
@@ -56,7 +61,7 @@ describe('Database Connection', () => {
   });
 
   it('queries parametrizadas sao suportadas', async () => {
-    const dbModule = await import('../_lib/db');
+    const dbModule = (await import('../_lib/db.js')) as unknown as { default: PoolLike };
     const pool = dbModule.default;
 
     expect(pool).toBeDefined();
