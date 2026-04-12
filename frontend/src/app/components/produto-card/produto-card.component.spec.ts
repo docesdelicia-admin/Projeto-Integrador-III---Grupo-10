@@ -110,7 +110,7 @@ describe('ProdutoCardComponent', () => {
     expect(component.indiceFoto).toBe(0);
   });
 
-  it('renderiza modal quando modalAberto eh true', () => {
+  it('renderiza modal quando modalAberto étrue', () => {
     component.modalAberto = true;
     fixture.changeDetectorRef.markForCheck();
     fixture.detectChanges();
@@ -119,7 +119,7 @@ describe('ProdutoCardComponent', () => {
     expect(modal).toBeTruthy();
   });
 
-  it('nao renderiza modal quando modalAberto eh false', () => {
+  it('nao renderiza modal quando modalAberto éfalse', () => {
     component.modalAberto = false;
     fixture.detectChanges();
 

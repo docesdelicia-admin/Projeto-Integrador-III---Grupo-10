@@ -9,10 +9,10 @@
       <p class="descricao">Gerenciar pedidos realizados.</p>
 
       <div class="tabela-wrapper">
-        @if (carregando) {
+        @if (carregando()) {
         <p>Carregando pedidos...</p>
-        } @else if (linhas.length > 0) {
-        <app-tabela [colunas]="colunasTabela" [linhas]="linhas" [acaoEditar]="acaoEditarPedido"
+        } @else if (linhas().length > 0) {
+        <app-tabela [colunas]="colunasTabela" [linhas]="linhas()" [acaoEditar]="acaoEditarPedido"
           [acaoExcluir]="acaoExcluirPedido">
         </app-tabela>
         } @else {

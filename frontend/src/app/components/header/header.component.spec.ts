@@ -29,12 +29,12 @@ describe('HeaderComponent', () => {
     expect(component.titulo).toBe('Meu Titulo');
   });
 
-  it('exibe busca quando exibirBusca eh true', () => {
+  it('exibe busca quando exibirBusca étrue', () => {
     component.exibirBusca = true;
     expect(component.exibirBusca).toBe(true);
   });
 
-  it('oculta busca quando exibirBusca eh false', () => {
+  it('oculta busca quando exibirBusca éfalse', () => {
     component.exibirBusca = false;
     expect(component.exibirBusca).toBe(false);
   });

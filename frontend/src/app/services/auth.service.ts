@@ -59,21 +59,21 @@ export class AuthService {
       return of(this.temSessaoValidaLocalmente());
     }
 
-    return this.http
-      .get<SessaoApiResponse>(this.apiUrl, { withCredentials: true })
-      .pipe(
-        map((resposta) => {
-          this.definirSessaoAtiva(
-            resposta.usuario,
-            resposta.expira_em ? this.calcularExpiracao(resposta.expira_em) : this.calcularExpiracao('8h'),
-          );
-          return true;
-        }),
-        catchError(() => {
-          this.removerToken();
-          return of(false);
-        }),
-      );
+    return this.http.get<SessaoApiResponse>(this.apiUrl, { withCredentials: true }).pipe(
+      map((resposta) => {
+        this.definirSessaoAtiva(
+          resposta.usuario,
+          resposta.expira_em
+            ? this.calcularExpiracao(resposta.expira_em)
+            : this.calcularExpiracao('8h'),
+        );
+        return true;
+      }),
+      catchError(() => {
+        this.removerToken();
+        return of(false);
+      }),
+    );
   }
 
   validarSessaoComCache(): Observable<boolean> {
@@ -102,7 +102,7 @@ export class AuthService {
     return this.usuarioAutenticado;
   }
 
-  ehAdmin(): boolean {
+  isAdmin(): boolean {
     return this.usuarioAutenticado?.tipo_usuario === 'admin';
   }
 

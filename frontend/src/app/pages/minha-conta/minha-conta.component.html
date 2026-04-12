@@ -100,53 +100,10 @@
         </table>
       </div>
 
-      @if (mostraModalSenhaAtual) {
-      <div class="modal-overlay" role="presentation">
-        <div class="modal-senha" role="dialog" aria-modal="true" aria-labelledby="confirmacaoSenhaTitulo">
-          <h3 id="confirmacaoSenhaTitulo">Confirmar alteracao</h3>
-          <p>Digite sua senha atual para concluir a alteracao.</p>
-
-          <form [formGroup]="formSenhaAtual" (ngSubmit)="confirmarTrocaSenha()">
-            <label for="senhaAtual">Senha atual</label>
-            <div class="campo-senha">
-              <input id="senhaAtual" [type]="mostrarSenhaAtual ? 'text' : 'password'" formControlName="senhaAtual"
-                autocomplete="current-password" placeholder="Sua senha atual" />
-              <button type="button" class="botao-olho" (click)="alternarVisualizacaoSenhaAtual()"
-                [attr.aria-label]="mostrarSenhaAtual ? 'Ocultar senha' : 'Mostrar senha'"
-                [attr.aria-pressed]="mostrarSenhaAtual">
-                @if (mostrarSenhaAtual) {
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M3 3l18 18" />
-                  <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
-                  <path d="M9.9 5.2A10.6 10.6 0 0 1 12 5c5.3 0 9.1 3.6 10 7-0.4 1.5-1.4 3.2-2.9 4.6" />
-                  <path d="M6.2 6.3C4.1 7.7 2.7 9.9 2 12c0.9 3.4 4.7 7 10 7 1.9 0 3.6-0.4 5-1.2" />
-                </svg>
-                } @else {
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M2 12c0.9-3.4 4.7-7 10-7s9.1 3.6 10 7c-0.9 3.4-4.7 7-10 7s-9.1-3.6-10-7z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-                }
-              </button>
-            </div>
-
-            <div class="modal-acoes">
-              <button type="button" class="botao-secundario" (click)="fecharModalSenhaAtual()"
-                [disabled]="salvandoSenha">
-                Cancelar
-              </button>
-              <button type="submit" class="botao-principal" [disabled]="formSenhaAtual.invalid || salvandoSenha">
-                @if (salvandoSenha) {
-                Salvando...
-                } @else {
-                Confirmar troca
-                }
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-      }
+      <app-password-confirm-modal [aberto]="mostraModalSenhaAtual" titulo="Confirmar alteracao"
+        mensagem="Digite sua senha atual para concluir a alteracao." textoConfirmar="Confirmar troca"
+        [salvando]="salvandoSenha" (cancelar)="fecharModalSenhaAtual()" (confirmar)="confirmarTrocaSenha($event)">
+      </app-password-confirm-modal>
     </main>
   </div>
 </div>

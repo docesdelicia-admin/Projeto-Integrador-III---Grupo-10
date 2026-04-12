@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { CacheStoreService } from './cache-store.service';
 
 export interface Produto {
   id: string;
@@ -42,46 +43,39 @@ interface ErroApiResponse {
 })
 export class ProdutosService {
   private readonly apiUrl = '/api/produtos';
-  private readonly tempoCacheMs = 24 * 60 * 60 * 1000;
-  private readonly chaveCacheLista = 'docesdelicia.produtos.lista';
-  private readonly chaveCacheListaPublica = 'docesdelicia.produtos.lista-publica';
-  private cacheLista: ListaProdutosResponse | null = null;
-  private cacheListaAtualizadaEm = 0;
-  private cacheListaPublica: ListaProdutosResponse | null = null;
-  private cacheListaPublicaAtualizadaEm = 0;
+  private readonly ttlProdutosMs = 60 * 60 * 1000;
+  private readonly ttlProdutosPublicosMs = 30 * 60 * 1000;
+  private readonly chaveCacheLista = 'products';
+  private readonly chaveCacheListaPublica = 'products:public';
 
-  constructor(private readonly http: HttpClient) {
-    this.hidratarCachesDoStorage();
+  constructor(
+    private readonly http: HttpClient,
+    private readonly cacheStore: CacheStoreService,
+  ) {}
+
+  listar(): Observable<ListaProdutosResponse> {
+    const request$ = this.http.get<ListaProdutosResponse>(this.apiUrl, { withCredentials: true });
+
+    return this.cacheStore
+      .getData(this.chaveCacheLista, request$, this.ttlProdutosMs)
+      .pipe(
+        catchError((error) => throwError(() => new Error(this.extrairMensagemErro(error?.error)))),
+      );
   }
 
-  listar(forceRefresh = false): Observable<ListaProdutosResponse> {
-    if (!forceRefresh) {
-      this.reidratarCacheListaSeNecessario();
-    }
+  listarPublico(): Observable<ListaProdutosResponse> {
+    const request$ = this.http.get<ListaProdutosResponse>(`${this.apiUrl}?publico=1`);
 
-    if (!forceRefresh && this.temCacheValido()) {
-      return of(this.cacheLista as ListaProdutosResponse);
-    }
-
-    return this.http.get<ListaProdutosResponse>(this.apiUrl, { withCredentials: true }).pipe(
-      tap((resposta) => this.salvarCacheLista(resposta)),
-      catchError((error) => throwError(() => new Error(this.extrairMensagemErro(error?.error)))),
-    );
+    return this.cacheStore
+      .getData(this.chaveCacheListaPublica, request$, this.ttlProdutosPublicosMs)
+      .pipe(
+        catchError((error) => throwError(() => new Error(this.extrairMensagemErro(error?.error)))),
+      );
   }
 
-  listarPublico(forceRefresh = false): Observable<ListaProdutosResponse> {
-    if (!forceRefresh) {
-      this.reidratarCacheListaPublicaSeNecessario();
-    }
-
-    if (!forceRefresh && this.temCachePublicoValido()) {
-      return of(this.cacheListaPublica as ListaProdutosResponse);
-    }
-
-    return this.http.get<ListaProdutosResponse>(`${this.apiUrl}?publico=1`).pipe(
-      tap((resposta) => this.salvarCacheListaPublica(resposta)),
-      catchError((error) => throwError(() => new Error(this.extrairMensagemErro(error?.error))))
-    );
+  obterProdutosPublicosEmCache(): Produto[] {
+    const entrada = this.cacheStore.getStale<ListaProdutosResponse>(this.chaveCacheListaPublica);
+    return entrada?.produtos ?? [];
   }
 
   criar(payload: ProdutoPayload): Observable<ProdutoResponse> {
@@ -102,144 +96,23 @@ export class ProdutosService {
       );
   }
 
-  excluir(id: string): Observable<{ mensagem: string }> {
+  excluir(id: string, senhaAtual: string): Observable<{ mensagem: string }> {
     return this.http
       .delete<{
         mensagem: string;
-      }>(`${this.apiUrl}?id=${encodeURIComponent(id)}`, { withCredentials: true })
+      }>(`${this.apiUrl}?id=${encodeURIComponent(id)}`, {
+        withCredentials: true,
+        body: { senha_atual: senhaAtual },
+      })
       .pipe(
         tap(() => this.invalidarCacheLista()),
         catchError((error) => throwError(() => new Error(this.extrairMensagemErro(error?.error)))),
       );
   }
 
-  private temCacheValido(): boolean {
-    return this.cacheLista !== null && Date.now() - this.cacheListaAtualizadaEm < this.tempoCacheMs;
-  }
-
-  private salvarCacheLista(resposta: ListaProdutosResponse): void {
-    this.cacheLista = resposta;
-    this.cacheListaAtualizadaEm = Date.now();
-    this.persistirCache(this.chaveCacheLista, resposta, this.cacheListaAtualizadaEm);
-  }
-
-  private salvarCacheListaPublica(resposta: ListaProdutosResponse): void {
-    this.cacheListaPublica = resposta;
-    this.cacheListaPublicaAtualizadaEm = Date.now();
-    this.persistirCache(this.chaveCacheListaPublica, resposta, this.cacheListaPublicaAtualizadaEm);
-  }
-
   private invalidarCacheLista(): void {
-    this.cacheLista = null;
-    this.cacheListaAtualizadaEm = 0;
-    this.cacheListaPublica = null;
-    this.cacheListaPublicaAtualizadaEm = 0;
-    this.removerCachePersistido(this.chaveCacheLista);
-    this.removerCachePersistido(this.chaveCacheListaPublica);
-  }
-
-  private temCachePublicoValido(): boolean {
-    return this.cacheListaPublica !== null && Date.now() - this.cacheListaPublicaAtualizadaEm < this.tempoCacheMs;
-  }
-
-  private hidratarCachesDoStorage(): void {
-    this.hidratarCache(this.chaveCacheLista, (resposta, atualizadoEm) => {
-      this.cacheLista = resposta;
-      this.cacheListaAtualizadaEm = atualizadoEm;
-    });
-
-    this.hidratarCache(this.chaveCacheListaPublica, (resposta, atualizadoEm) => {
-      this.cacheListaPublica = resposta;
-      this.cacheListaPublicaAtualizadaEm = atualizadoEm;
-    });
-  }
-
-  private reidratarCacheListaSeNecessario(): void {
-    if (this.temCacheValido()) {
-      return;
-    }
-
-    this.hidratarCache(this.chaveCacheLista, (resposta, atualizadoEm) => {
-      this.cacheLista = resposta;
-      this.cacheListaAtualizadaEm = atualizadoEm;
-    });
-  }
-
-  private reidratarCacheListaPublicaSeNecessario(): void {
-    if (this.temCachePublicoValido()) {
-      return;
-    }
-
-    this.hidratarCache(this.chaveCacheListaPublica, (resposta, atualizadoEm) => {
-      this.cacheListaPublica = resposta;
-      this.cacheListaPublicaAtualizadaEm = atualizadoEm;
-    });
-  }
-
-  private hidratarCache(
-    chave: string,
-    definir: (resposta: ListaProdutosResponse, atualizadoEm: number) => void,
-  ): void {
-    const entrada = this.lerCachePersistido(chave);
-    if (!entrada) {
-      return;
-    }
-
-    if (Date.now() - entrada.atualizadoEm >= this.tempoCacheMs) {
-      this.removerCachePersistido(chave);
-      return;
-    }
-
-    definir(entrada.resposta, entrada.atualizadoEm);
-  }
-
-  private persistirCache(
-    chave: string,
-    resposta: ListaProdutosResponse,
-    atualizadoEm: number,
-  ): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    window.localStorage.setItem(
-      chave,
-      JSON.stringify({ resposta, atualizadoEm }),
-    );
-  }
-
-  private lerCachePersistido(chave: string): { resposta: ListaProdutosResponse; atualizadoEm: number } | null {
-    if (typeof window === 'undefined') {
-      return null;
-    }
-
-    const bruto = window.localStorage.getItem(chave);
-    if (!bruto) {
-      return null;
-    }
-
-    try {
-      const entrada = JSON.parse(bruto) as { resposta?: ListaProdutosResponse; atualizadoEm?: number };
-
-      if (!entrada.resposta || typeof entrada.atualizadoEm !== 'number') {
-        return null;
-      }
-
-      return {
-        resposta: entrada.resposta,
-        atualizadoEm: entrada.atualizadoEm,
-      };
-    } catch {
-      return null;
-    }
-  }
-
-  private removerCachePersistido(chave: string): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    window.localStorage.removeItem(chave);
+    this.cacheStore.invalidate(this.chaveCacheLista);
+    this.cacheStore.invalidate(this.chaveCacheListaPublica);
   }
 
   private extrairMensagemErro(payload: ErroApiResponse | undefined): string {

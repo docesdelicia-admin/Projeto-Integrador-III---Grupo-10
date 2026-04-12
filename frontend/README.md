@@ -51,6 +51,8 @@ Rodar testes locais:
 npm test
 ```
 
+O frontend passou a usar Signals nas paginas principais e um componente reutilizavel de confirmacao por senha.
+
 ## Minha Conta - Troca de senha
 
 Fluxo implementado na area logada:
@@ -58,6 +60,14 @@ Fluxo implementado na area logada:
 - Usuario informa a nova senha e a confirmacao.
 - Ao clicar em salvar, abre modal solicitando a senha atual.
 - A confirmacao envia `PUT /api/usuarios?id=<id>` com `senha_atual` e os dados alterados.
+
+O modal de confirmacao foi extraido para `frontend/src/app/components/password-confirm-modal` e pode ser reutilizado em outras acoes sensiveis.
+
+## Exclusao com confirmacao de senha
+
+- A exclusao de produtos usa o mesmo componente de confirmacao por senha da troca de senha.
+- O fluxo envia a senha atual no `DELETE` como corpo da requisicao, seguindo a validacao do backend.
+- O estado das telas com dados carregados foi migrado para Signals para evitar duplicacao de chamadas e manter a interface reativa.
 
 ## Busca no header (componente reutilizavel)
 

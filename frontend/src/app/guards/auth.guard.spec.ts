@@ -137,7 +137,7 @@ describe('loginGuard', () => {
 describe('adminGuard', () => {
   let AuthServiceSpy: {
     validarSessaoComCache: ReturnType<typeof vi.fn>;
-    ehAdmin: ReturnType<typeof vi.fn>;
+    isAdmin: ReturnType<typeof vi.fn>;
   };
   let routerSpy: {
     createUrlTree: ReturnType<typeof vi.fn>;
@@ -146,7 +146,7 @@ describe('adminGuard', () => {
   beforeEach(() => {
     AuthServiceSpy = {
       validarSessaoComCache: vi.fn(),
-      ehAdmin: vi.fn(),
+      isAdmin: vi.fn(),
     };
     routerSpy = {
       createUrlTree: vi.fn(),
@@ -160,9 +160,9 @@ describe('adminGuard', () => {
     });
   });
 
-  it('permite acesso quando usuario eh admin', async () => {
+  it('permite acesso quando usuario éadmin', async () => {
     AuthServiceSpy.validarSessaoComCache.mockReturnValue(of(true));
-    AuthServiceSpy.ehAdmin.mockReturnValue(true);
+    AuthServiceSpy.isAdmin.mockReturnValue(true);
 
     const resultado = await resolverResultadoGuard(
       TestBed.runInInjectionContext(() => adminGuard({} as any, {} as any)),
@@ -172,10 +172,10 @@ describe('adminGuard', () => {
     expect(routerSpy.createUrlTree).not.toHaveBeenCalled();
   });
 
-  it('redireciona para dashboard quando usuario nao eh admin', async () => {
+  it('redireciona para dashboard quando usuario nao éadmin', async () => {
     const arvoreDashboard = {} as UrlTree;
     AuthServiceSpy.validarSessaoComCache.mockReturnValue(of(true));
-    AuthServiceSpy.ehAdmin.mockReturnValue(false);
+    AuthServiceSpy.isAdmin.mockReturnValue(false);
     routerSpy.createUrlTree.mockReturnValue(arvoreDashboard);
 
     const resultado = await resolverResultadoGuard(

@@ -95,7 +95,7 @@ describe('AuthService', () => {
     expect(autenticado).toBe(true);
   });
 
-  it('retorna false quando sessao eh invalida', () => {
+  it('retorna false quando sessao éinvalida', () => {
     let autenticado: boolean | undefined;
     service.validarSessao(true).subscribe((resultado) => {
       autenticado = resultado;
@@ -157,16 +157,16 @@ describe('AuthService', () => {
     expect(usuario?.email).toBe('admin@doces.com');
   });
 
-  it('verifica se usuario eh admin', () => {
+  it('verifica se usuario éadmin', () => {
     service.login('admin@doces.com', '123456').subscribe();
 
     const req = httpMock.expectOne('/api/auth');
     req.flush(respostaLoginMock);
 
-    expect(service.ehAdmin()).toBe(true);
+    expect(service.isAdmin()).toBe(true);
   });
 
-  it('verifica se usuario nao eh admin', () => {
+  it('verifica se usuario nao éadmin', () => {
     const respostaOperador = {
       ...respostaLoginMock,
       usuario: { ...respostaLoginMock.usuario, tipo_usuario: 'operador' as const },
@@ -177,7 +177,7 @@ describe('AuthService', () => {
     const req = httpMock.expectOne('/api/auth');
     req.flush(respostaOperador);
 
-    expect(service.ehAdmin()).toBe(false);
+    expect(service.isAdmin()).toBe(false);
   });
 
   it('remove token ao chamar removerToken', () => {
@@ -259,7 +259,7 @@ describe('AuthService', () => {
     expect(autenticado).toBe(true);
   });
 
-  it('validarSessaoComCache usa cache quando sessao eh valida', () => {
+  it('validarSessaoComCache usa cache quando sessao évalida', () => {
     service.login('admin@doces.com', '123456').subscribe();
     const reqLogin = httpMock.expectOne('/api/auth');
     reqLogin.flush(respostaLoginMock);

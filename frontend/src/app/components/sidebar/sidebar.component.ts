@@ -29,7 +29,7 @@ export class SidebarComponent implements OnInit {
     { label: 'Minha conta', path: '/dashboard/minha-conta' },
   ];
 
-  ehAdmin = false;
+  isAdmin = false;
   nomeUsuario = '';
   tipoUsuario = '';
 
@@ -42,7 +42,7 @@ export class SidebarComponent implements OnInit {
   }
 
   get itensVisiveis(): SidebarItem[] {
-    return this.itens.filter((item) => !item.apenasAdmin || this.ehAdmin);
+    return this.itens.filter((item) => !item.apenasAdmin || this.isAdmin);
   }
 
   ngOnInit(): void {
@@ -53,7 +53,7 @@ export class SidebarComponent implements OnInit {
     }
 
     this.authService.validarSessao().subscribe((autenticado) => {
-      this.ehAdmin = autenticado && this.authService.ehAdmin();
+      this.isAdmin = autenticado && this.authService.isAdmin();
 
       if (!autenticado) {
         this.nomeUsuario = '';

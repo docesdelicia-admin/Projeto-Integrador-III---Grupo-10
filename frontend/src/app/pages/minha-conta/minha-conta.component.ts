@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HeaderComponent } from '../../components/header/header.component';
+import { PasswordConfirmModalComponent } from '../../components/password-confirm-modal/password-confirm-modal.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
@@ -10,7 +11,13 @@ import { UsuariosService } from '../../services/usuarios.service';
 @Component({
   selector: 'app-minha-conta',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HeaderComponent, SidebarComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    HeaderComponent,
+    SidebarComponent,
+    PasswordConfirmModalComponent,
+  ],
   templateUrl: './minha-conta.component.html',
   styleUrl: './minha-conta.component.scss',
 })
@@ -27,10 +34,6 @@ export class MinhaContaPage implements OnInit {
     senhaConfirmacao: [''],
   });
 
-  readonly formSenhaAtual = this.formBuilder.nonNullable.group({
-    senhaAtual: ['', [Validators.required, Validators.minLength(6)]],
-  });
-
   tipoUsuario = '';
   usuarioId = '';
   mostraSecaoSenha = false;
@@ -38,7 +41,6 @@ export class MinhaContaPage implements OnInit {
   salvandoSenha = false;
   mostrarSenhaNova = false;
   mostrarSenhaConfirmacao = false;
-  mostrarSenhaAtual = false;
 
   ngOnInit(): void {
     const usuario = this.authService.obterSessaoAutenticada();
@@ -82,7 +84,6 @@ export class MinhaContaPage implements OnInit {
       this.acaoAtual = 'conta';
     }
 
-    this.formSenhaAtual.reset();
     this.mostraModalSenhaAtual = true;
   }
 
@@ -98,18 +99,16 @@ export class MinhaContaPage implements OnInit {
     }
 
     this.mostraModalSenhaAtual = false;
-    this.formSenhaAtual.reset();
   }
 
-  confirmarTrocaSenha(): void {
-    if (this.formSenhaAtual.invalid) {
-      this.formSenhaAtual.markAllAsTouched();
+  confirmarTrocaSenha(senhaAtual: string): void {
+    const senhaAtualLimpa = senhaAtual.trim();
+    if (!senhaAtualLimpa) {
       this.toastService.erro('Digite a senha atual para confirmar a alteracao.');
       return;
     }
 
     this.salvandoSenha = true;
-    const { senhaAtual } = this.formSenhaAtual.getRawValue();
     const valoresConta = this.formConta.getRawValue();
 
     if (this.acaoAtual === 'senha') {
@@ -131,10 +130,10 @@ export class MinhaContaPage implements OnInit {
         ? {
             nome: valoresConta.nome,
             email: valoresConta.email,
-            senhaAtual,
+            senhaAtual: senhaAtualLimpa,
           }
         : {
-            senhaAtual,
+            senhaAtual: senhaAtualLimpa,
             senhaNova: this.formConta.getRawValue().senhaNova,
           };
 
@@ -147,10 +146,8 @@ export class MinhaContaPage implements OnInit {
         });
         this.formConta.markAsPristine();
         this.mostraModalSenhaAtual = false;
-        this.formSenhaAtual.reset();
         this.mostrarSenhaNova = false;
         this.mostrarSenhaConfirmacao = false;
-        this.mostrarSenhaAtual = false;
         this.toastService.sucesso(resposta.mensagem);
       },
       error: (error: Error) => {
@@ -168,12 +165,12 @@ export class MinhaContaPage implements OnInit {
     this.mostrarSenhaConfirmacao = !this.mostrarSenhaConfirmacao;
   }
 
-  alternarVisualizacaoSenhaAtual(): void {
-    this.mostrarSenhaAtual = !this.mostrarSenhaAtual;
-  }
-
   get podeSalvar(): boolean {
-    return this.formConta.valid && this.formConta.dirty && (!this.mostraSecaoSenha || this.temSenhaPreenchida());
+    return (
+      this.formConta.valid &&
+      this.formConta.dirty &&
+      (!this.mostraSecaoSenha || this.temSenhaPreenchida())
+    );
   }
 
   private temSenhaPreenchida(): boolean {

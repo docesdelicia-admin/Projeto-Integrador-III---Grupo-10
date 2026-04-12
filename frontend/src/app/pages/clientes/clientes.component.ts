@@ -28,10 +28,10 @@ export class ClientesPage implements OnInit {
 
   linhas: any[] = [];
   carregando = false;
-  ehAdmin = false;
+  isAdmin = false;
 
   ngOnInit(): void {
-    this.ehAdmin = this.authService.ehAdmin();
+    this.isAdmin = this.authService.isAdmin();
     this.carregarClientes();
   }
 

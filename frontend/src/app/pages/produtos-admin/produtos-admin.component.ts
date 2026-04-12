@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
 import { HeaderComponent } from '../../components/header/header.component';
+import { PasswordConfirmModalComponent } from '../../components/password-confirm-modal/password-confirm-modal.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import {
   TabelaColuna,
@@ -15,7 +16,14 @@ import { Produto, ProdutoPayload, ProdutosService } from '../../services/produto
 @Component({
   selector: 'app-produtos-admin',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HeaderComponent, SidebarComponent, TabelaComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    HeaderComponent,
+    SidebarComponent,
+    TabelaComponent,
+    PasswordConfirmModalComponent,
+  ],
   templateUrl: './produtos-admin.component.html',
   styleUrl: './produtos-admin.component.scss',
 })
@@ -54,38 +62,41 @@ export class ProdutosAdminPage implements OnInit {
     this.excluirProduto(linha);
   };
 
-  readonly excluirDesabilitado = (): boolean => !this.ehAdmin;
+  readonly excluirDesabilitado = (): boolean => !this.isAdmin();
 
-  produtos: Produto[] = [];
-  carregandoTabela = false;
-  carregandoFormulario = false;
-  modalAberto = false;
-  modoEdicao = false;
-  ehAdmin = false;
-  idProdutoEdicao: string | null = null;
-  mensagemSucesso = '';
-  mensagemErro = '';
-  arquivosSelecionados: File[] = [];
-  fotosExistentesEdicao: string[] = [];
-  dropzoneAtiva = false;
+  readonly produtos = signal<Produto[]>([]);
+  readonly carregandoTabela = signal(false);
+  readonly carregandoFormulario = signal(false);
+  readonly modalAberto = signal(false);
+  readonly modoEdicao = signal(false);
+  readonly isAdmin = signal(false);
+  readonly idProdutoEdicao = signal<string | null>(null);
+  readonly mensagemSucesso = signal('');
+  readonly mensagemErro = signal('');
+  readonly arquivosSelecionados = signal<File[]>([]);
+  readonly fotosExistentesEdicao = signal<string[]>([]);
+  readonly dropzoneAtiva = signal(false);
+  readonly modalConfirmacaoExclusaoAberto = signal(false);
+  readonly produtoPendenteExclusao = signal<Produto | null>(null);
+  readonly carregandoExclusao = signal(false);
 
   get linhasTabela(): TabelaLinha[] {
-    return this.produtos.map((produto) => ({ ...produto }) as TabelaLinha);
+    return this.produtos().map((produto) => ({ ...produto }) as TabelaLinha);
   }
 
   ngOnInit(): void {
     this.authService.validarSessao().subscribe((autenticado) => {
-      this.ehAdmin = autenticado && this.authService.ehAdmin();
+      this.isAdmin.set(autenticado && this.authService.isAdmin());
     });
 
     this.carregarProdutos();
   }
 
   abrirModalCadastro(): void {
-    this.mensagemErro = '';
-    this.mensagemSucesso = '';
-    this.modoEdicao = false;
-    this.idProdutoEdicao = null;
+    this.mensagemErro.set('');
+    this.mensagemSucesso.set('');
+    this.modoEdicao.set(false);
+    this.idProdutoEdicao.set(null);
     this.formProduto.reset({
       nome: '',
       categoria: '',
@@ -93,23 +104,23 @@ export class ProdutosAdminPage implements OnInit {
       preco: 0,
       ativo: true,
     });
-    this.arquivosSelecionados = [];
-    this.fotosExistentesEdicao = [];
-    this.dropzoneAtiva = false;
-    this.modalAberto = true;
+    this.arquivosSelecionados.set([]);
+    this.fotosExistentesEdicao.set([]);
+    this.dropzoneAtiva.set(false);
+    this.modalAberto.set(true);
   }
 
   fecharModal(): void {
-    if (this.carregandoFormulario) {
+    if (this.carregandoFormulario()) {
       return;
     }
 
-    this.modalAberto = false;
+    this.modalAberto.set(false);
   }
 
   async salvarProduto(): Promise<void> {
-    this.mensagemErro = '';
-    this.mensagemSucesso = '';
+    this.mensagemErro.set('');
+    this.mensagemSucesso.set('');
 
     if (this.formProduto.invalid) {
       this.formProduto.markAllAsTouched();
@@ -122,8 +133,9 @@ export class ProdutosAdminPage implements OnInit {
     try {
       fotos = await this.prepararFotosParaPayload();
     } catch (error) {
-      this.mensagemErro =
-        error instanceof Error ? error.message : 'Falha ao processar os arquivos selecionados.';
+      this.mensagemErro.set(
+        error instanceof Error ? error.message : 'Falha ao processar os arquivos selecionados.',
+      );
       return;
     }
 
@@ -136,38 +148,39 @@ export class ProdutosAdminPage implements OnInit {
       ativo: valores.ativo,
     };
 
-    this.carregandoFormulario = true;
+    this.carregandoFormulario.set(true);
 
     const requisicao =
-      this.modoEdicao && this.idProdutoEdicao
-        ? this.produtosService.editar(this.idProdutoEdicao, payload)
+      this.modoEdicao() && this.idProdutoEdicao()
+        ? this.produtosService.editar(this.idProdutoEdicao() as string, payload)
         : this.produtosService.criar(payload);
 
-    requisicao.pipe(finalize(() => (this.carregandoFormulario = false))).subscribe({
+    requisicao.pipe(finalize(() => this.carregandoFormulario.set(false))).subscribe({
       next: () => {
-        this.modalAberto = false;
-        this.mensagemSucesso = this.modoEdicao
+        const mensagem = this.modoEdicao()
           ? 'Produto atualizado com sucesso.'
           : 'Produto cadastrado com sucesso.';
+        this.modalAberto.set(false);
+        this.mensagemSucesso.set(mensagem);
         this.carregarProdutos();
       },
       error: (error: Error) => {
-        this.mensagemErro = error.message;
+        this.mensagemErro.set(error.message);
       },
     });
   }
 
   private carregarProdutos(): void {
-    this.carregandoTabela = true;
+    this.carregandoTabela.set(true);
     this.produtosService
       .listar()
-      .pipe(finalize(() => (this.carregandoTabela = false)))
+      .pipe(finalize(() => this.carregandoTabela.set(false)))
       .subscribe({
         next: (resposta) => {
-          this.produtos = resposta.produtos;
+          this.produtos.set(resposta.produtos);
         },
         error: (error: Error) => {
-          this.mensagemErro = error.message;
+          this.mensagemErro.set(error.message);
         },
       });
   }
@@ -178,10 +191,10 @@ export class ProdutosAdminPage implements OnInit {
       return;
     }
 
-    this.mensagemErro = '';
-    this.mensagemSucesso = '';
-    this.modoEdicao = true;
-    this.idProdutoEdicao = produto.id;
+    this.mensagemErro.set('');
+    this.mensagemSucesso.set('');
+    this.modoEdicao.set(true);
+    this.idProdutoEdicao.set(produto.id);
     this.formProduto.reset({
       nome: produto.nome,
       categoria: produto.categoria ?? '',
@@ -189,10 +202,10 @@ export class ProdutosAdminPage implements OnInit {
       preco: Number(produto.preco),
       ativo: produto.ativo,
     });
-    this.arquivosSelecionados = [];
-    this.fotosExistentesEdicao = [...produto.fotos];
-    this.dropzoneAtiva = false;
-    this.modalAberto = true;
+    this.arquivosSelecionados.set([]);
+    this.fotosExistentesEdicao.set([...produto.fotos]);
+    this.dropzoneAtiva.set(false);
+    this.modalAberto.set(true);
   }
 
   abrirSeletorArquivos(inputArquivos: HTMLInputElement): void {
@@ -206,27 +219,27 @@ export class ProdutosAdminPage implements OnInit {
 
   onArrastarSobreDropzone(event: DragEvent): void {
     event.preventDefault();
-    this.dropzoneAtiva = true;
+    this.dropzoneAtiva.set(true);
   }
 
   onSairDropzone(event: DragEvent): void {
     event.preventDefault();
-    this.dropzoneAtiva = false;
+    this.dropzoneAtiva.set(false);
   }
 
   onSoltarArquivos(event: DragEvent): void {
     event.preventDefault();
-    this.dropzoneAtiva = false;
+    this.dropzoneAtiva.set(false);
     this.definirArquivosSelecionados(event.dataTransfer?.files ?? null);
   }
 
   limparArquivosSelecionados(): void {
-    this.arquivosSelecionados = [];
+    this.arquivosSelecionados.set([]);
   }
 
   private excluirProduto(linha: TabelaLinha): void {
-    if (!this.ehAdmin) {
-      this.mensagemErro = 'Apenas administradores podem deletar dados.';
+    if (!this.isAdmin()) {
+      this.mensagemErro.set('Apenas administradores podem deletar dados.');
       return;
     }
 
@@ -235,37 +248,59 @@ export class ProdutosAdminPage implements OnInit {
       return;
     }
 
-    const confirmou = window.confirm(`Deseja realmente excluir o produto ${produto.nome}?`);
-    if (!confirmou) {
+    this.produtoPendenteExclusao.set(produto);
+    this.modalConfirmacaoExclusaoAberto.set(true);
+  }
+
+  cancelarConfirmacaoExclusao(): void {
+    if (this.carregandoExclusao()) {
       return;
     }
 
-    this.mensagemErro = '';
-    this.mensagemSucesso = '';
+    this.modalConfirmacaoExclusaoAberto.set(false);
+    this.produtoPendenteExclusao.set(null);
+  }
 
-    this.produtosService.excluir(produto.id).subscribe({
-      next: () => {
-        this.mensagemSucesso = 'Produto excluido com sucesso.';
-        this.carregarProdutos();
-      },
-      error: (error: Error) => {
-        this.mensagemErro = error.message;
-      },
-    });
+  confirmarExclusaoComSenha(senhaAtual: string): void {
+    const produto = this.produtoPendenteExclusao();
+    const senhaAtualLimpa = senhaAtual.trim();
+
+    if (!produto || !senhaAtualLimpa) {
+      return;
+    }
+
+    this.mensagemErro.set('');
+    this.mensagemSucesso.set('');
+    this.carregandoExclusao.set(true);
+
+    this.produtosService
+      .excluir(produto.id, senhaAtualLimpa)
+      .pipe(finalize(() => this.carregandoExclusao.set(false)))
+      .subscribe({
+        next: () => {
+          this.modalConfirmacaoExclusaoAberto.set(false);
+          this.produtoPendenteExclusao.set(null);
+          this.mensagemSucesso.set('Produto excluido com sucesso.');
+          this.carregarProdutos();
+        },
+        error: (error: Error) => {
+          this.mensagemErro.set(error.message);
+        },
+      });
   }
 
   private mapearLinhaParaProduto(linha: TabelaLinha): Produto | null {
     const id = linha['id'];
 
     if (typeof id !== 'string') {
-      this.mensagemErro = 'Nao foi possivel identificar o produto selecionado.';
+      this.mensagemErro.set('Nao foi possivel identificar o produto selecionado.');
       return null;
     }
 
-    const produto = this.produtos.find((item) => item.id === id);
+    const produto = this.produtos().find((item) => item.id === id);
 
     if (!produto) {
-      this.mensagemErro = 'Produto nao encontrado na lista atual.';
+      this.mensagemErro.set('Produto nao encontrado na lista atual.');
       return null;
     }
 
@@ -277,16 +312,16 @@ export class ProdutosAdminPage implements OnInit {
       return;
     }
 
-    this.arquivosSelecionados = Array.from(files);
+    this.arquivosSelecionados.set(Array.from(files));
   }
 
   private async prepararFotosParaPayload(): Promise<string[]> {
-    if (this.arquivosSelecionados.length === 0) {
-      return [...this.fotosExistentesEdicao];
+    if (this.arquivosSelecionados().length === 0) {
+      return [...this.fotosExistentesEdicao()];
     }
 
     const fotos = await Promise.all(
-      this.arquivosSelecionados.map((arquivo) => this.converterArquivoParaDataUrl(arquivo)),
+      this.arquivosSelecionados().map((arquivo) => this.converterArquivoParaDataUrl(arquivo)),
     );
     return fotos;
   }

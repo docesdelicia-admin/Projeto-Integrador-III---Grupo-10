@@ -7,9 +7,6 @@ describe('ProdutosService', () => {
   let service: ProdutosService;
   let httpMock: HttpTestingController;
 
-  const chaveCacheLista = 'docesdelicia.produtos.lista';
-  const chaveCacheListaPublica = 'docesdelicia.produtos.lista-publica';
-
   const produtoMock: Produto = {
     id: '1',
     nome: 'Bolo Chocolate',
@@ -22,8 +19,6 @@ describe('ProdutosService', () => {
   };
 
   beforeEach(() => {
-    window.localStorage.clear();
-
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [ProdutosService],
@@ -35,7 +30,6 @@ describe('ProdutosService', () => {
 
   afterEach(() => {
     httpMock.verify();
-    window.localStorage.clear();
   });
 
   it('lista todos os produtos', () => {
@@ -90,17 +84,11 @@ describe('ProdutosService', () => {
     expect(segundaResposta?.produtos[0].nome).toBe('Bolo Chocolate');
   });
 
-  it('persiste cache de produtos no localStorage por uma nova instancia', () => {
-    let primeiraResposta: { total: number; produtos: Produto[] } | undefined;
-
-    service.listar().subscribe((resposta) => {
-      primeiraResposta = resposta;
-    });
+  it('nao compartilha cache entre instancias diferentes do service', () => {
+    service.listar().subscribe();
 
     const req = httpMock.expectOne('/api/produtos');
     req.flush({ total: 1, produtos: [produtoMock] });
-
-    expect(window.localStorage.getItem(chaveCacheLista)).not.toBeNull();
 
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -111,24 +99,9 @@ describe('ProdutosService', () => {
     service = TestBed.inject(ProdutosService);
     httpMock = TestBed.inject(HttpTestingController);
 
-    let segundaResposta: { total: number; produtos: Produto[] } | undefined;
-    service.listar().subscribe((resposta) => {
-      segundaResposta = resposta;
-    });
-
-    httpMock.expectNone('/api/produtos');
-
-    expect(primeiraResposta?.total).toBe(1);
-    expect(segundaResposta?.produtos[0].nome).toBe('Bolo Chocolate');
-  });
-
-  it('persiste cache publico no localStorage', () => {
-    service.listarPublico().subscribe();
-
-    const req = httpMock.expectOne('/api/produtos?publico=1');
-    req.flush({ total: 1, produtos: [produtoMock] });
-
-    expect(window.localStorage.getItem(chaveCacheListaPublica)).not.toBeNull();
+    service.listar().subscribe();
+    const reqNovaInstancia = httpMock.expectOne('/api/produtos');
+    reqNovaInstancia.flush({ total: 1, produtos: [produtoMock] });
   });
 
   it('cria novo produto', () => {
@@ -163,25 +136,22 @@ describe('ProdutosService', () => {
     const reqListagem = httpMock.expectOne('/api/produtos');
     reqListagem.flush({ total: 1, produtos: [produtoMock] });
 
-    expect(window.localStorage.getItem(chaveCacheLista)).not.toBeNull();
-
-    service.criar({
-      nome: 'Novo Bolo',
-      categoria: 'Bolos personalizados',
-      descricao: 'Um novo bolo',
-      preco: 149.9,
-      fotos: ['foto1.jpg'],
-      ativo: true,
-    }).subscribe();
+    service
+      .criar({
+        nome: 'Novo Bolo',
+        categoria: 'Bolos personalizados',
+        descricao: 'Um novo bolo',
+        preco: 149.9,
+        fotos: ['foto1.jpg'],
+        ativo: true,
+      })
+      .subscribe();
 
     const reqCriacao = httpMock.expectOne('/api/produtos');
     reqCriacao.flush({
       mensagem: 'Produto criado com sucesso.',
       produto: { ...produtoMock, nome: 'Novo Bolo' },
     });
-
-    expect(window.localStorage.getItem(chaveCacheLista)).toBeNull();
-    expect(window.localStorage.getItem(chaveCacheListaPublica)).toBeNull();
 
     service.listar().subscribe();
     const reqRecarregamento = httpMock.expectOne('/api/produtos');
@@ -215,12 +185,13 @@ describe('ProdutosService', () => {
 
   it('exclui produto existente', () => {
     let resultado: { mensagem: string } | undefined;
-    service.excluir('1').subscribe((resposta) => {
+    service.excluir('1', '123456').subscribe((resposta) => {
       resultado = resposta;
     });
 
     const req = httpMock.expectOne('/api/produtos?id=1');
     expect(req.request.method).toBe('DELETE');
+    expect(req.request.body).toEqual({ senha_atual: '123456' });
     req.flush({ mensagem: 'Produto excluído com sucesso.' });
 
     expect(resultado?.mensagem).toContain('excluído');
@@ -258,9 +229,9 @@ describe('ProdutosService', () => {
     });
 
     const req = httpMock.expectOne('/api/produtos');
-    req.flush({ erro: 'Nome eh obrigatorio' }, { status: 400, statusText: 'Bad Request' });
+    req.flush({ erro: 'Nome éobrigatorio' }, { status: 400, statusText: 'Bad Request' });
 
-    expect(erro?.message).toContain('Nome eh obrigatorio');
+    expect(erro?.message).toContain('Nome éobrigatorio');
   });
 
   it('lanca erro quando falha ao atualizar produto', () => {
@@ -288,7 +259,7 @@ describe('ProdutosService', () => {
 
   it('lanca erro quando falha ao excluir produto', () => {
     let erro: Error | undefined;
-    service.excluir('999').subscribe({
+    service.excluir('999', '123456').subscribe({
       error: (e: Error) => {
         erro = e;
       },
