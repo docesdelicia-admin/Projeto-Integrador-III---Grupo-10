@@ -40,26 +40,90 @@ function extrairIdDaUrl(req: VercelRequest): string {
 }
 
 export async function listarPedidos(req: VercelRequest, res: VercelResponse) {
-	try {
-		autenticarRequisicao(req);
-	} catch (error) {
-		if (error instanceof AuthError) {
-			return res.status(error.statusCode).json({ erro: error.message });
-		}
+    try {
+        autenticarRequisicao(req);
+    } catch (error) {
+        if (error instanceof AuthError) {
+            return res.status(error.statusCode).json({ erro: error.message });
+        }
+        return res.status(401).json({ erro: 'Requer autenticacao.' });
+    }
 
-		return res.status(401).json({ erro: 'Requer autenticacao.' });
-	}
+    const {
+        cliente_id,
+        status,
+        data_inicio,
+        data_fim,
+        limit = '20',
+        offset = '0',
+    } = req.query;
 
-	const resultado = await pool.query<PedidoListagem>(
-		'SELECT id, cliente_id, data_pedido, data_entrega, status, observacoes, criado_em FROM pedidos ORDER BY criado_em DESC',
-	);
+    const filtros: string[] = [];
+    const valores: unknown[] = [];
 
-	return res.status(200).json({
-		total: resultado.rowCount ?? 0,
-		pedidos: resultado.rows,
-	});
+    // Filtro por cliente
+    if (cliente_id && typeof cliente_id === 'string') {
+        valores.push(cliente_id);
+        filtros.push(`cliente_id = $${valores.length}`);
+    }
+
+    // Filtro por status
+    if (status && typeof status === 'string') {
+        valores.push(status.toLowerCase());
+        filtros.push(`status = $${valores.length}`);
+    }
+
+    // Filtro por período
+    if (data_inicio && typeof data_inicio === 'string') {
+        valores.push(data_inicio);
+        filtros.push(`data_pedido >= $${valores.length}`);
+    }
+
+    if (data_fim && typeof data_fim === 'string') {
+        valores.push(data_fim);
+        filtros.push(`data_pedido <= $${valores.length}`);
+    }
+
+    const whereClause = filtros.length
+        ? `WHERE ${filtros.join(' AND ')}`
+        : '';
+
+    const parsedLimit = Math.min(Number(limit) || 20, 100);
+    const parsedOffset = Number(offset) || 0;
+
+    valores.push(parsedLimit, parsedOffset);
+
+    const query = `
+        SELECT
+            id,
+            cliente_id,
+            data_pedido,
+            data_entrega,
+            status,
+            observacoes,
+            criado_em
+        FROM pedidos
+        ${whereClause}
+        ORDER BY criado_em DESC
+        LIMIT $${valores.length - 1}
+        OFFSET $${valores.length}
+    `;
+
+    const resultado = await pool.query<PedidoListagem>(query, valores);
+
+    return res.status(200).json({
+        filtros_aplicados: {
+            cliente_id: cliente_id ?? null,
+            status: status ?? null,
+            data_inicio: data_inicio ?? null,
+            data_fim: data_fim ?? null,
+        },
+        limit: parsedLimit,
+        offset: parsedOffset,
+        total: resultado.rowCount ?? 0,
+        pedidos: resultado.rows,
+    });
 }
-
 export async function criarPedido(req: VercelRequest, res: VercelResponse) {
 	try {
 		autenticarRequisicao(req);
