@@ -77,7 +77,7 @@ describe('TabelaComponent', () => {
     expect(valor).toBe('30 anos');
   });
 
-  it('retorna traco quando valor eh null ou undefined', () => {
+  it('retorna traco quando valor énull ou undefined', () => {
     const colunaSimples: TabelaColuna = { chave: 'nome', titulo: 'Nome' };
     const linhaVazia: TabelaLinha = { id: 1, nome: null };
 
@@ -96,7 +96,7 @@ describe('TabelaComponent', () => {
     expect(rastreador).toBe(5);
   });
 
-  it('chama acaoEditar quando editar eh acionado', () => {
+  it('chama acaoEditar quando editar éacionado', () => {
     let chamado = false;
     component.acaoEditar = () => {
       chamado = true;
@@ -107,7 +107,7 @@ describe('TabelaComponent', () => {
     expect(chamado).toBe(true);
   });
 
-  it('chama acaoExcluir quando excluir eh acionado', () => {
+  it('chama acaoExcluir quando excluir éacionado', () => {
     let chamado = false;
     component.acaoExcluir = () => {
       chamado = true;

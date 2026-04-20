@@ -15,15 +15,15 @@
         </button>
       </section>
 
-      @if (mensagemSucesso) {
-      <p class="feedback sucesso">{{ mensagemSucesso }}</p>
+      @if (mensagemSucesso()) {
+      <p class="feedback sucesso">{{ mensagemSucesso() }}</p>
       }
 
-      @if (mensagemErro) {
-      <p class="feedback erro">{{ mensagemErro }}</p>
+      @if (mensagemErro()) {
+      <p class="feedback erro">{{ mensagemErro() }}</p>
       }
 
-      @if (carregandoTabela) {
+      @if (carregandoTabela()) {
       <p class="carregando">Carregando produtos...</p>
       } @else {
       <app-tabela [colunas]="colunasTabela" [linhas]="linhasTabela" [acaoEditar]="acaoEditarProduto"
@@ -35,11 +35,17 @@
   </div>
 </div>
 
-@if (modalAberto) {
+<app-password-confirm-modal [aberto]="modalConfirmacaoExclusaoAberto()" titulo="Confirmar exclusao"
+  [mensagem]="'Digite sua senha atual para excluir o produto ' + (produtoPendenteExclusao()?.nome ?? '') + '.'"
+  textoConfirmar="Confirmar exclusao" [salvando]="carregandoExclusao()" (cancelar)="cancelarConfirmacaoExclusao()"
+  (confirmar)="confirmarExclusaoComSenha($event)">
+</app-password-confirm-modal>
+
+@if (modalAberto()) {
 <div class="modal-backdrop" role="presentation">
   <section class="modal" role="dialog" aria-modal="true" aria-label="Formulario de produto">
     <header>
-      <h2>{{ modoEdicao ? 'Editar produto' : 'Cadastrar produto' }}</h2>
+      <h2>{{ modoEdicao() ? 'Editar produto' : 'Cadastrar produto' }}</h2>
     </header>
 
     <form [formGroup]="formProduto" (ngSubmit)="salvarProduto()" novalidate>
@@ -59,21 +65,21 @@
       <input #inputArquivos id="input-arquivos" type="file" accept="image/*" multiple class="input-arquivos"
         (change)="onArquivosSelecionados($event)" />
 
-      <div class="dropzone" [class.ativa]="dropzoneAtiva" role="button" tabindex="0"
+      <div class="dropzone" [class.ativa]="dropzoneAtiva()" role="button" tabindex="0"
         (click)="abrirSeletorArquivos(inputArquivos)" (dragover)="onArrastarSobreDropzone($event)"
         (dragleave)="onSairDropzone($event)" (drop)="onSoltarArquivos($event)">
         <p>Arraste as imagens aqui ou clique para selecionar no dispositivo.</p>
       </div>
 
-      @if (arquivosSelecionados.length > 0) {
+      @if (arquivosSelecionados().length > 0) {
       <div class="lista-arquivos">
-        <p>{{ arquivosSelecionados.length }} arquivo(s) selecionado(s).</p>
+        <p>{{ arquivosSelecionados().length }} arquivo(s) selecionado(s).</p>
         <button type="button" class="botao-secundario" (click)="limparArquivosSelecionados()">
           Limpar selecao
         </button>
       </div>
-      } @else if (modoEdicao && fotosExistentesEdicao.length > 0) {
-      <p class="fotos-existentes">Sem novos arquivos. Serao mantidas {{ fotosExistentesEdicao.length }} foto(s) ja
+      } @else if (modoEdicao() && fotosExistentesEdicao().length > 0) {
+      <p class="fotos-existentes">Sem novos arquivos. Serao mantidas {{ fotosExistentesEdicao().length }} foto(s) ja
         cadastrada(s).</p>
       }
 
@@ -93,11 +99,11 @@
       }
 
       <footer>
-        <button type="button" class="botao-secundario" (click)="fecharModal()" [disabled]="carregandoFormulario">
+        <button type="button" class="botao-secundario" (click)="fecharModal()" [disabled]="carregandoFormulario()">
           Cancelar
         </button>
-        <button type="submit" class="botao-principal" [disabled]="carregandoFormulario">
-          {{ carregandoFormulario ? 'Salvando...' : (modoEdicao ? 'Salvar alteracoes' : 'Cadastrar') }}
+        <button type="submit" class="botao-principal" [disabled]="carregandoFormulario()">
+          {{ carregandoFormulario() ? 'Salvando...' : (modoEdicao() ? 'Salvar alteracoes' : 'Cadastrar') }}
         </button>
       </footer>
     </form>

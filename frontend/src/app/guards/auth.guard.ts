@@ -17,7 +17,7 @@ export const loginGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  return authService.validarSessao(true).pipe(
+  return authService.validarSessao().pipe(
     map((autenticado) => (autenticado ? router.createUrlTree(['/dashboard']) : true)),
     catchError(() => of(true)),
   );
@@ -29,7 +29,7 @@ export const adminGuard: CanActivateFn = () => {
 
   return authService.validarSessaoComCache().pipe(
     map((autenticado) =>
-      autenticado && authService.ehAdmin() ? true : router.createUrlTree(['/dashboard']),
+      autenticado && authService.isAdmin() ? true : router.createUrlTree(['/dashboard']),
     ),
     catchError(() => of(router.createUrlTree(['/dashboard']))),
   );

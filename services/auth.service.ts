@@ -1,7 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { AuthError, autenticarRequisicao, criarCookieSessao, criarCookieSessaoEncerrada, gerarAccessToken } from '../api/_lib/auth';
-import { validarSenha } from '../api/_lib/password';
-import type { TipoUsuario } from '../api/_lib/types';
+import { AuthError, autenticarRequisicao, criarCookieSessao, criarCookieSessaoEncerrada, gerarAccessToken } from '../api/_lib/auth.js';
+import pool from '../api/_lib/db.js';
+import { validarSenha } from '../api/_lib/password.js';
+import type { TipoUsuario } from '../api/_lib/types.js';
 
 interface LoginBody {
   email?: string;
@@ -54,8 +55,6 @@ function validarEntradaLogin(body: LoginBody): { email: string; senha: string } 
 
 export async function autenticarLogin(req: VercelRequest, res: VercelResponse) {
   try {
-    const { default: pool } = await import('../api/_lib/db');
-
     const body = obterBody(req);
     const { email, senha } = validarEntradaLogin(body);
 

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { listarInsumos, criarInsumo, editarInsumo, deletarInsumo } from '../../services/insumos.service';
+import { listarInsumos, criarInsumo, editarInsumo, deletarInsumo } from '../../services/insumos.service.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   switch (req.method) {

@@ -28,7 +28,7 @@ describe('ProdutosAdminPage', () => {
     AuthServiceMock = {
       possuiToken: vi.fn().mockReturnValue(true),
       validarSessao: vi.fn().mockReturnValue(of(true)),
-      ehAdmin: vi.fn().mockReturnValue(true),
+      isAdmin: vi.fn().mockReturnValue(true),
       obterSessaoAutenticada: vi.fn().mockReturnValue({
         id: '1',
         nome: 'Admin Teste',
@@ -69,26 +69,26 @@ describe('ProdutosAdminPage', () => {
   it('abre modal de cadastro', () => {
     component.abrirModalCadastro();
 
-    expect(component.modalAberto).toBe(true);
-    expect(component.modoEdicao).toBe(false);
+    expect(component.modalAberto()).toBe(true);
+    expect(component.modoEdicao()).toBe(false);
   });
 
   it('fecha modal quando nao esta carregando', () => {
-    component.modalAberto = true;
-    component.carregandoFormulario = false;
+    component.modalAberto.set(true);
+    component.carregandoFormulario.set(false);
 
     component.fecharModal();
 
-    expect(component.modalAberto).toBe(false);
+    expect(component.modalAberto()).toBe(false);
   });
 
   it('nao fecha modal quando esta carregando', () => {
-    component.modalAberto = true;
-    component.carregandoFormulario = true;
+    component.modalAberto.set(true);
+    component.carregandoFormulario.set(true);
 
     component.fecharModal();
 
-    expect(component.modalAberto).toBe(true);
+    expect(component.modalAberto()).toBe(true);
   });
 
   it('reseta formulario ao abrir modal de cadastro', () => {
@@ -109,17 +109,17 @@ describe('ProdutosAdminPage', () => {
   });
 
   it('limpa mensagens ao abrir modal', () => {
-    component.mensagemErro = 'Erro anterior';
-    component.mensagemSucesso = 'Sucesso anterior';
+    component.mensagemErro.set('Erro anterior');
+    component.mensagemSucesso.set('Sucesso anterior');
 
     component.abrirModalCadastro();
 
-    expect(component.mensagemErro).toBe('');
-    expect(component.mensagemSucesso).toBe('');
+    expect(component.mensagemErro()).toBe('');
+    expect(component.mensagemSucesso()).toBe('');
   });
 
   it('renderiza componente da tabela', () => {
-    component.produtos = [produtoMock];
+    component.produtos.set([produtoMock]);
     fixture.detectChanges();
 
     const tabela = fixture.nativeElement.querySelector('app-tabela');
@@ -127,7 +127,7 @@ describe('ProdutosAdminPage', () => {
   });
 
   it('retorna linhas da tabela mapeadas de produtos', () => {
-    component.produtos = [produtoMock];
+    component.produtos.set([produtoMock]);
     fixture.detectChanges();
 
     expect(component.linhasTabela.length).toBe(1);
@@ -138,7 +138,7 @@ describe('ProdutosAdminPage', () => {
     component.ngOnInit();
     fixture.detectChanges();
 
-    expect(component.produtos.length).toBeGreaterThanOrEqual(0);
+    expect(component.produtos().length).toBeGreaterThanOrEqual(0);
   });
 
   it('exibe "Sim" quando produto esta ativo na coluna ativo', () => {
@@ -148,18 +148,18 @@ describe('ProdutosAdminPage', () => {
     expect(resultado).toBe('Sim');
   });
 
-  it('define ehAdmin baseado na validacao de sessao', () => {
+  it('define isAdmin baseado na validacao de sessao', () => {
     AuthServiceMock.validarSessao.mockReturnValue(of(true));
-    AuthServiceMock.ehAdmin.mockReturnValue(true);
+    AuthServiceMock.isAdmin.mockReturnValue(true);
 
     component.ngOnInit();
     fixture.detectChanges();
 
-    expect(component.ehAdmin).toBe(true);
+    expect(component.isAdmin()).toBe(true);
   });
 
-  it('desabilita exclusao quando usuario nao eh admin', () => {
-    component.ehAdmin = false;
+  it('desabilita exclusao quando usuario nao éadmin', () => {
+    component.isAdmin.set(false);
 
     const desabilitado = component.excluirDesabilitado();
 

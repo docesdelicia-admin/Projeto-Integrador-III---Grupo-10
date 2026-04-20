@@ -10,20 +10,20 @@
       </p>
     </section>
 
-    @if (carregando) {
+    @if (carregando() && categorias().length === 0) {
     <section class="estado-vitrine" aria-live="polite">
       <p class="kicker">Carregando</p>
       <h2>Buscando produtos da vitrine</h2>
     </section>
-    } @else if (erroCarregamento) {
+    } @else if (erroCarregamento() && categorias().length === 0) {
     <section class="estado-vitrine estado-erro" aria-live="assertive">
       <p class="kicker">Erro</p>
       <h2>Nao foi possivel carregar os produtos</h2>
-      <p>{{ erroCarregamento }}</p>
+      <p>{{ erroCarregamento() }}</p>
     </section>
     } @else {
     <section class="secoes-grid" aria-label="Vitrine por categorias">
-      @for (categoria of categorias; track categoria.titulo) {
+      @for (categoria of categorias(); track categoria.titulo) {
       <article class="secao-card">
         <div class="secao-header">
           <p class="kicker">Categoria</p>

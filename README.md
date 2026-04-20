@@ -17,9 +17,8 @@ Aplicacao web desenvolvida como Projeto Integrador III - UNIVESP, Grupo 10.
 O projeto passa a adotar versionamento semantico para entregas publicadas por tag:
 
 - Padrao: SemVer (`MAJOR.MINOR.PATCH`)
-- Fase atual: pre-release `1.0.0-rc.0`
-- Release alvo: `v1.0.0`
-- Pre-release (RC): tags como `v1.0.0-rc.0`, `v1.0.0-rc.1`
+- Fase atual: release `1.1.0`
+- Release atual: `v1.1.0`
 
 Regras praticas:
 
@@ -37,8 +36,8 @@ Fluxo minimo para publicar versao:
 Exemplo:
 
 ```bash
-git tag -a v1.0.0-rc.0 -m "release: v1.0.0-rc.0"
-git push origin v1.0.0-rc.0
+git tag -a v1.1.0 -m "release: v1.1.0"
+git push origin v1.1.0
 ```
 
 Para detalhes completos, consulte [docs/versionamento.md](docs/versionamento.md).
@@ -71,6 +70,32 @@ O historico das entregas publicadas e registradas em [CHANGELOG.md](CHANGELOG.md
 - O visual da busca esta padronizado entre area publica e area logada.
 - A logica de busca na area logada foi adiada para uma implementacao contextual (ha modulos alem de produtos).
 - Existem TODOs no componente para conectar os eventos quando a regra final de busca for definida.
+
+## Confirmacao por senha
+
+- O frontend possui um componente reutilizavel de confirmacao por senha em `frontend/src/app/components/password-confirm-modal`.
+- Esse componente e usado tanto na troca de senha da pagina Minha Conta quanto na exclusao de registros no admin.
+- A regra de exclusao no backend exige senha de confirmacao do administrador.
+
+## Testes
+
+### API
+
+```bash
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/doces_delicia npm --prefix api test
+npm --prefix api run type-check
+```
+
+Observacao: os testes da API que importam a camada de autenticacao dependem de `DATABASE_URL` definido no ambiente.
+
+### Frontend
+
+```bash
+npm --prefix frontend run test -- --watch=false
+npm --prefix frontend run build
+```
+
+Observacao: a suite do frontend foi atualizada para o fluxo com Signals e leitura de cache em memoria.
 
 ## Como executar localmente
 

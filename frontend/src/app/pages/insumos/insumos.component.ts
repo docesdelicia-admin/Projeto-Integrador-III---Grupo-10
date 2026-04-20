@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { HeaderComponent } from '../../components/header/header.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { AuthService } from '../../services/auth.service';
+import { Insumo, InsumosService } from '../../services/insumos.service';
 import {
   TabelaColuna,
   TabelaLinha,
@@ -18,6 +19,7 @@ import {
 })
 export class InsumosPage implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly insumosService = inject(InsumosService);
 
   readonly colunasTabela: TabelaColuna[] = [
     { chave: 'nome', titulo: 'Nome' },
@@ -26,19 +28,36 @@ export class InsumosPage implements OnInit {
     { chave: 'criado_em', titulo: 'Criado em', formatador: (valor) => this.formatarData(valor) },
   ];
 
-  linhas: any[] = [];
-  carregando = false;
-  ehAdmin = false;
+  readonly linhas = signal<TabelaLinha[]>([]);
+  readonly carregando = signal(false);
+  readonly isAdmin = signal(false);
+  readonly mensagemErro = signal('');
 
   ngOnInit(): void {
-    this.ehAdmin = this.authService.ehAdmin();
+    this.isAdmin.set(this.authService.isAdmin());
     this.carregarInsumos();
   }
 
   private carregarInsumos(): void {
-    this.carregando = true;
-    // TODO: Implementar carregamento de insumos
-    this.carregando = false;
+    const insumosEmCache = this.insumosService.obterInsumosEmCache();
+    this.linhas.set(insumosEmCache.map((insumo: Insumo) => ({ ...insumo }) as TabelaLinha));
+
+    this.carregando.set(this.linhas().length === 0);
+    this.mensagemErro.set('');
+
+    this.insumosService.listar().subscribe({
+      next: (resposta) => {
+        this.linhas.set(
+          (resposta.insumos ?? []).map((insumo: Insumo) => ({ ...insumo }) as TabelaLinha),
+        );
+        this.carregando.set(false);
+      },
+      error: (error: Error) => {
+        this.mensagemErro.set(error.message);
+        this.linhas.set([]);
+        this.carregando.set(false);
+      },
+    });
   }
 
   private formatarData(valor: any): string {

@@ -9,10 +9,10 @@
       <p class="descricao">Gerenciar insumos em estoque.</p>
 
       <div class="tabela-wrapper">
-        @if (carregando) {
+        @if (carregando()) {
         <p>Carregando insumos...</p>
-        } @else if (linhas.length > 0) {
-        <app-tabela [colunas]="colunasTabela" [linhas]="linhas" [acaoEditar]="acaoEditarInsumo"
+        } @else if (linhas().length > 0) {
+        <app-tabela [colunas]="colunasTabela" [linhas]="linhas()" [acaoEditar]="acaoEditarInsumo"
           [acaoExcluir]="acaoExcluirInsumo">
         </app-tabela>
         } @else {

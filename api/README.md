@@ -4,8 +4,8 @@ Esta pasta contem o backend do projeto, usando funcoes serverless da Vercel.
 
 ## Versao da API
 
-- Versao atual do pacote: `1.0.0-rc.0` (ver `api/package.json`)
-- Versionamento de release do produto: tags no repositorio raiz (ex.: `v1.0.0-rc.0`)
+- Versao atual do pacote: `1.1.0` (ver `api/package.json`)
+- Versionamento de release do produto: tags no repositorio raiz (ex.: `v1.1.0`)
 
 Antes de release, registre mudancas de API em [CHANGELOG.md](../CHANGELOG.md).
 
@@ -45,24 +45,40 @@ api/
 - `GET /api/usuarios`: lista usuarios (admin)
 - `POST /api/usuarios`: cria usuario (admin)
 - `PUT /api/usuarios?id=<id>`: edita usuario; autoedicao exige `senha_atual`
-- `DELETE /api/usuarios?id=<id>`: remove usuario (admin)
+- `DELETE /api/usuarios?id=<id>`: remove usuario (admin com confirmacao de senha)
 - `GET /api/clientes`: lista clientes (autenticado)
 - `POST /api/clientes`: cria cliente (admin)
 - `PUT /api/clientes?id=<id>`: edita cliente (autenticado)
-- `DELETE /api/clientes?id=<id>`: deleta cliente (admin)
+- `DELETE /api/clientes?id=<id>`: deleta cliente (admin com confirmacao de senha)
 - `GET /api/insumos`: lista insumos (autenticado)
 - `POST /api/insumos`: cria insumo (admin)
 - `PUT /api/insumos?id=<id>`: edita insumo (autenticado)
-- `DELETE /api/insumos?id=<id>`: deleta insumo (admin)
+- `DELETE /api/insumos?id=<id>`: deleta insumo (admin com confirmacao de senha)
 - `GET /api/estoque_insumos`: lista estoque (autenticado)
 - `GET /api/pedidos`: lista pedidos (autenticado)
 - `POST /api/pedidos`: cria pedido (autenticado)
 - `PUT /api/pedidos?id=<id>`: edita pedido (autenticado)
-- `DELETE /api/pedidos?id=<id>`: deleta pedido (admin)
+- `DELETE /api/pedidos?id=<id>`: deleta pedido (admin com confirmacao de senha)
 - `GET /api/produtos`: lista produtos (autenticado)
 - `POST /api/produtos`: cria produto (admin)
 - `PUT /api/produtos?id=<id>`: edita produto (autenticado)
-- `DELETE /api/produtos?id=<id>`: deleta produto (admin)
+- `DELETE /api/produtos?id=<id>`: deleta produto (admin com confirmacao de senha)
+
+## Exclusao com senha
+
+As rotas `DELETE` usam um fluxo unificado de autorizacao em `api/_lib/auth.ts`.
+
+- O usuario precisa ser `admin`.
+- A requisicao deve enviar a senha atual no corpo da chamada.
+- O backend valida essa senha antes de executar a exclusao.
+
+Formato aceito no corpo da requisicao:
+
+```json
+{
+	"senha_atual": "minha-senha"
+}
+```
 
 ## JWT e sessao
 
@@ -108,7 +124,12 @@ npm install --prefix api
 
 # validar tipos TypeScript
 npx tsc --noEmit -p api/tsconfig.json
+
+# executar testes da API
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/doces_delicia npm --prefix api test
 ```
+
+Observacao: os testes da API que carregam `api/_lib/auth.ts` exigem `DATABASE_URL` definido, mesmo quando a validacao e focada em JWT ou permissao.
 
 ## Comandos de banco (migrations)
 

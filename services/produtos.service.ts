@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { AuthError, autenticarRequisicao, verificarAdminAutorizado, verificarPermissaoDeletar } from '../api/_lib/auth';
-import pool from '../api/_lib/db';
-import type { JwtUsuarioPayload } from '../api/_lib/types';
+import { AuthError, autenticarRequisicao, extrairIdDaUrl, verificarPermissaoDeletar } from '../api/_lib/auth.js';
+import pool from '../api/_lib/db.js';
 
 interface ProdutoListagem {
 	id: string;
@@ -34,16 +33,6 @@ interface EditarProdutoBody {
 	ativo?: boolean;
 }
 
-function extrairIdDaUrl(req: VercelRequest): string {
-	const { id } = req.query;
-
-	if (!id || Array.isArray(id)) {
-		throw new AuthError('ID invalido.', 400);
-	}
-
-	return id;
-}
-
 export async function listarProdutos(req: VercelRequest, res: VercelResponse) {
 	const listagemPublica = String(req.query.publico ?? '').toLowerCase() === 'true' || req.query.publico === '1';
 
@@ -65,6 +54,14 @@ export async function listarProdutos(req: VercelRequest, res: VercelResponse) {
 
 	const resultado = await pool.query<ProdutoListagem>(query);
 
+	if (listagemPublica) {
+		res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+		res.setHeader('CDN-Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
+		res.setHeader('Vercel-CDN-Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
+	} else {
+		res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=86400');
+	}
+
 	return res.status(200).json({
 		total: resultado.rowCount ?? 0,
 		produtos: resultado.rows,
@@ -73,8 +70,7 @@ export async function listarProdutos(req: VercelRequest, res: VercelResponse) {
 
 export async function criarProduto(req: VercelRequest, res: VercelResponse) {
 	try {
-		const usuarioLogado = autenticarRequisicao(req);
-		verificarAdminAutorizado(usuarioLogado);
+		autenticarRequisicao(req);
 	} catch (error) {
 		if (error instanceof AuthError) {
 			return res.status(error.statusCode).json({ erro: error.message });
@@ -86,7 +82,7 @@ export async function criarProduto(req: VercelRequest, res: VercelResponse) {
 		const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body as CriarProdutoBody);
 
 		if (typeof body.nome !== 'string' || !body.nome.trim()) {
-			return res.status(400).json({ erro: 'Nome do produto eh obrigatorio.' });
+			return res.status(400).json({ erro: 'Nome do produto é obrigatorio.' });
 		}
 
 		if (body.categoria !== undefined && typeof body.categoria !== 'string') {
@@ -94,7 +90,7 @@ export async function criarProduto(req: VercelRequest, res: VercelResponse) {
 		}
 
 		if (typeof body.preco !== 'string' && typeof body.preco !== 'number') {
-			return res.status(400).json({ erro: 'Preco eh obrigatorio.' });
+			return res.status(400).json({ erro: 'Preço é obrigatorio.' });
 		}
 
 		const nome = body.nome.trim();
@@ -216,7 +212,7 @@ export async function deletarProduto(req: VercelRequest, res: VercelResponse) {
 	try {
 		id = extrairIdDaUrl(req);
 		const usuarioLogado = autenticarRequisicao(req);
-		verificarPermissaoDeletar(usuarioLogado);
+		await verificarPermissaoDeletar(req, usuarioLogado);
 	} catch (error) {
 		if (error instanceof AuthError) {
 			return res.status(error.statusCode).json({ erro: error.message });

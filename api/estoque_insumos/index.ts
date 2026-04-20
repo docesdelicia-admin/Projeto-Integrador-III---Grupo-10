@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { listarEstoqueInsumos } from '../../services/insumos.service';
+import { listarEstoqueInsumos } from '../../services/estoque-insumos.service.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   switch (req.method) {

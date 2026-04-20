@@ -2,12 +2,14 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
   AuthError,
   autenticarRequisicao,
+  extrairIdDaUrl,
   verificarAdminAutorizado,
   verificarPermissaoAcesso,
-} from '../api/_lib/auth';
-import pool from '../api/_lib/db';
-import { gerarSenhaHash, validarSenha } from '../api/_lib/password';
-import type { CriarUsuarioInput, JwtUsuarioPayload, TipoUsuario, Usuario } from '../api/_lib/types';
+  verificarPermissaoDeletar,
+} from '../api/_lib/auth.js';
+import pool from '../api/_lib/db.js';
+import { gerarSenhaHash, validarSenha } from '../api/_lib/password.js';
+import type { CriarUsuarioInput, JwtUsuarioPayload, TipoUsuario, Usuario } from '../api/_lib/types.js';
 
 interface CriarUsuarioBody {
   nome?: string;
@@ -22,22 +24,6 @@ interface EditarUsuarioBody {
   senha?: string;
   tipo_usuario?: TipoUsuario;
   senha_atual?: string;
-}
-
-function extrairIdDaUrl(req: VercelRequest): string {
-  const { id } = req.query;
-
-  if (!id || Array.isArray(id)) {
-    throw new AuthError('ID invalido.', 400);
-  }
-
-  const valor = String(id).trim();
-
-  if (!valor) {
-    throw new AuthError('ID invalido.', 400);
-  }
-
-  return valor;
 }
 
 function obterBodyCriacao(req: VercelRequest): CriarUsuarioBody {
@@ -333,13 +319,7 @@ export async function deletarUsuario(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ erro: 'Requer autenticacao.' });
     }
 
-    try {
-      verificarAdminAutorizado(usuarioLogado);
-    } catch (error) {
-      if (error instanceof AuthError) {
-        return res.status(error.statusCode).json({ erro: error.message });
-      }
-    }
+    await verificarPermissaoDeletar(req, usuarioLogado);
 
     const resultado = await pool.query('DELETE FROM usuarios WHERE id = $1', [id]);
 

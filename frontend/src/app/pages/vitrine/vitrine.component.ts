@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { HeaderComponent } from '../../components/header/header.component';
 import {
   ProdutoCardComponent,
@@ -23,9 +23,10 @@ interface CategoriaVitrine {
 export class VitrinePage implements OnInit {
   readonly titulo = 'Doces Delicia No Pote: Conheca nossos produtos';
 
-  categorias: CategoriaVitrine[] = [];
-  carregando = true;
-  erroCarregamento = '';
+  readonly categorias = signal<CategoriaVitrine[]>([]);
+  readonly carregando = signal(true);
+  readonly atualizandoEmSegundoPlano = signal(false);
+  readonly erroCarregamento = signal('');
 
   constructor(private readonly produtosService: ProdutosService) {}
 
@@ -34,18 +35,24 @@ export class VitrinePage implements OnInit {
   }
 
   private carregarCategorias(): void {
-    this.carregando = true;
-    this.erroCarregamento = '';
+    const produtosEmCache = this.produtosService.obterProdutosPublicosEmCache();
+    const categoriasIniciais = this.agruparProdutosPorCategoria(produtosEmCache);
+    this.categorias.set(categoriasIniciais);
+    this.carregando.set(categoriasIniciais.length === 0);
+    this.atualizandoEmSegundoPlano.set(categoriasIniciais.length > 0);
+    this.erroCarregamento.set('');
 
     this.produtosService.listarPublico().subscribe({
       next: (resposta) => {
-        this.categorias = this.agruparProdutosPorCategoria(resposta.produtos ?? []);
-        this.carregando = false;
+        this.categorias.set(this.agruparProdutosPorCategoria(resposta.produtos ?? []));
+        this.carregando.set(false);
+        this.atualizandoEmSegundoPlano.set(false);
       },
       error: (error: Error) => {
-        this.erroCarregamento = error.message;
-        this.categorias = [];
-        this.carregando = false;
+        this.erroCarregamento.set(error.message);
+        this.categorias.set([]);
+        this.carregando.set(false);
+        this.atualizandoEmSegundoPlano.set(false);
       },
     });
   }

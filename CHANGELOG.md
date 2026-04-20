@@ -6,7 +6,27 @@ Este formato segue Keep a Changelog e Semantic Versioning.
 
 ## [Unreleased]
 
-## [1.0.0-rc.0] - 2026-04-01
+## [1.1.0] - 2026-04-12
+
+### Added
+- Componente reutilizavel de confirmacao por senha em `frontend/src/app/components/password-confirm-modal` para acoes sensiveis.
+- Helper compartilhado para extrair `id` da URL na camada de API.
+- Leitura inicial de dados via cache em memoria com Signals nas paginas principais do frontend.
+
+### Changed
+- Unificacao da validacao de exclusao em `api/_lib/auth.ts`, combinando autorizacao de admin e confirmacao de senha em um unico helper.
+- Exclusao de produtos, clientes, insumos, pedidos e usuarios passou a usar o helper unificado e exige senha atual no backend.
+- A pagina "Minha Conta" passou a usar o componente reutilizavel de confirmacao por senha.
+- O admin de produtos passou a abrir modal reutilizavel para confirmar exclusao com senha.
+- Vitrine, insumos, pedidos e admin de produtos foram ajustados para Signals e cache em memoria com deduplicacao de requisicoes.
+- READMEs raiz, API, frontend e database foram atualizados para refletir o fluxo final de release e teste.
+
+### Fixed
+- Falhas de testes no frontend causadas pela migracao para Signals e pelo prefill em cache da vitrine.
+- Falha dos testes da API quando `DATABASE_URL` nao estava definido no ambiente de teste.
+- Chamadas de rede duplicadas no frontend apos a remocao do `forceRefresh` e a adicao de deduplicacao no cache.
+
+## [1.0.0] - 2026-04-01
 
 ### Added
 - Pagina "Minha Conta" com fluxo completo de autoedicao e confirmacao de senha atual por modal para troca de senha.

@@ -1,0 +1,74 @@
+erDiagram
+	USUARIOS {
+		UUID id PK
+		VARCHAR nome
+		VARCHAR email UK
+		TEXT senha_hash
+		VARCHAR tipo_usuario
+		BOOLEAN ativo
+		TIMESTAMPTZ criado_em
+		TIMESTAMPTZ atualizado_em
+	}
+
+	CLIENTES {
+		UUID id PK
+		VARCHAR nome
+		VARCHAR telefone
+		TEXT observacoes
+		TIMESTAMPTZ criado_em
+		TIMESTAMPTZ atualizado_em
+	}
+
+	PEDIDOS {
+		UUID id PK
+		UUID cliente_id FK
+		TIMESTAMPTZ data_pedido
+		TIMESTAMPTZ data_entrega
+		VARCHAR status
+		TEXT observacoes
+		TIMESTAMPTZ criado_em
+		TIMESTAMPTZ atualizado_em
+	}
+
+	ITENS_PEDIDO {
+		UUID id PK
+		UUID pedido_id FK
+		UUID produto_id FK
+		NUMERIC quantidade
+		NUMERIC preco_unitario
+		TIMESTAMPTZ criado_em
+	}
+
+	PRODUTOS {
+		UUID id PK
+		VARCHAR nome UK
+		VARCHAR categoria
+		TEXT descricao
+		NUMERIC preco
+		TEXT[] fotos
+		BOOLEAN ativo
+		TIMESTAMPTZ criado_em
+		TIMESTAMPTZ atualizado_em
+	}
+
+	INSUMOS {
+		UUID id PK
+		VARCHAR nome UK
+		TEXT descricao
+		VARCHAR unidade_medida
+		TIMESTAMPTZ criado_em
+		TIMESTAMPTZ atualizado_em
+	}
+
+	ESTOQUE_INSUMOS {
+		UUID id PK
+		UUID insumo_id FK,UK
+		NUMERIC quantidade_disponivel
+		NUMERIC quantidade_minima
+		TIMESTAMPTZ ultima_atualizacao
+	}
+
+	CLIENTES ||--o{ PEDIDOS : "realiza"
+	PEDIDOS ||--o{ ITENS_PEDIDO : "possui"
+	PRODUTOS ||--o{ ITENS_PEDIDO : "compoe"
+	INSUMOS ||--o| ESTOQUE_INSUMOS : "controla"

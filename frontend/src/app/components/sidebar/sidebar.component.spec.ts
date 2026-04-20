@@ -6,16 +6,16 @@ import { AuthService } from '../../services/auth.service';
 import { SidebarComponent } from './sidebar.component';
 
 describe('SidebarComponent', () => {
-  function criarComponente(ehAdmin: boolean): {
+  function criarComponente(isAdmin: boolean): {
     fixture: ComponentFixture<SidebarComponent>;
     component: SidebarComponent;
   } {
     const AuthServiceSpy = {
       validarSessao: vi.fn().mockReturnValue(of(true)),
-      ehAdmin: vi.fn().mockReturnValue(ehAdmin),
+      isAdmin: vi.fn().mockReturnValue(isAdmin),
       obterSessaoAutenticada: vi.fn().mockReturnValue({
         nome: 'Teste',
-        tipo_usuario: ehAdmin ? 'admin' : 'operador',
+        tipo_usuario: isAdmin ? 'admin' : 'operador',
       }),
     };
 
