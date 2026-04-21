@@ -30,131 +30,107 @@ interface EditarPedidoBody {
 }
 
 export async function listarPedidos(req: VercelRequest, res: VercelResponse) {
-    try {
-        autenticarRequisicao(req);
-    } catch (error) {
-        if (error instanceof AuthError) {
-            return res.status(error.statusCode).json({ erro: error.message });
-        }
-        return res.status(401).json({ erro: 'Requer autenticacao.' });
-    }
+	try {
+		autenticarRequisicao(req);
+	} catch (error) {
+		if (error instanceof AuthError) {
+			return res.status(error.statusCode).json({ erro: error.message });
+		}
+		return res.status(401).json({ erro: 'Requer autenticacao.' });
+	}
 
-    const {
-        cliente_id,
-        status,
-        data_inicio,
-        data_fim,
-        limit = '20',
-        offset = '0',
-    } = req.query;
+	const {
+		cliente_id,
+		status,
+		data_inicio,
+		data_fim,
+		page = '1',
+		page_size = '10',
+	} = req.query;
 
-<<<<<<< HEAD
-    const filtros: string[] = [];
-    const valores: unknown[] = [];
-
-    // Filtro por cliente
-    if (cliente_id && typeof cliente_id === 'string') {
-        valores.push(cliente_id);
-        filtros.push(`cliente_id = $${valores.length}`);
-    }
-
-    // Filtro por status
-    if (status && typeof status === 'string') {
-        valores.push(status.toLowerCase());
-        filtros.push(`status = $${valores.length}`);
-    }
-
-    // Filtro por período
-    if (data_inicio && typeof data_inicio === 'string') {
-        valores.push(data_inicio);
-        filtros.push(`data_pedido >= $${valores.length}`);
-    }
-
-    if (data_fim && typeof data_fim === 'string') {
-        valores.push(data_fim);
-        filtros.push(`data_pedido <= $${valores.length}`);
-    }
-
-    const whereClause = filtros.length
-        ? `WHERE ${filtros.join(' AND ')}`
-        : '';
-
-    const parsedLimit = Math.min(Number(limit) || 20, 100);
-    const parsedOffset = Number(offset) || 0;
-
-    valores.push(parsedLimit, parsedOffset);
-
-    const query = `
-        SELECT
-            id,
-            cliente_id,
-            data_pedido,
-            data_entrega,
-            status,
-            observacoes,
-            criado_em
-        FROM pedidos
-        ${whereClause}
-        ORDER BY criado_em DESC
-        LIMIT $${valores.length - 1}
-        OFFSET $${valores.length}
-    `;
-
-    const resultado = await pool.query<PedidoListagem>(query, valores);
-
-    return res.status(200).json({
-        filtros_aplicados: {
-            cliente_id: cliente_id ?? null,
-            status: status ?? null,
-            data_inicio: data_inicio ?? null,
-            data_fim: data_fim ?? null,
-        },
-        limit: parsedLimit,
-        offset: parsedOffset,
-        total: resultado.rowCount ?? 0,
-        pedidos: resultado.rows,
-    });
-=======
-	const status = typeof req.query.status === 'string' ? req.query.status.trim().toLowerCase() : '';
-	const dataInicio = typeof req.query.data_inicio === 'string' ? req.query.data_inicio.trim() : '';
-	const dataFim = typeof req.query.data_fim === 'string' ? req.query.data_fim.trim() : '';
-
-	if (status && !['novo', 'em_producao', 'entregue', 'cancelado'].includes(status)) {
+	// Validação do filtro de status
+	const statusStr = typeof status === 'string' ? status.trim().toLowerCase() : '';
+	if (statusStr && !['novo', 'em_producao', 'entregue', 'cancelado'].includes(statusStr)) {
 		return res.status(400).json({ erro: 'Filtro de status invalido. Use: novo, em_producao, entregue, cancelado.' });
 	}
 
 	const filtros: string[] = [];
 	const valores: unknown[] = [];
 
-	if (status) {
-		filtros.push(`status = $${valores.length + 1}`);
-		valores.push(status);
+	// Filtro por cliente
+	if (cliente_id && typeof cliente_id === 'string' && cliente_id.trim()) {
+		valores.push(cliente_id.trim());
+		filtros.push(`cliente_id = $${valores.length}`);
 	}
 
-	if (dataInicio) {
-		filtros.push(`data_pedido >= $${valores.length + 1}`);
-		valores.push(dataInicio);
+	// Filtro por status
+	if (statusStr) {
+		valores.push(statusStr);
+		filtros.push(`status = $${valores.length}`);
 	}
 
-	if (dataFim) {
-		filtros.push(`data_pedido <= $${valores.length + 1}`);
-		valores.push(dataFim);
+	// Filtro por período - data início
+	if (data_inicio && typeof data_inicio === 'string' && data_inicio.trim()) {
+		valores.push(data_inicio.trim());
+		filtros.push(`data_pedido >= $${valores.length}`);
+	}
+
+	// Filtro por período - data fim
+	if (data_fim && typeof data_fim === 'string' && data_fim.trim()) {
+		valores.push(data_fim.trim());
+		filtros.push(`data_pedido <= $${valores.length}`);
 	}
 
 	const whereClause = filtros.length > 0 ? `WHERE ${filtros.join(' AND ')}` : '';
 
-	const resultado = await pool.query<PedidoListagem>(
-		`SELECT id, cliente_id, data_pedido, data_entrega, status, observacoes, criado_em FROM pedidos ${whereClause} ORDER BY criado_em DESC`,
-		valores,
-	);
+	// Parsing de paginação com page e page_size
+	const parsedPage = Math.max(Number(page) || 1, 1);
+	const parsedPageSize = Math.min(Math.max(Number(page_size) || 10, 1), 100);
+	const parsedOffset = (parsedPage - 1) * parsedPageSize;
+
+	// Query para contar total de registros
+	const countQuery = `SELECT COUNT(*) as total FROM pedidos ${whereClause}`;
+	const countResult = await pool.query(countQuery, valores);
+	const totalRegistros = Number(countResult.rows[0]?.total ?? 0);
+
+	// Query principal com paginação
+	valores.push(parsedPageSize, parsedOffset);
+
+	const query = `
+		SELECT
+			id,
+			cliente_id,
+			data_pedido,
+			data_entrega,
+			status,
+			observacoes,
+			criado_em
+		FROM pedidos
+		${whereClause}
+		ORDER BY criado_em DESC
+		LIMIT $${valores.length - 1}
+		OFFSET $${valores.length}
+	`;
+
+	const resultado = await pool.query<PedidoListagem>(query, valores);
 
 	res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
 
 	return res.status(200).json({
-		total: resultado.rowCount ?? 0,
+		filtros_aplicados: {
+			cliente_id: cliente_id ?? null,
+			status: statusStr || null,
+			data_inicio: data_inicio ?? null,
+			data_fim: data_fim ?? null,
+		},
+		paginacao: {
+			page: parsedPage,
+			page_size: parsedPageSize,
+			total: totalRegistros,
+			total_paginas: Math.ceil(totalRegistros / parsedPageSize),
+		},
 		pedidos: resultado.rows,
 	});
->>>>>>> b778bde9586ef2a22fd8e3be1e7ca9dbf209d31a
 }
 export async function criarPedido(req: VercelRequest, res: VercelResponse) {
 	try {
