@@ -117,18 +117,9 @@ export async function listarPedidos(req: VercelRequest, res: VercelResponse) {
 	res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
 
 	return res.status(200).json({
-		filtros_aplicados: {
-			cliente_id: cliente_id ?? null,
-			status: statusStr || null,
-			data_inicio: data_inicio ?? null,
-			data_fim: data_fim ?? null,
-		},
-		paginacao: {
-			page: parsedPage,
-			page_size: parsedPageSize,
-			total: totalRegistros,
-			total_paginas: Math.ceil(totalRegistros / parsedPageSize),
-		},
+		total: totalRegistros,
+		page: parsedPage,
+		page_size: parsedPageSize,
 		pedidos: resultado.rows,
 	});
 }
