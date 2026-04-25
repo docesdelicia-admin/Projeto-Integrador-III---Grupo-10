@@ -7,7 +7,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { listarClientes, criarCliente, editarCliente, deletarCliente } from '../../services/clientes.service.js';
-import { autenticarRequisicao, AuthError } from '../../api/_lib/auth.js';
+import { autenticarRequisicao } from '../../api/_lib/auth.js';
 
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -27,7 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 }
 export async function handleGetClientes(req: VercelRequest, res: VercelResponse) {
   try {
-    autenticarRequisicao(req, res);
+    autenticarRequisicao(req);
   } catch (error) {
     if (error instanceof AuthError) {
       return res.status(error.statusCode).json({ erro: error.message });
@@ -38,7 +38,7 @@ export async function handleGetClientes(req: VercelRequest, res: VercelResponse)
   try {
     const { q } = req.query;
 
-    const resultado = await listarClientes({ 
+    const resultado = await listarClientes(req,res){ 
       q: q ? String(q) : undefined 
     });
 
