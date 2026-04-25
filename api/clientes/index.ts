@@ -38,9 +38,9 @@ export async function handleGetClientes(req: VercelRequest, res: VercelResponse)
   try {
     const { q } = req.query;
 
-    const resultado = await listarClientes(req){ 
+    const resultado = await listarClientes(req,res){ 
       q: q ? String(q) : undefined 
-    });
+    };
 
     return res.status(200).json(resultado);
 
