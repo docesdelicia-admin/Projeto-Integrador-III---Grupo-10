@@ -180,3 +180,28 @@ export async function deletarCliente(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ erro: 'Erro interno ao excluir cliente.' });
   }
 }
+    export const listarClientes = async (filtros: { q?: string }) => {
+  let query = `
+    SELECT id, nome, telefone, observacoes, criado_em 
+    FROM clientes 
+    WHERE 1=1
+  `;
+  
+  const values: any[] = [];
+
+  if (filtros.q && filtros.q.trim() !== '') {
+    const termo = `%${filtros.q.trim()}%`;
+    query += ` AND (nome ILIKE $1 OR telefone ILIKE $1)`;
+    values.push(termo);
+  }
+
+  query += ` ORDER BY criado_em DESC LIMIT 50`;
+
+  const result = await pool.query(query, values);
+
+  return {
+    total: result.rows.length,
+    clientes: result.rows
+  };
+};
+    
