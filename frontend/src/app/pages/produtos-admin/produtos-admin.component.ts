@@ -45,11 +45,15 @@ export class ProdutosAdminPage implements OnInit {
     { chave: 'categoria', titulo: 'Categoria' },
     {
       chave: 'descricao',
-      titulo: 'Descricao',
-      formatador: (valor) => this.formatarDescricao(valor),
+      titulo: 'Descrição',
+      tipo: 'descricao',
     },
     { chave: 'preco', titulo: 'Preco', formatador: (valor) => this.formatarPreco(valor) },
-    { chave: 'fotos', titulo: 'Fotos', formatador: (valor) => this.formatarFotos(valor) },
+    {
+      chave: 'fotos',
+      titulo: 'Fotos',
+      tipo: 'lista-imagens',
+    },
     { chave: 'ativo', titulo: 'Ativo', formatador: (valor) => (valor ? 'Sim' : 'Nao') },
     { chave: 'criado_em', titulo: 'Criado em', formatador: (valor) => this.formatarData(valor) },
   ];
@@ -75,6 +79,7 @@ export class ProdutosAdminPage implements OnInit {
   readonly mensagemErro = signal('');
   readonly arquivosSelecionados = signal<File[]>([]);
   readonly fotosExistentesEdicao = signal<string[]>([]);
+  readonly previewsNovos = signal<string[]>([]);
   readonly dropzoneAtiva = signal(false);
   readonly modalConfirmacaoExclusaoAberto = signal(false);
   readonly produtoPendenteExclusao = signal<Produto | null>(null);
@@ -106,6 +111,7 @@ export class ProdutosAdminPage implements OnInit {
     });
     this.arquivosSelecionados.set([]);
     this.fotosExistentesEdicao.set([]);
+    this.previewsNovos.set([]);
     this.dropzoneAtiva.set(false);
     this.modalAberto.set(true);
   }
@@ -204,6 +210,7 @@ export class ProdutosAdminPage implements OnInit {
     });
     this.arquivosSelecionados.set([]);
     this.fotosExistentesEdicao.set([...produto.fotos]);
+    this.previewsNovos.set([]);
     this.dropzoneAtiva.set(false);
     this.modalAberto.set(true);
   }
@@ -214,7 +221,8 @@ export class ProdutosAdminPage implements OnInit {
 
   onArquivosSelecionados(event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.definirArquivosSelecionados(target.files);
+    this.adicionarArquivos(target.files);
+    target.value = '';
   }
 
   onArrastarSobreDropzone(event: DragEvent): void {
@@ -230,11 +238,27 @@ export class ProdutosAdminPage implements OnInit {
   onSoltarArquivos(event: DragEvent): void {
     event.preventDefault();
     this.dropzoneAtiva.set(false);
-    this.definirArquivosSelecionados(event.dataTransfer?.files ?? null);
+    this.adicionarArquivos(event.dataTransfer?.files ?? null);
   }
 
   limparArquivosSelecionados(): void {
     this.arquivosSelecionados.set([]);
+    this.previewsNovos.set([]);
+  }
+
+  removerNovaFoto(index: number): void {
+    const arquivos = [...this.arquivosSelecionados()];
+    const previews = [...this.previewsNovos()];
+    arquivos.splice(index, 1);
+    previews.splice(index, 1);
+    this.arquivosSelecionados.set(arquivos);
+    this.previewsNovos.set(previews);
+  }
+
+  removerFotoExistente(index: number): void {
+    const fotos = [...this.fotosExistentesEdicao()];
+    fotos.splice(index, 1);
+    this.fotosExistentesEdicao.set(fotos);
   }
 
   private excluirProduto(linha: TabelaLinha): void {
@@ -307,23 +331,34 @@ export class ProdutosAdminPage implements OnInit {
     return produto;
   }
 
-  private definirArquivosSelecionados(files: FileList | null): void {
-    if (!files) {
+  private adicionarArquivos(files: FileList | null): void {
+    if (!files || files.length === 0) {
       return;
     }
 
-    this.arquivosSelecionados.set(Array.from(files));
+    const novosArquivos = Array.from(files);
+    const arquivosAtuais = this.arquivosSelecionados();
+
+    const arquivosFiltrados = novosArquivos.filter(
+      (novo) =>
+        !arquivosAtuais.some((atual) => atual.name === novo.name && atual.size === novo.size),
+    );
+
+    if (arquivosFiltrados.length === 0) {
+      return;
+    }
+
+    this.arquivosSelecionados.set([...arquivosAtuais, ...arquivosFiltrados]);
+
+    Promise.all(arquivosFiltrados.map((arquivo) => this.converterArquivoParaDataUrl(arquivo))).then(
+      (novasUrls) => {
+        this.previewsNovos.set([...this.previewsNovos(), ...novasUrls]);
+      },
+    );
   }
 
   private async prepararFotosParaPayload(): Promise<string[]> {
-    if (this.arquivosSelecionados().length === 0) {
-      return [...this.fotosExistentesEdicao()];
-    }
-
-    const fotos = await Promise.all(
-      this.arquivosSelecionados().map((arquivo) => this.converterArquivoParaDataUrl(arquivo)),
-    );
-    return fotos;
+    return [...this.fotosExistentesEdicao(), ...this.previewsNovos()];
   }
 
   private converterArquivoParaDataUrl(arquivo: File): Promise<string> {
@@ -347,22 +382,6 @@ export class ProdutosAdminPage implements OnInit {
 
       leitor.readAsDataURL(arquivo);
     });
-  }
-
-  private formatarDescricao(valor: unknown): string {
-    if (typeof valor !== 'string' || !valor.trim()) {
-      return '-';
-    }
-
-    return valor;
-  }
-
-  private formatarFotos(valor: unknown): string {
-    if (!Array.isArray(valor) || valor.length === 0) {
-      return 'Sem fotos';
-    }
-
-    return `${valor.length} arquivo(s)`;
   }
 
   private formatarPreco(valor: unknown): string {

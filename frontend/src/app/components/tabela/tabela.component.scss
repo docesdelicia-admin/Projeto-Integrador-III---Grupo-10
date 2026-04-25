@@ -1,28 +1,30 @@
 .tabela-wrapper {
   border: 1px solid #e5c6a9;
   border-radius: 0.9rem;
-  overflow: auto;
+  overflow-x: auto;
   background: rgba(255, 255, 255, 0.88);
 }
 
 .tabela {
   width: 100%;
   border-collapse: collapse;
-  min-width: 52rem;
+  min-width: 600px;
 }
 
 .tabela th,
 .tabela td {
-  padding: 0.85rem 0.9rem;
+  padding: 0.75rem 0.8rem;
   text-align: left;
   border-bottom: 1px solid #f0dcc9;
   color: #5d4028;
+  vertical-align: middle;
 }
 
 .tabela thead th {
   background: #fff1e2;
   color: #4f2a17;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 .tabela tbody tr:hover {
@@ -30,16 +32,22 @@
 }
 
 .acoes-coluna {
-  width: 6.8rem;
+  width: 90px;
 }
 
+/* Botões */
 .botao {
   border: 0;
-  border-radius: 0.65rem;
-  padding: 0.45rem 0.75rem;
+  border-radius: 0.6rem;
+  padding: 0.4rem 0.7rem;
   font-weight: 600;
   cursor: pointer;
   color: #fff;
+  font-size: 0.8rem;
+}
+
+.acao-ver-descricao {
+  background: linear-gradient(135deg, #6a4023, #4f2a17);
 }
 
 .acao-editar {
@@ -55,21 +63,55 @@
   cursor: not-allowed;
 }
 
-.botao-ver-descricao {
-  border: 0;
-  border-radius: 0.6rem;
-  padding: 0.4rem 0.7rem;
-  font-weight: 600;
+/* Fotos */
+.tabela-fotos-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 90px;
+}
+
+.tabela-miniatura {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1.5px solid #dfbe9f;
+}
+
+/* Botões navegação */
+.nav {
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: #f7ddc3;
   cursor: pointer;
-  background: linear-gradient(135deg, #7a4c2f, #5c3520);
-  color: #fff;
+  border-radius: 6px;
+  font-weight: bold;
+  color: #6a4023;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: 0.15s;
 }
 
-.sem-dados {
-  text-align: center;
-  color: #6b4a31;
+.nav:hover {
+  background: #e7c4a3;
 }
 
+.nav:active {
+  transform: scale(0.92);
+}
+
+.sem-fotos {
+  color: #b09070;
+  font-size: 0.8rem;
+}
+
+/* Modal */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -105,8 +147,36 @@
   justify-content: flex-end;
 }
 
+/* Responsividade */
 @media (max-width: 900px) {
   .tabela {
-    min-width: 46rem;
+    min-width: 520px;
+  }
+
+  .tabela-miniatura {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+@media (max-width: 600px) {
+  .tabela {
+    min-width: 480px;
+  }
+
+  .botao {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .nav {
+    width: 22px;
+    height: 22px;
+    font-size: 0.75rem;
+  }
+
+  .tabela-miniatura {
+    width: 34px;
+    height: 34px;
   }
 }

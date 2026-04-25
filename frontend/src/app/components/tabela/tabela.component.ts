@@ -1,13 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
+export type TabelaValor = string | number | boolean | null | undefined | string[];
+
 export interface TabelaLinha {
-  [chave: string]: unknown;
+  [chave: string]: TabelaValor;
 }
 
 export interface TabelaColuna {
   chave: string;
   titulo: string;
+  tipo?: 'texto' | 'html' | 'imagem' | 'lista-imagens' | 'descricao';
   formatador?: (valor: unknown, linha: TabelaLinha) => string;
 }
 
@@ -19,6 +22,7 @@ export interface TabelaColuna {
   styleUrl: './tabela.component.scss',
 })
 export class TabelaComponent {
+  // Inputs
   @Input({ required: true }) colunas: TabelaColuna[] = [];
   @Input({ required: true }) linhas: TabelaLinha[] = [];
   @Input() mensagemSemDados = 'Nenhum registro encontrado.';
@@ -29,68 +33,62 @@ export class TabelaComponent {
   modalDescricaoAberto = false;
   textoDescricaoModal = '';
 
+  private indiceFotoAtual: Record<string | number, number> = {};
+
   rastrearLinha(index: number, linha: TabelaLinha): string | number {
     const id = linha['id'];
-    if (typeof id === 'string' || typeof id === 'number') {
-      return id;
-    }
-
-    return index;
+    return typeof id === 'string' || typeof id === 'number' ? id : index;
   }
 
-  obterValorCelula(linha: TabelaLinha, coluna: TabelaColuna): string {
-    const valor = linha[coluna.chave];
-
-    if (coluna.formatador) {
-      return coluna.formatador(valor, linha);
-    }
-
-    if (Array.isArray(valor)) {
-      return valor.join(', ');
-    }
-
-    if (typeof valor === 'boolean') {
-      return valor ? 'Sim' : 'Nao';
-    }
-
-    return valor == null ? '-' : String(valor);
-  }
+  // AÇÕES
 
   editar(linha: TabelaLinha): void {
     this.acaoEditar(linha);
   }
 
   excluir(linha: TabelaLinha): void {
-    if (this.excluirDesabilitado(linha)) {
-      return;
-    }
-
+    if (this.excluirDesabilitado(linha)) return;
     this.acaoExcluir(linha);
   }
 
-  possuiDescricao(linha: TabelaLinha, coluna: TabelaColuna): boolean {
+  private obterDescricao(linha: TabelaLinha, coluna: TabelaColuna): string {
     const valor = linha[coluna.chave];
-    return typeof valor === 'string' && valor.trim().length > 0;
-  }
 
-  deveMostrarLerMais(linha: TabelaLinha, coluna: TabelaColuna): boolean {
-    const valor = linha[coluna.chave];
-    return typeof valor === 'string' && valor.trim().length > 20;
-  }
-
-  obterDescricaoCurta(linha: TabelaLinha, coluna: TabelaColuna): string {
-    const valor = linha[coluna.chave];
-    return typeof valor === 'string' && valor.trim() ? valor.trim() : '-';
+    return typeof valor === 'string' && valor.trim() ? valor.trim() : 'Descrição não informada.';
   }
 
   abrirModalDescricao(linha: TabelaLinha, coluna: TabelaColuna): void {
-    const valor = linha[coluna.chave];
-    this.textoDescricaoModal = typeof valor === 'string' && valor.trim() ? valor : 'Descricao nao informada.';
+    this.textoDescricaoModal = this.obterDescricao(linha, coluna);
     this.modalDescricaoAberto = true;
   }
 
   fecharModalDescricao(): void {
     this.modalDescricaoAberto = false;
     this.textoDescricaoModal = '';
+  }
+
+  // IMAGENS
+
+  getListaImagens(valor: unknown): string[] {
+    return Array.isArray(valor) ? (valor as string[]) : [];
+  }
+
+  private getIndiceAtual(linhaId: string | number): number {
+    return this.indiceFotoAtual[linhaId] ?? 0;
+  }
+
+  getFotoAtual(linhaId: string | number, fotos: string[]): string {
+    if (!fotos.length) return '';
+    return fotos[this.getIndiceAtual(linhaId)];
+  }
+
+  proximaFoto(linhaId: string | number, total: number): void {
+    const atual = this.getIndiceAtual(linhaId);
+    this.indiceFotoAtual[linhaId] = (atual + 1) % total;
+  }
+
+  fotoAnterior(linhaId: string | number, total: number): void {
+    const atual = this.getIndiceAtual(linhaId);
+    this.indiceFotoAtual[linhaId] = (atual - 1 + total) % total;
   }
 }

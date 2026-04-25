@@ -71,16 +71,40 @@
         <p>Arraste as imagens aqui ou clique para selecionar no dispositivo.</p>
       </div>
 
-      @if (arquivosSelecionados().length > 0) {
-      <div class="lista-arquivos">
-        <p>{{ arquivosSelecionados().length }} arquivo(s) selecionado(s).</p>
-        <button type="button" class="botao-secundario" (click)="limparArquivosSelecionados()">
-          Limpar selecao
+      @if (previewsNovos().length > 0) {
+      <div class="fotos-preview-header">
+        <span>{{ previewsNovos().length }} nova(s) foto(s)</span>
+        <button type="button" class="botao-secundario botao-sm" (click)="limparArquivosSelecionados()">
+          Limpar todas
         </button>
       </div>
-      } @else if (modoEdicao() && fotosExistentesEdicao().length > 0) {
-      <p class="fotos-existentes">Sem novos arquivos. Serao mantidas {{ fotosExistentesEdicao().length }} foto(s) ja
-        cadastrada(s).</p>
+      <div class="carrossel-fotos">
+        @for (url of previewsNovos(); track url; let i = $index) {
+        <div class="miniatura nova">
+          <img [src]="url" [alt]="'Nova foto ' + (i + 1)" />
+          <button type="button" class="btn-remover-foto" (click)="removerNovaFoto(i)" aria-label="Remover foto">
+            ✕
+          </button>
+          <span class="badge-nova">Nova</span>
+        </div>
+        }
+      </div>
+      }
+
+      @if (modoEdicao() && fotosExistentesEdicao().length > 0) {
+      <p class="label-fotos-existentes">Fotos cadastradas</p>
+      <div class="carrossel-fotos">
+        @for (url of fotosExistentesEdicao(); track url; let i = $index) {
+        <div class="miniatura existente">
+          <img [src]="url" [alt]="'Foto existente ' + (i + 1)" />
+          <button type="button" class="btn-remover-foto" (click)="removerFotoExistente(i)" aria-label="Remover foto">
+            ✕
+          </button>
+        </div>
+        }
+      </div>
+      } @else if (modoEdicao() && fotosExistentesEdicao().length === 0 && previewsNovos().length === 0) {
+      <p class="fotos-existentes">Nenhuma foto cadastrada.</p>
       }
 
       <label class="campo-checkbox">
