@@ -11,6 +11,15 @@ import { autenticarRequisicao, AuthError } from '../../api/_lib/auth.js';
 
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  try {
+    autenticarRequisicao(req);
+  } catch (error: any) {
+    if (error instanceof AuthError) {
+      return res.status(error.statusCode).json({ erro: error.message });
+    }
+    return res.status(401).json({ erro: 'Requer autenticacao.' });
+  }
+
   switch (req.method) {
     case 'GET':
       return await listarClientes(req, res);
@@ -23,29 +32,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     default:
       res.setHeader('Allow', 'GET, POST, PUT, DELETE');
       return res.status(405).json({ erro: 'Metodo nao permitido' });
-  }
-}
-export async function handleGetClientes(req: VercelRequest, res: VercelResponse) {
-  try {
-    autenticarRequisicao(req);
-  } catch (error) {
-    if (error instanceof AuthError) {
-      return res.status(error.statusCode).json({ erro: error.message });
-    }
-    return res.status(401).json({ erro: 'Requer autenticacao.' });
-  }
-
-  try {
-    const { q } = req.query;
-
-    const resultado = await listarClientes(req,res){ 
-      q: q ? String(q) : undefined 
-    };
-
-    return res.status(200).json(resultado);
-
-  } catch (error) {
-    console.error('Erro ao processar listagem de clientes:', error);
-    return res.status(500).json({ erro: 'Erro interno ao buscar clientes.' });
   }
 }
