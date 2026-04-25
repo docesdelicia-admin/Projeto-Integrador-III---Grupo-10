@@ -7,6 +7,8 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { listarClientes, criarCliente, editarCliente, deletarCliente } from '../../services/clientes.service.js';
+import { autenticarRequisicao, AuthError } from '../../api/_lib/auth.ts';
+
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   switch (req.method) {
