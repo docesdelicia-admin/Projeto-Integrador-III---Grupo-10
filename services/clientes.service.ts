@@ -31,20 +31,35 @@ export async function listarClientes(req: VercelRequest, res: VercelResponse) {
     if (error instanceof AuthError) {
       return res.status(error.statusCode).json({ erro: error.message });
     }
-
     return res.status(401).json({ erro: 'Requer autenticacao.' });
   }
 
-  const resultado = await pool.query<ClienteListagem>(
-    'SELECT id, nome, telefone, observacoes, criado_em FROM clientes ORDER BY criado_em DESC',
-  );
+  try {
+    const { q } = req.query;
+    
+    let queryTexto = 'SELECT id, nome, telefone, observacoes, criado_em FROM clientes';
+    const valores: any[] = [];
 
-  return res.status(200).json({
-    total: resultado.rowCount ?? 0,
-    clientes: resultado.rows,
-  });
+    if (q && String(q).trim() !== '') {
+      const termo = `%${String(q).trim()}%`;
+      queryTexto += ' WHERE nome ILIKE $1 OR telefone ILIKE $1';
+      valores.push(termo);
+    }
+
+    queryTexto += ' ORDER BY criado_em DESC LIMIT 50';
+
+    const resultado = await pool.query<ClienteListagem>(queryTexto, valores);
+
+    return res.status(200).json({
+      total: resultado.rowCount ?? 0,
+      clientes: resultado.rows,
+    });
+    
+  } catch (error) {
+    console.error('Erro ao listar clientes:', error);
+    return res.status(500).json({ erro: 'Erro interno ao buscar clientes.' });
+  }
 }
-
 export async function criarCliente(req: VercelRequest, res: VercelResponse) {
   try {
     autenticarRequisicao(req);
@@ -180,28 +195,4 @@ export async function deletarCliente(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ erro: 'Erro interno ao excluir cliente.' });
   }
 }
-    export const listarClientes = async (filtros: { q?: string }) => {
-  let query = `
-    SELECT id, nome, telefone, observacoes, criado_em 
-    FROM clientes 
-    WHERE 1=1
-  `;
-  
-  const values: any[] = [];
-
-  if (filtros.q && filtros.q.trim() !== '') {
-    const termo = `%${filtros.q.trim()}%`;
-    query += ` AND (nome ILIKE $1 OR telefone ILIKE $1)`;
-    values.push(termo);
-  }
-
-  query += ` ORDER BY criado_em DESC LIMIT 50`;
-
-  const result = await pool.query(query, values);
-
-  return {
-    total: result.rows.length,
-    clientes: result.rows
-  };
-};
-    
+   
