@@ -46,10 +46,69 @@ export async function listarPedidos(req: VercelRequest, res: VercelResponse) {
 		if (error instanceof AuthError) {
 			return res.status(error.statusCode).json({ erro: error.message });
 		}
-
 		return res.status(401).json({ erro: 'Requer autenticacao.' });
 	}
 
+	const { data_inicio, data_fim, status } = req.query;
+
+	if (data_inicio && data_fim && new Date(data_inicio as string) > new Date(data_fim as string)) {
+		return res.status(400).json({ erro: 'data_inicio não pode ser maior que data_fim.' });
+	}
+
+	try {
+		const values: any[] = [];
+		const conditions: string[] = [];
+
+		if (data_inicio) {
+			values.push(data_inicio);
+			conditions.push(`p.data_pedido >= $${values.length}`);
+		}
+
+		if (data_fim) {
+			values.push(data_fim);
+			conditions.push(`p.data_pedido <= $${values.length}`);
+		}
+
+		if (status) {
+			values.push(status);
+			conditions.push(`p.status = $${values.length}`);
+		}
+
+		const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+	
+		const query = `
+			SELECT 
+				p.*,
+				COALESCE(SUM(i.quantidade * i.preco_unitario), 0) as valor_total,
+				COALESCE(
+					json_agg(
+						json_build_object(
+							'id', i.id,
+							'produto_id', i.produto_id,
+							'quantidade', i.quantidade,
+							'preco_unitario', i.preco_unitario
+						)
+					) FILTER (WHERE i.id IS NOT NULL), '[]'
+				) as itens
+			FROM pedidos p
+			LEFT JOIN itens_pedido i ON p.id = i.pedido_id
+			${whereClause}
+			GROUP BY p.id
+			ORDER BY p.data_pedido DESC
+		`;
+
+		const resultado = await pool.query<PedidoListagem>(query, values);
+
+		return res.status(200).json({
+			total: resultado.rowCount ?? 0,
+			pedidos: resultado.rows,
+		});
+	} catch (error) {
+		console.error('Erro ao listar pedidos:', error);
+		return res.status(500).json({ erro: 'Erro interno ao buscar pedidos.' });
+	}
+}
 	const resultado = await pool.query<PedidoListagem>(
 		'SELECT id, cliente_id, data_pedido, data_entrega, status, observacoes, criado_em FROM pedidos ORDER BY criado_em DESC',
 	);
