@@ -5,18 +5,32 @@
         @for (coluna of colunas; track coluna.chave) {
         <th scope="col">{{ coluna.titulo }}</th>
         }
-        <th scope="col" class="acoes-coluna">Editar</th>
-        <th scope="col" class="acoes-coluna">Excluir</th>
+
+        @if (mostrarColunaEditar) {
+        <th scope="col" class="acoes-coluna">{{ rotuloEditar }}</th>
+        }
+
+        @if (mostrarColunaExcluir) {
+        <th scope="col" class="acoes-coluna">{{ rotuloExcluir }}</th>
+        }
       </tr>
     </thead>
 
     <tbody>
-      @if (linhas.length === 0) {
+      @if (carregando) {
       <tr>
-        <td class="sem-dados" [attr.colspan]="colunas.length + 2">
+        <td class="sem-dados" [attr.colspan]="totalColunasRenderizadas">
+          {{ mensagemCarregando }}
+        </td>
+      </tr>
+
+      } @else if (linhas.length === 0) {
+      <tr>
+        <td class="sem-dados" [attr.colspan]="totalColunasRenderizadas">
           {{ mensagemSemDados }}
         </td>
       </tr>
+
       } @else {
       @for (linha of linhas; track rastrearLinha($index, linha)) {
       <tr>
@@ -26,7 +40,6 @@
           @let valor = linha[coluna.chave];
           @let linhaId = rastrearLinha($index, linha);
 
-          <!-- IMAGENS -->
           @if (coluna.tipo === 'lista-imagens') {
 
           @let fotos = getListaImagens(valor);
@@ -51,36 +64,45 @@
 
           } @else if (coluna.tipo === 'descricao') {
 
+          @if (deveMostrarLerMais(linha, coluna)) {
           <button type="button" class="botao acao-ver-descricao" (click)="abrirModalDescricao(linha, coluna)">
-            Visualizar
+            Ler
           </button>
 
-          <!-- PADRÃO -->
-          } @else {
+          } @else if (possuiDescricao(linha, coluna)) {
+          {{ obterDescricaoCurta(linha, coluna) }}
 
+          } @else {
+          -
+          }
+
+          } @else {
           {{
           coluna.formatador
           ? coluna.formatador(valor, linha)
           : (valor ?? '-')
           }}
-
           }
 
         </td>
         }
 
+        @if (mostrarColunaEditar) {
         <td>
           <button type="button" class="botao acao-editar" (click)="editar(linha)">
-            Editar
+            {{ rotuloEditar }}
           </button>
         </td>
+        }
 
+        @if (mostrarColunaExcluir) {
         <td>
           <button type="button" class="botao acao-excluir" [disabled]="excluirDesabilitado(linha)"
             (click)="excluir(linha)">
-            Excluir
+            {{ rotuloExcluir }}
           </button>
         </td>
+        }
 
       </tr>
       }
@@ -89,10 +111,12 @@
   </table>
 </div>
 
-<!-- MODAL DESCRIÇÃO -->
+<!-- 🧾 MODAL DESCRIÇÃO -->
 @if (modalDescricaoAberto) {
-<div class="modal-overlay" (click)="fecharModalDescricao()">
-  <section class="modal-descricao" (click)="$event.stopPropagation()">
+<div class="modal-overlay" role="presentation" (click)="fecharModalDescricao()">
+
+  <section class="modal-descricao" role="dialog" aria-modal="true" aria-label="Descrição"
+    (click)="$event.stopPropagation()">
 
     <header>
       <h3>Descrição</h3>
