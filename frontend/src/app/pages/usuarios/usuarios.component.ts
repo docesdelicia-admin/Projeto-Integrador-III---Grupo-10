@@ -14,7 +14,6 @@ import {
 
 import {
   TabelaColuna,
-  TabelaLinha,
   TabelaComponent,
 } from '../../components/tabela/tabela.component';
 
@@ -23,7 +22,7 @@ import {
   standalone: true,
   imports: [CommonModule, HeaderComponent, SidebarComponent, TabelaComponent],
   templateUrl: './usuarios.component.html',
-  styleUrls: './usuarios.component.scss',
+  styleUrls: ['./usuarios.component.scss'],
 })
 export class UsuariosPage implements OnInit {
   private readonly authService = inject(AuthService);
@@ -46,7 +45,7 @@ export class UsuariosPage implements OnInit {
     this.carregarUsuarios();
   }
 
-  private carregarUsuarios(): void {
+  carregarUsuarios(): void {
     this.carregando = true;
 
     this.usuariosService
@@ -67,17 +66,15 @@ export class UsuariosPage implements OnInit {
       });
   }
 
-  readonly acaoEditarUsuario = (_linha: TabelaLinha): void => {
+  readonly acaoEditarUsuario = (_linha: Usuario): void => {
     // TODO: Implementar edicao de usuario
   };
 
-  readonly acaoExcluirUsuario = (linha: TabelaLinha): void => {
+  readonly acaoExcluirUsuario = (usuario: Usuario): void => {
     if (!this.isAdmin) {
       window.alert('Apenas administradores podem excluir usuarios.');
       return;
     }
-
-    const usuario = linha as Usuario;
 
     const senhaAtual = window.prompt(
       'Digite sua senha atual para confirmar a exclusao:'
