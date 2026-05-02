@@ -10,8 +10,8 @@ export interface TabelaLinha {
 export interface TabelaColuna {
   chave: string;
   titulo: string;
-  tipo?: 'texto' | 'html' | 'imagem' | 'lista-imagens' | 'descricao';
-  formatador?: (valor: unknown, linha: TabelaLinha) => string;
+  tipo?: 'texto' | 'imagem' | 'lista-imagens' | 'descricao';
+  formatador?: (valor: TabelaValor, linha: TabelaLinha) => string;
 }
 
 @Component({
@@ -22,14 +22,25 @@ export interface TabelaColuna {
   styleUrl: './tabela.component.scss',
 })
 export class TabelaComponent {
-  // Inputs
+  // INPUTS
   @Input({ required: true }) colunas: TabelaColuna[] = [];
   @Input({ required: true }) linhas: TabelaLinha[] = [];
+
+  @Input() carregando = false;
+  @Input() mensagemCarregando = 'Carregando registros...';
   @Input() mensagemSemDados = 'Nenhum registro encontrado.';
+
+  @Input() rotuloEditar = 'Editar';
+  @Input() rotuloExcluir = 'Excluir';
+
+  @Input() mostrarColunaEditar = true;
+  @Input() mostrarColunaExcluir = true;
+
   @Input() acaoEditar: (linha: TabelaLinha) => void = () => undefined;
   @Input() acaoExcluir: (linha: TabelaLinha) => void = () => undefined;
   @Input() excluirDesabilitado: (linha: TabelaLinha) => boolean = () => false;
 
+  // ESTADO INTERNO
   modalDescricaoAberto = false;
   textoDescricaoModal = '';
 
@@ -40,8 +51,26 @@ export class TabelaComponent {
     return typeof id === 'string' || typeof id === 'number' ? id : index;
   }
 
-  // AÇÕES
+  // CELULA
+  obterValorCelula(linha: TabelaLinha, coluna: TabelaColuna): string {
+    const valor = linha[coluna.chave];
 
+    if (coluna.formatador) {
+      return coluna.formatador(valor, linha);
+    }
+
+    if (Array.isArray(valor)) {
+      return valor.join(', ');
+    }
+
+    if (typeof valor === 'boolean') {
+      return valor ? 'Sim' : 'Não';
+    }
+
+    return valor == null ? '-' : String(valor);
+  }
+
+  // AÇÕES
   editar(linha: TabelaLinha): void {
     this.acaoEditar(linha);
   }
@@ -51,14 +80,26 @@ export class TabelaComponent {
     this.acaoExcluir(linha);
   }
 
-  private obterDescricao(linha: TabelaLinha, coluna: TabelaColuna): string {
+  // DESCRIÇÃO
+  possuiDescricao(linha: TabelaLinha, coluna: TabelaColuna): boolean {
     const valor = linha[coluna.chave];
+    return typeof valor === 'string' && valor.trim().length > 0;
+  }
 
-    return typeof valor === 'string' && valor.trim() ? valor.trim() : 'Descrição não informada.';
+  deveMostrarLerMais(linha: TabelaLinha, coluna: TabelaColuna): boolean {
+    const valor = linha[coluna.chave];
+    return typeof valor === 'string' && valor.length > 20;
+  }
+
+  obterDescricaoCurta(linha: TabelaLinha, coluna: TabelaColuna): string {
+    const valor = linha[coluna.chave];
+    return typeof valor === 'string' && valor.trim() ? valor.slice(0, 20) + '...' : '-';
   }
 
   abrirModalDescricao(linha: TabelaLinha, coluna: TabelaColuna): void {
-    this.textoDescricaoModal = this.obterDescricao(linha, coluna);
+    const valor = linha[coluna.chave];
+    this.textoDescricaoModal =
+      typeof valor === 'string' && valor.trim() ? valor : 'Descrição não informada.';
     this.modalDescricaoAberto = true;
   }
 
@@ -68,9 +109,8 @@ export class TabelaComponent {
   }
 
   // IMAGENS
-
-  getListaImagens(valor: unknown): string[] {
-    return Array.isArray(valor) ? (valor as string[]) : [];
+  getListaImagens(valor: TabelaValor): string[] {
+    return Array.isArray(valor) ? valor : [];
   }
 
   private getIndiceAtual(linhaId: string | number): number {
@@ -90,5 +130,11 @@ export class TabelaComponent {
   fotoAnterior(linhaId: string | number, total: number): void {
     const atual = this.getIndiceAtual(linhaId);
     this.indiceFotoAtual[linhaId] = (atual - 1 + total) % total;
+  }
+
+  get totalColunasRenderizadas(): number {
+    return (
+      this.colunas.length + (this.mostrarColunaEditar ? 1 : 0) + (this.mostrarColunaExcluir ? 1 : 0)
+    );
   }
 }
