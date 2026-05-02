@@ -23,7 +23,7 @@ import {
   standalone: true,
   imports: [CommonModule, HeaderComponent, SidebarComponent, TabelaComponent],
   templateUrl: './usuarios.component.html',
-  styleUrl: './usuarios.component.scss',
+  styleUrls: './usuarios.component.scss',
 })
 export class UsuariosPage implements OnInit {
   private readonly authService = inject(AuthService);
