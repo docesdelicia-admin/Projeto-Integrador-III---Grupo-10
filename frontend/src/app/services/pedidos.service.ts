@@ -9,6 +9,7 @@ export type PedidoStatus = 'novo' | 'em_producao' | 'entregue' | 'cancelado';
 export interface Pedido {
   id: string;
   cliente_id: string;
+  cliente_nome: string;
   data_pedido: string;
   data_entrega: string | null;
   status: PedidoStatus;
@@ -29,6 +30,7 @@ export interface PedidosFiltro {
 
 export interface PedidoPayload {
   cliente_id: string;
+  cliente_nome: string;
   data_pedido: string;
   data_entrega?: string | null;
   status?: PedidoStatus;

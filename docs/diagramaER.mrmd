@@ -19,16 +19,17 @@ erDiagram
 		TIMESTAMPTZ atualizado_em
 	}
 
-	PEDIDOS {
-		UUID id PK
-		UUID cliente_id FK
-		TIMESTAMPTZ data_pedido
-		TIMESTAMPTZ data_entrega
-		VARCHAR status
-		TEXT observacoes
-		TIMESTAMPTZ criado_em
-		TIMESTAMPTZ atualizado_em
-	}
+	   PEDIDOS {
+		   UUID id PK
+		   UUID cliente_id FK
+		   VARCHAR cliente_nome
+		   TIMESTAMPTZ data_pedido
+		   TIMESTAMPTZ data_entrega
+		   VARCHAR status
+		   TEXT observacoes
+		   TIMESTAMPTZ criado_em
+		   TIMESTAMPTZ atualizado_em
+	   }
 
 	ITENS_PEDIDO {
 		UUID id PK

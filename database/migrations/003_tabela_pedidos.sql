@@ -3,6 +3,7 @@
 CREATE TABLE IF NOT EXISTS pedidos (
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	cliente_id UUID NOT NULL REFERENCES clientes (id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	cliente_nome VARCHAR(255),
 	data_pedido TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 	data_entrega TIMESTAMPTZ,
 	status VARCHAR(20) NOT NULL DEFAULT 'novo' CHECK (status IN ('novo', 'em_producao', 'entregue')),

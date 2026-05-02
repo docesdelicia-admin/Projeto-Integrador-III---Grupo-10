@@ -3,17 +3,17 @@
   min-height: 100dvh;
   font-family: 'Poppins', 'Segoe UI', sans-serif;
   background:
-    radial-gradient(circle at 80% 10%, #ffe2c1 0%, transparent 35%),
-    linear-gradient(160deg, #fff8ec 0%, #ffeedd 100%);
+    radial-gradient(circle at 15% 10%, #ffe6ca 0%, transparent 28%),
+    linear-gradient(160deg, #fff8ec 0%, #ffedd9 100%);
 }
 
-.pagina-shell {
+.pedidos-shell {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
 
-.pagina-layout {
+.pedidos-layout {
   flex: 1;
   width: min(78rem, 100%);
   margin: 0 auto;
@@ -23,40 +23,415 @@
   gap: 1rem;
 }
 
-.pagina-main {
+.pedidos-main {
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   border: 1px solid #e5c6a9;
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.78);
-  padding: 1.1rem;
 }
 
-.pagina-main h1 {
+// ── Topo ──────────────────────────────────────────────────────────────────────
+
+.topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.topo h1 {
   margin: 0;
   color: #4f2a17;
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
 }
 
-.pagina-main p {
-  margin: 0.45rem 0 0;
+.topo p {
+  margin: 0.35rem 0 0;
+  color: #705138;
+}
+
+// ── Botões base ───────────────────────────────────────────────────────────────
+
+.botao-principal,
+.botao-secundario {
+  border: 0;
+  border-radius: 0.8rem;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: opacity 120ms ease;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.botao-principal {
+  background: linear-gradient(135deg, #d96f35, #bf3b2b);
+  color: #fff;
+}
+
+.botao-secundario {
+  background: #f7ddc3;
+  color: #6a4023;
+}
+
+// ── Feedback ──────────────────────────────────────────────────────────────────
+
+.feedback {
+  margin: 0;
+  font-weight: 600;
+}
+
+.feedback.erro,
+.erro {
+  color: #bf3b2b;
+  font-size: 0.85rem;
+}
+
+.carregando {
   color: #6f5037;
 }
 
-.descricao {
+// ── Badges de status na tabela ────────────────────────────────────────────────
+
+:host ::ng-deep .badge-status {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &.novo {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  &.em-producao {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  &.entregue {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  &.cancelado {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+}
+
+// ── Modal backdrop ────────────────────────────────────────────────────────────
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: rgba(32, 17, 8, 0.5);
+  padding: 1rem;
+}
+
+// ── Modal base ────────────────────────────────────────────────────────────────
+
+.modal {
+  width: min(100%, 34rem);
+  border-radius: 1rem;
+  border: 1px solid #e2c2a4;
+  background: #fff8ee;
+  box-shadow: 0 18px 40px rgba(45, 26, 13, 0.28);
+  padding: 1.4rem;
+  max-height: 90dvh;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f7ddc3;
+    border-radius: 2px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #d8ab85;
+    border-radius: 2px;
+  }
+
+  &.modal-largo {
+    width: min(100%, 40rem);
+  }
+}
+
+.modal h2 {
+  margin: 0 0 0.25rem;
+  color: #4f2a17;
+  font-size: 1.25rem;
+}
+
+.modal-subtitulo {
+  margin: 0 0 1rem;
+  color: #705138;
+  font-size: 0.9rem;
+
+  strong {
+    color: #4f2a17;
+  }
+}
+
+// ── Form fields ───────────────────────────────────────────────────────────────
+
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.modal label {
+  font-weight: 600;
+  color: #5a3a21;
+  font-size: 0.9rem;
+}
+
+.modal input,
+.modal textarea,
+.modal select {
+  border: 1px solid #dfbe9f;
+  border-radius: 0.7rem;
+  padding: 0.65rem 0.75rem;
+  font-family: inherit;
   font-size: 0.95rem;
+  color: #4d2d1a;
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: #d88b49;
+    box-shadow: 0 0 0 3px rgba(216, 139, 73, 0.2);
+  }
 }
 
-.tabela-wrapper {
-  margin-top: 1.5rem;
+.modal select {
+  appearance: auto;
 }
 
-.sem-dados {
+// ── Footer do modal ───────────────────────────────────────────────────────────
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.modal-footer-simples {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+// ── Footer com botão cancelar pedido à esquerda ───────────────────────────────
+
+.footer-acoes-direita {
+  display: flex;
+  gap: 0.6rem;
+  margin-left: auto;
+}
+
+.botao-cancelar-pedido {
+  border: 1.5px solid #bf3b2b;
+  border-radius: 0.8rem;
+  padding: 0.65rem 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: transparent;
+  color: #bf3b2b;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
+
+  &:hover:not(:disabled) {
+    background: #fde8e8;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+// ── Etapa escolha: cards cliente novo/existente ───────────────────────────────
+
+.escolha-cliente {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 0.5rem 0 0;
+}
+
+.card-escolha {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 1.2rem 0.8rem;
+  border: 2px solid #dfbe9f;
+  border-radius: 0.9rem;
+  background: #fff5e8;
+  cursor: pointer;
+  font-family: inherit;
   text-align: center;
-  color: #999;
-  padding: 2rem;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    transform 80ms ease;
+
+  &:hover {
+    border-color: #d96f35;
+    background: #ffe9d3;
+    transform: translateY(-1px);
+  }
+
+  .card-escolha-icone {
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+
+  strong {
+    font-size: 0.92rem;
+    color: #4f2a17;
+  }
+
+  small {
+    font-size: 0.78rem;
+    color: #7a5234;
+  }
 }
+
+// ── Campo busca com spinner ───────────────────────────────────────────────────
+
+.campo-busca {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  input {
+    padding-right: 2.2rem;
+  }
+
+  .busca-spinner {
+    position: absolute;
+    right: 0.75rem;
+    font-size: 0.9rem;
+    pointer-events: none;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ── Lista de resultados de busca ──────────────────────────────────────────────
+
+.lista-resultados {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #dfbe9f;
+  border-radius: 0.7rem;
+  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.resultado-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  cursor: pointer;
+  font-size: 0.92rem;
+  color: #4d2d1a;
+  transition: background 100ms ease;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #f0d8bf;
+  }
+
+  &:hover {
+    background: #ffe9d3;
+  }
+
+  strong {
+    color: #4f2a17;
+  }
+
+  .resultado-detalhe {
+    font-size: 0.82rem;
+    color: #7a5234;
+  }
+}
+
+.sem-resultados {
+  margin: 0;
+  color: #b09070;
+  font-size: 0.88rem;
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+// ── Botão trocar cliente inline ───────────────────────────────────────────────
+
+.btn-trocar-cliente {
+  border: 0;
+  background: none;
+  color: #d96f35;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  padding: 0;
+  font-family: inherit;
+  text-decoration: underline;
+
+  &:hover {
+    color: #bf3b2b;
+  }
+}
+
+// ── Responsivo ────────────────────────────────────────────────────────────────
 
 @media (max-width: 900px) {
-  .pagina-layout {
+  .pedidos-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .topo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .escolha-cliente {
     grid-template-columns: 1fr;
   }
 }

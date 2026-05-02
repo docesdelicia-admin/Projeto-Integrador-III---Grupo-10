@@ -1,24 +1,77 @@
-<div class="pagina-shell">
+<div class="clientes-shell">
   <app-header [modoBusca]="'campo'"></app-header>
 
-  <div class="pagina-layout">
+  <div class="clientes-layout">
     <app-sidebar></app-sidebar>
 
-    <main class="pagina-main">
-      <h1>Clientes</h1>
-      <p class="descricao">Gerenciar clientes cadastrados.</p>
+    <main class="clientes-main">
+      <section class="topo">
+        <div>
+          <h1>Clientes</h1>
+          <p>Gerencie os clientes cadastrados.</p>
+        </div>
+        <button type="button" class="botao-principal" (click)="abrirModalCadastro()">
+          Novo cliente
+        </button>
+      </section>
 
-      <div class="tabela-wrapper">
-        @if (carregando) {
-        <p>Carregando clientes...</p>
-        } @else if (linhas.length > 0) {
-        <app-tabela [colunas]="colunasTabela" [linhas]="linhas" [acaoEditar]="acaoEditarCliente"
-          [acaoExcluir]="acaoExcluirCliente">
-        </app-tabela>
-        } @else {
-        <p class="sem-dados">Nenhum cliente encontrado.</p>
-        }
-      </div>
+      @if (carregando()) {
+      <p class="carregando">Carregando clientes...</p>
+      } @else {
+      <app-tabela [colunas]="colunasTabela" [linhas]="linhas()" [acaoEditar]="acaoEditarCliente"
+        [acaoExcluir]="acaoExcluirCliente" [excluirDesabilitado]="excluirDesabilitado"
+        mensagemSemDados="Nenhum cliente cadastrado.">
+      </app-tabela>
+      }
     </main>
   </div>
 </div>
+
+<!-- ───────────────────────── MODAL CADASTRO / EDIÇÃO ───────────────────────── -->
+@if (modalAberto()) {
+<div class="modal-backdrop" role="presentation">
+  <section class="modal" role="dialog" aria-modal="true"
+    [attr.aria-label]="modoEdicao() ? 'Editar cliente' : 'Cadastrar cliente'">
+
+    <div class="modal-header">
+      <h2>{{ modoEdicao() ? 'Editar cliente' : 'Novo cliente' }}</h2>
+    </div>
+
+    <form [formGroup]="formCliente" (ngSubmit)="salvarCliente()" novalidate>
+
+      <label for="cliente-nome">Nome</label>
+      <input id="cliente-nome" type="text" formControlName="nome" maxlength="160" placeholder="Nome completo" />
+      @if (formCliente.controls.nome.invalid && (formCliente.controls.nome.touched || formCliente.controls.nome.dirty))
+      {
+      <small class="erro">Informe um nome válido.</small>
+      }
+
+      <label for="cliente-telefone">Telefone</label>
+      <input id="cliente-telefone" type="tel" formControlName="telefone" maxlength="20" placeholder="(11) 99999-9999" />
+
+      <label for="cliente-obs">Observações</label>
+      <textarea id="cliente-obs" rows="3" formControlName="observacoes" placeholder="Observações opcionais"></textarea>
+
+      @if (erroFormulario()) {
+      <p class="feedback erro">{{ erroFormulario() }}</p>
+      }
+
+      <div class="modal-footer">
+        <button type="button" class="botao-secundario" (click)="fecharModal()" [disabled]="salvando()">
+          Cancelar
+        </button>
+        <button type="submit" class="botao-principal" [disabled]="salvando()">
+          {{ salvando() ? 'Salvando...' : (modoEdicao() ? 'Salvar alterações' : 'Cadastrar') }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>
+}
+
+<!-- ───────────────────────── MODAL CONFIRMAÇÃO EXCLUSÃO ───────────────────────── -->
+<app-password-confirm-modal [aberto]="modalExclusaoAberto()" titulo="Confirmar exclusão"
+  [mensagem]="'Digite sua senha para excluir o cliente ' + (clientePendenteExclusao()?.nome ?? '') + '.'"
+  textoConfirmar="Confirmar exclusão" [salvando]="excluindo()" (cancelar)="fecharModalExclusao()"
+  (confirmar)="confirmarExclusaoComSenha($event)">
+</app-password-confirm-modal>

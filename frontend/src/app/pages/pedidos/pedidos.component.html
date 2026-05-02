@@ -1,24 +1,240 @@
-<div class="pagina-shell">
+<div class="pedidos-shell">
   <app-header [modoBusca]="'campo'"></app-header>
 
-  <div class="pagina-layout">
+  <div class="pedidos-layout">
     <app-sidebar></app-sidebar>
 
-    <main class="pagina-main">
-      <h1>Pedidos</h1>
-      <p class="descricao">Gerenciar pedidos realizados.</p>
+    <main class="pedidos-main">
+      <section class="topo">
+        <div>
+          <h1>Pedidos</h1>
+          <p>Gerencie os pedidos realizados.</p>
+        </div>
+        <button type="button" class="botao-principal" (click)="abrirModalNovoPedido()">
+          Novo pedido
+        </button>
+      </section>
 
-      <div class="tabela-wrapper">
-        @if (carregando()) {
-        <p>Carregando pedidos...</p>
-        } @else if (linhas().length > 0) {
-        <app-tabela [colunas]="colunasTabela" [linhas]="linhas()" [acaoEditar]="acaoEditarPedido"
-          [acaoExcluir]="acaoExcluirPedido">
-        </app-tabela>
-        } @else {
-        <p class="sem-dados">Nenhum pedido encontrado.</p>
-        }
-      </div>
+      @if (carregando()) {
+      <p class="carregando">Carregando pedidos...</p>
+      } @else {
+      <app-tabela [colunas]="colunasTabela" [linhas]="linhas()" [acaoEditar]="acaoEditarPedido"
+        mensagemSemDados="Nenhum pedido encontrado.">
+      </app-tabela>
+      }
     </main>
   </div>
 </div>
+
+<!-- ───────────────────────── MODAL NOVO PEDIDO ───────────────────────── -->
+@if (modalNovoPedidoAberto()) {
+<div class="modal-backdrop" role="presentation">
+  <section class="modal" role="dialog" aria-modal="true" aria-label="Novo pedido">
+
+    <!-- ETAPA 0: escolha cliente novo ou existente -->
+    @if (etapaCriacao() === 'escolha') {
+    <div class="modal-header">
+      <h2>Novo pedido</h2>
+      <p class="modal-subtitulo">O cliente já tem cadastro?</p>
+    </div>
+    <div class="escolha-cliente">
+      <button type="button" class="card-escolha" (click)="irParaClienteExistente()">
+        <span class="card-escolha-icone">🔍</span>
+        <strong>Sim, já é cliente</strong>
+        <small>Buscar pelo nome ou telefone</small>
+      </button>
+      <button type="button" class="card-escolha" (click)="irParaNovoCliente()">
+        <span class="card-escolha-icone">➕</span>
+        <strong>Não, é cliente novo</strong>
+        <small>Cadastrar antes de continuar</small>
+      </button>
+    </div>
+    <div class="modal-footer-simples">
+      <button type="button" class="botao-secundario" (click)="fecharModalNovoPedido()">Cancelar</button>
+    </div>
+    }
+
+    <!-- ETAPA 1a: cadastrar novo cliente -->
+    @if (etapaCriacao() === 'novo-cliente') {
+    <div class="modal-header">
+      <h2>Cadastrar cliente</h2>
+      <p class="modal-subtitulo">Preencha os dados do novo cliente.</p>
+    </div>
+    <form [formGroup]="formNovoCliente" (ngSubmit)="salvarNovoCliente()" novalidate>
+      <label for="cliente-nome">Nome</label>
+      <input id="cliente-nome" type="text" formControlName="nome" maxlength="160" placeholder="Nome completo" />
+      @if (formNovoCliente.controls.nome.invalid && formNovoCliente.controls.nome.touched) {
+      <small class="erro">Informe o nome do cliente.</small>
+      }
+
+      <label for="cliente-telefone">Telefone</label>
+      <input id="cliente-telefone" type="tel" formControlName="telefone" maxlength="20" placeholder="(11) 99999-9999" />
+
+      <label for="cliente-obs">Observações</label>
+      <textarea id="cliente-obs" rows="2" formControlName="observacoes" placeholder="Observações opcionais"></textarea>
+
+      @if (erroCliente()) {
+      <p class="feedback erro">{{ erroCliente() }}</p>
+      }
+
+      <div class="modal-footer">
+        <button type="button" class="botao-secundario" (click)="voltarParaEscolha()" [disabled]="salvandoCliente()">
+          Voltar
+        </button>
+        <button type="submit" class="botao-principal" [disabled]="salvandoCliente()">
+          {{ salvandoCliente() ? 'Cadastrando...' : 'Cadastrar e continuar' }}
+        </button>
+      </div>
+    </form>
+    }
+
+    <!-- ETAPA 1b: buscar cliente existente -->
+    @if (etapaCriacao() === 'buscar-cliente') {
+    <div class="modal-header">
+      <h2>Buscar cliente</h2>
+      <p class="modal-subtitulo">Pesquise pelo nome ou telefone.</p>
+    </div>
+
+    <label for="busca-cliente">Nome ou telefone</label>
+    <div class="campo-busca">
+      <input id="busca-cliente" type="text" [value]="termoBuscaCliente()" (input)="onTermoBuscaCliente($event)"
+        placeholder="Digite para buscar..." autocomplete="off" />
+      @if (buscandoCliente()) {
+      <span class="busca-spinner">⏳</span>
+      }
+    </div>
+
+    @if (resultadosBuscaCliente().length > 0) {
+    <ul class="lista-resultados">
+      @for (cliente of resultadosBuscaCliente(); track cliente.id) {
+      <li class="resultado-item" (click)="selecionarClienteExistente(cliente)">
+        <strong>{{ cliente.nome }}</strong>
+        @if (cliente.telefone) {
+        <span class="resultado-detalhe">{{ cliente.telefone }}</span>
+        }
+      </li>
+      }
+    </ul>
+    } @else if (termoBuscaCliente().length >= 2 && !buscandoCliente()) {
+    <p class="sem-resultados">Nenhum cliente encontrado.</p>
+    }
+
+    @if (erroCliente()) {
+    <p class="feedback erro">{{ erroCliente() }}</p>
+    }
+
+    <div class="modal-footer-simples">
+      <button type="button" class="botao-secundario" (click)="voltarParaEscolha()">Voltar</button>
+    </div>
+    }
+
+    <!-- ETAPA 2: dados do pedido -->
+    @if (etapaCriacao() === 'dados-pedido') {
+    <div class="modal-header">
+      <h2>Novo pedido</h2>
+      <p class="modal-subtitulo">
+        Cliente: <strong>{{ clienteSelecionado()?.nome }}</strong>
+        <button type="button" class="btn-trocar-cliente" (click)="voltarParaEscolha()">Trocar</button>
+      </p>
+    </div>
+    <form [formGroup]="formPedido" (ngSubmit)="salvarPedido()" novalidate>
+
+      <label for="data-pedido">Data do pedido</label>
+      <input id="data-pedido" type="datetime-local" formControlName="data_pedido" />
+      @if (formPedido.controls.data_pedido.invalid && formPedido.controls.data_pedido.touched) {
+      <small class="erro">Informe a data do pedido.</small>
+      }
+
+      <label for="data-entrega">Data de entrega</label>
+      <input id="data-entrega" type="datetime-local" formControlName="data_entrega" />
+
+      <label for="status-pedido">Status</label>
+      <select id="status-pedido" formControlName="status">
+        <option value="novo">Novo</option>
+        <option value="em_producao">Em produção</option>
+        <option value="entregue">Entregue</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+
+      <label for="obs-pedido">Observações</label>
+      <textarea id="obs-pedido" rows="3" formControlName="observacoes"></textarea>
+
+      @if (erroPedido()) {
+      <p class="feedback erro">{{ erroPedido() }}</p>
+      }
+
+      <div class="modal-footer">
+        <button type="button" class="botao-secundario" (click)="fecharModalNovoPedido()" [disabled]="salvandoPedido()">
+          Cancelar
+        </button>
+        <button type="submit" class="botao-principal" [disabled]="salvandoPedido()">
+          {{ salvandoPedido() ? 'Salvando...' : 'Cadastrar pedido' }}
+        </button>
+      </div>
+    </form>
+    }
+
+  </section>
+</div>
+}
+
+<!-- ───────────────────────── MODAL VISUALIZAR/EDITAR PEDIDO ───────────────────────── -->
+@if (modalVisualizarAberto()) {
+<div class="modal-backdrop" role="presentation">
+  <section class="modal modal-largo" role="dialog" aria-modal="true" aria-label="Detalhes do pedido">
+    <div class="modal-header">
+      <h2>Pedido</h2>
+      <!-- nomeClientePedido é um computed signal tipado — sem acesso por index signature -->
+      <p class="modal-subtitulo">Cliente: <strong>{{ nomeClientePedido() }}</strong></p>
+    </div>
+
+    <form [formGroup]="formEdicaoPedido" (ngSubmit)="salvarEdicaoPedido()" novalidate>
+
+      <label for="edit-data-pedido">Data do pedido</label>
+      <input id="edit-data-pedido" type="datetime-local" formControlName="data_pedido" />
+
+      <label for="edit-data-entrega">Data de entrega</label>
+      <input id="edit-data-entrega" type="datetime-local" formControlName="data_entrega" />
+
+      <label for="edit-status">Status</label>
+      <select id="edit-status" formControlName="status">
+        <option value="novo">Novo</option>
+        <option value="em_producao">Em produção</option>
+        <option value="entregue">Entregue</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+
+      <label for="edit-obs">Observações</label>
+      <textarea id="edit-obs" rows="3" formControlName="observacoes"></textarea>
+
+      @if (erroEdicao()) {
+      <p class="feedback erro">{{ erroEdicao() }}</p>
+      }
+
+      <div class="modal-footer">
+        <!-- statusPedidoSelecionado é computed signal tipado — sem index signature -->
+        <button type="button" class="botao-cancelar-pedido" (click)="solicitarCancelamentoPedido()"
+          [disabled]="salvandoEdicao() || statusPedidoSelecionado() === 'cancelado'">
+          Cancelar pedido
+        </button>
+        <div class="footer-acoes-direita">
+          <button type="button" class="botao-secundario" (click)="fecharModalVisualizar()"
+            [disabled]="salvandoEdicao()">
+            Fechar
+          </button>
+          <button type="submit" class="botao-principal" [disabled]="salvandoEdicao()">
+            {{ salvandoEdicao() ? 'Salvando...' : 'Salvar alterações' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </section>
+</div>
+}
+
+<!-- ───────────────────────── MODAL CONFIRMAÇÃO CANCELAMENTO ───────────────────────── -->
+<app-password-confirm-modal [aberto]="modalConfirmaCancelamentoAberto()" titulo="Confirmar cancelamento"
+  [mensagem]="'Digite sua senha para cancelar o pedido de ' + nomeClientePedido() + '.'"
+  textoConfirmar="Confirmar cancelamento" [salvando]="salvandoCancelamento()"
+  (cancelar)="fecharModalConfirmaCancelamento()" (confirmar)="confirmarCancelamentoComSenha($event)">
+</app-password-confirm-modal>

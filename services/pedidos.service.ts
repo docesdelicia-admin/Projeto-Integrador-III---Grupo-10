@@ -5,6 +5,7 @@ import pool from '../api/_lib/db.js';
 interface PedidoListagem {
 	id: string;
 	cliente_id: string;
+	cliente_nome: string | null;
 	data_pedido: string;
 	data_entrega: string | null;
 	status: 'novo' | 'em_producao' | 'entregue' | 'cancelado';
@@ -16,6 +17,7 @@ interface Pedido extends PedidoListagem {}
 
 interface CriarPedidoBody {
 	cliente_id?: string;
+	cliente_nome?: string;
 	data_pedido?: string;
 	data_entrega?: string | null;
 	status?: string;
@@ -23,6 +25,7 @@ interface CriarPedidoBody {
 }
 
 interface EditarPedidoBody {
+	cliente_nome?: string;
 	data_pedido?: string;
 	data_entrega?: string | null;
 	status?: string;
@@ -100,6 +103,7 @@ export async function listarPedidos(req: VercelRequest, res: VercelResponse) {
 		SELECT
 			id,
 			cliente_id,
+			cliente_nome,
 			data_pedido,
 			data_entrega,
 			status,
@@ -145,6 +149,7 @@ export async function criarPedido(req: VercelRequest, res: VercelResponse) {
 		}
 
 		const clienteId = body.cliente_id.trim();
+		const clienteNome = body.cliente_nome ? String(body.cliente_nome).trim() : null;
 		const dataPedido = body.data_pedido.trim();
 		const dataEntrega = body.data_entrega ? String(body.data_entrega).trim() : null;
 		const status = body.status ? String(body.status).trim().toLowerCase() : 'novo';
@@ -156,8 +161,8 @@ export async function criarPedido(req: VercelRequest, res: VercelResponse) {
 		}
 
 		const resultado = await pool.query<Pedido>(
-			'INSERT INTO pedidos (cliente_id, data_pedido, data_entrega, status, observacoes) VALUES ($1, $2, $3, $4, $5) RETURNING id, cliente_id, data_pedido, data_entrega, status, observacoes, criado_em',
-			[clienteId, dataPedido, dataEntrega, status, observacoes],
+			'INSERT INTO pedidos (cliente_id, cliente_nome, data_pedido, data_entrega, status, observacoes) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, cliente_id, cliente_nome, data_pedido, data_entrega, status, observacoes, criado_em',
+			[clienteId, clienteNome, dataPedido, dataEntrega, status, observacoes],
 		);
 
 		if (resultado.rowCount !== 1) {
@@ -198,6 +203,11 @@ export async function editarPedido(req: VercelRequest, res: VercelResponse) {
 
 		const campos: { chave: string; valor: unknown }[] = [];
 
+		if (body.cliente_nome !== undefined) {
+			const clienteNome = body.cliente_nome ? String(body.cliente_nome).trim() : null;
+			campos.push({ chave: 'cliente_nome', valor: clienteNome });
+		}
+
 		if (body.data_pedido !== undefined) {
 			if (typeof body.data_pedido !== 'string' || !body.data_pedido.trim()) {
 				return res.status(400).json({ erro: 'data_pedido deve ser uma string nao-vazia.' });
@@ -231,7 +241,7 @@ export async function editarPedido(req: VercelRequest, res: VercelResponse) {
 		const valores = campos.map((campo) => campo.valor);
 
 		const resultado = await pool.query<Pedido>(
-			`UPDATE pedidos SET ${setClauses} WHERE id = $${campos.length + 1} RETURNING id, cliente_id, data_pedido, data_entrega, status, observacoes, criado_em`,
+			`UPDATE pedidos SET ${setClauses} WHERE id = $${campos.length + 1} RETURNING id, cliente_id, cliente_nome, data_pedido, data_entrega, status, observacoes, criado_em`,
 			[...valores, id],
 		);
 
