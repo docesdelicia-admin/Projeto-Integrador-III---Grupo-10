@@ -35,18 +35,35 @@ export async function listarClientes(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { q } = req.query;
-    
-    let queryTexto = 'SELECT id, nome, telefone, observacoes, criado_em FROM clientes';
-    const valores: any[] = [];
+    const { q, data_inicio, data_fim } = req.query;
+    const termoBusca = typeof q === 'string' ? q.trim() : '';
+    const dataInicio = typeof data_inicio === 'string' ? data_inicio.trim() : '';
+    const dataFim = typeof data_fim === 'string' ? data_fim.trim() : '';
 
-    if (q && String(q).trim() !== '') {
-      const termo = `%${String(q).trim()}%`;
-      queryTexto += ' WHERE nome ILIKE $1 OR telefone ILIKE $1';
-      valores.push(termo);
+    if (dataInicio && dataFim && new Date(dataInicio) > new Date(dataFim)) {
+      return res.status(400).json({ erro: 'data_inicio não pode ser maior que data_fim.' });
     }
 
-    queryTexto += ' ORDER BY criado_em DESC LIMIT 50';
+    const valores: string[] = [];
+    const condicoes: string[] = [];
+
+    if (termoBusca) {
+      valores.push(`%${termoBusca}%`);
+      condicoes.push(`(nome ILIKE $${valores.length} OR telefone ILIKE $${valores.length})`);
+    }
+
+    if (dataInicio) {
+      valores.push(dataInicio);
+      condicoes.push(`criado_em >= $${valores.length}`);
+    }
+
+    if (dataFim) {
+      valores.push(dataFim);
+      condicoes.push(`criado_em <= $${valores.length}`);
+    }
+
+    const whereClause = condicoes.length > 0 ? ` WHERE ${condicoes.join(' AND ')}` : '';
+    const queryTexto = `SELECT id, nome, telefone, observacoes, criado_em FROM clientes${whereClause} ORDER BY criado_em DESC LIMIT 50`;
 
     const resultado = await pool.query<ClienteListagem>(queryTexto, valores);
 
@@ -195,4 +212,6 @@ export async function deletarCliente(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ erro: 'Erro interno ao excluir cliente.' });
   }
 }
+   
+
    
