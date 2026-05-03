@@ -88,6 +88,76 @@ describe('GET /api/clientes', () => {
     });
   });
 
+  it('filtra clientes por intervalo de datas', async () => {
+    const handler = (await import('./index.js')).default as unknown as (
+      req: VercelRequest,
+      res: VercelResponse,
+    ) => Promise<unknown>;
+
+    mockedAutenticarRequisicao.mockReturnValue({
+      sub: '1',
+      id: 1,
+      nome: 'Admin',
+      email: 'admin@teste.com',
+      tipo_usuario: 'admin',
+    });
+
+    mockedPoolQuery.mockResolvedValueOnce({
+      rows: [],
+      rowCount: 0,
+    });
+
+    const { res, state } = createMockRes();
+    const req = createMockReq({
+      method: 'GET',
+      query: {
+        data_inicio: '2024-03-01',
+        data_fim: '2024-03-31',
+      },
+    });
+
+    await handler(req, res);
+
+    expect(state.statusCode).toBe(200);
+    expect(mockedPoolQuery).toHaveBeenCalledTimes(1);
+
+    const [sql, valores] = mockedPoolQuery.mock.calls[0];
+    expect(sql).toContain('FROM clientes WHERE criado_em >= $1 AND criado_em <= $2');
+    expect(valores).toEqual(['2024-03-01', '2024-03-31']);
+  });
+
+  it('retorna erro quando data_inicio e maior que data_fim', async () => {
+    const handler = (await import('./index.js')).default as unknown as (
+      req: VercelRequest,
+      res: VercelResponse,
+    ) => Promise<unknown>;
+
+    mockedAutenticarRequisicao.mockReturnValue({
+      sub: '1',
+      id: 1,
+      nome: 'Admin',
+      email: 'admin@teste.com',
+      tipo_usuario: 'admin',
+    });
+
+    const { res, state } = createMockRes();
+    const req = createMockReq({
+      method: 'GET',
+      query: {
+        data_inicio: '2024-04-10',
+        data_fim: '2024-04-01',
+      },
+    });
+
+    await handler(req, res);
+
+    expect(state.statusCode).toBe(400);
+    expect(state.jsonBody).toEqual({
+      erro: 'data_inicio não pode ser maior que data_fim.',
+    });
+    expect(mockedPoolQuery).not.toHaveBeenCalled();
+  });
+
   it('retorna erro de autenticacao quando token invalido', async () => {
     const { AuthError } = await import('../_lib/auth.js');
     const handler = (await import('./index.js')).default as unknown as (
