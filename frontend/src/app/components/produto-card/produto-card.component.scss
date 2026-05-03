@@ -1,0 +1,167 @@
+.produto-card {
+  border-radius: 1rem;
+  border: 1px solid #efc5da;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(164, 48, 96, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+.capa {
+  min-height: 11rem;
+  background-size: cover;
+  background-position: center;
+}
+
+.conteudo {
+  padding: 1rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.conteudo h3 {
+  margin: 0;
+  color: #8e2757;
+  font-size: 1.08rem;
+}
+
+.conteudo p {
+  margin: 0;
+  color: #6d3350;
+  line-height: 1.35;
+}
+
+.conteudo strong {
+  color: #8d134f;
+  font-size: 1.02rem;
+}
+
+.conteudo button,
+.cta,
+.controle,
+.fechar {
+  border: 0;
+  cursor: pointer;
+}
+
+.conteudo button {
+  justify-self: start;
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  background: linear-gradient(135deg, #d94f8d, #b32564);
+  color: #fff;
+  font-weight: 700;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: rgba(54, 15, 31, 0.62);
+  padding: 1rem;
+}
+
+.modal {
+  width: min(100%, 40rem);
+  border-radius: 1rem;
+  background: #fff7fb;
+  border: 1px solid #ebb9d4;
+  box-shadow: 0 20px 40px rgba(57, 12, 30, 0.35);
+  padding: 1rem;
+}
+
+.modal header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.modal h4 {
+  margin: 0;
+  color: #8e2757;
+  font-size: 1.25rem;
+}
+
+.fechar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #f7d7e7;
+  color: #8e2757;
+  font-weight: 700;
+}
+
+.carrossel {
+  margin-top: 0.8rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.carrossel img {
+  width: 100%;
+  height: 18rem;
+  object-fit: cover;
+  border-radius: 0.9rem;
+  border: 1px solid #efc5da;
+}
+
+.controle {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background: #f7d7e7;
+  color: #8e2757;
+  font-size: 1.4rem;
+}
+
+.indicadores {
+  margin-top: 0.7rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.indicadores button {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 999px;
+  border: 0;
+  background: #e5b7cf;
+}
+
+.indicadores button.ativo {
+  background: #b32564;
+}
+
+.descricao {
+  margin: 1rem 0 0.45rem;
+  color: #5f3149;
+}
+
+.preco {
+  margin: 0;
+  color: #8d134f;
+  font-weight: 800;
+}
+
+.cta {
+  margin-top: 1rem;
+  width: 100%;
+  border-radius: 0.8rem;
+  padding: 0.85rem 1rem;
+  background: linear-gradient(135deg, #d94f8d, #b32564);
+  color: #fff;
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .carrossel img {
+    height: 14rem;
+  }
+}

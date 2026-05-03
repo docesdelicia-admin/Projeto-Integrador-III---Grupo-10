@@ -6,7 +6,7 @@ describe('password utils', () => {
 	});
 
 	it('gera hash e valida senha corretamente', async () => {
-		const { gerarSenhaHash, validarSenha } = await import('../_lib/password');
+		const { gerarSenhaHash, validarSenha } = await import('../_lib/password.js');
 
 		const senha = 'senhaForte123';
 		const hash = await gerarSenhaHash(senha);
@@ -16,7 +16,7 @@ describe('password utils', () => {
 	});
 
 	it('retorna false para senha incorreta', async () => {
-		const { gerarSenhaHash, validarSenha } = await import('../_lib/password');
+		const { gerarSenhaHash, validarSenha } = await import('../_lib/password.js');
 
 		const hash = await gerarSenhaHash('senhaForte123');
 
@@ -24,14 +24,14 @@ describe('password utils', () => {
 	});
 
 	it('retorna false quando senha ou hash estao ausentes', async () => {
-		const { validarSenha } = await import('../_lib/password');
+		const { validarSenha } = await import('../_lib/password.js');
 
 		await expect(validarSenha('', 'hash')).resolves.toBe(false);
 		await expect(validarSenha('senha', '')).resolves.toBe(false);
 	});
 
 	it('lanca erro para senha curta ao gerar hash', async () => {
-		const { gerarSenhaHash } = await import('../_lib/password');
+		const { gerarSenhaHash } = await import('../_lib/password.js');
 
 		await expect(gerarSenhaHash('123')).rejects.toThrow('A senha precisa ter pelo menos 6 caracteres.');
 	});

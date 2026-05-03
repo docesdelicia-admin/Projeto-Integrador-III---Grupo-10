@@ -1,6 +1,18 @@
 import type { VercelRequest } from '@vercel/node';
-import jwt, { type JwtPayload, type SignOptions } from 'jsonwebtoken';
-import type { JwtUsuarioPayload, TipoUsuario } from './types';
+import type { JwtPayload, SignOptions } from 'jsonwebtoken';
+import type { JwtUsuarioPayload, TipoUsuario } from './types.js';
+import pool from './db.js';
+import { validarSenha } from './password.js';
+
+interface JwtTokenClaims extends JwtUsuarioPayload {
+  sub: string;
+}
+
+const jwt = require('jsonwebtoken/index.js') as typeof import('jsonwebtoken');
+
+if (typeof jwt.sign !== 'function' || typeof jwt.verify !== 'function') {
+  throw new Error('Biblioteca jsonwebtoken indisponivel para assinatura/validacao de token.');
+}
 
 const jwtSecret: string = process.env.JWT_SECRET ?? '';
 
@@ -31,8 +43,8 @@ function isTipoUsuario(value: unknown): value is TipoUsuario {
  * Gera um token JWT com os dados do usuario
  * O token contem o ID, nome, email e tipo de usuario
  */
-export function gerarAccessToken(usuario: Omit<JwtUsuarioPayload, 'sub'>): string {
-  const payload: JwtUsuarioPayload = {
+export function gerarAccessToken(usuario: JwtUsuarioPayload): string {
+  const payload: JwtTokenClaims = {
     sub: String(usuario.id),
     ...usuario,
   };
@@ -137,17 +149,17 @@ export function verificarAccessToken(token: string): JwtUsuarioPayload {
     throw new AuthError('Payload do token invalido.');
   }
 
-  const id = typeof decoded.id === 'number' ? decoded.id : Number(decoded.sub);
+  const idRaw = decoded.id ?? decoded.sub;
+  const id = typeof idRaw === 'string' || typeof idRaw === 'number' ? String(idRaw).trim() : '';
   const nome = decoded.nome;
   const email = decoded.email;
   const tipoUsuario = decoded.tipo_usuario;
 
-  if (!Number.isFinite(id) || typeof nome !== 'string' || typeof email !== 'string' || !isTipoUsuario(tipoUsuario)) {
+  if (!id || typeof nome !== 'string' || typeof email !== 'string' || !isTipoUsuario(tipoUsuario)) {
     throw new AuthError('Token com payload invalido.');
   }
 
   return {
-    sub: String(decoded.sub ?? id),
     id,
     nome,
     email,
@@ -170,18 +182,82 @@ export function verificarAdminAutorizado(usuario: JwtUsuarioPayload): void {
   }
 }
 
-export function verificarPermissaoAcesso(usuario: JwtUsuarioPayload, usuarioIdSolicitado: number): void {
+export function verificarPermissaoAcesso(usuario: JwtUsuarioPayload, usuarioIdSolicitado: string | number): void {
   if (usuario.tipo_usuario === 'admin') {
     return;
   }
 
-  if (usuario.id !== usuarioIdSolicitado) {
+  if (usuario.id !== String(usuarioIdSolicitado)) {
     throw new AuthError('Acesso Restrito a Administradores.', 403);
   }
 }
 
-export function verificarPermissaoDeletar(usuario: JwtUsuarioPayload): void {
+export function extrairIdDaUrl(req: VercelRequest): string {
+  const { id } = req.query;
+
+  if (!id || Array.isArray(id)) {
+    throw new AuthError('ID invalido.', 400);
+  }
+
+  const valor = String(id).trim();
+
+  if (!valor) {
+    throw new AuthError('ID invalido.', 400);
+  }
+
+  return valor;
+}
+
+function obterSenhaConfirmacaoAdmin(req: VercelRequest): string {
+  const body = typeof req.body === 'string'
+    ? JSON.parse(req.body)
+    : (typeof req.body === 'object' && req.body !== null ? req.body : {});
+
+  const senhaBruta =
+    (typeof (body as Record<string, unknown>)['senha_atual'] === 'string' && (body as Record<string, string>)['senha_atual']) ||
+    (typeof (body as Record<string, unknown>)['senha_admin'] === 'string' && (body as Record<string, string>)['senha_admin']) ||
+    (typeof (body as Record<string, unknown>)['senha'] === 'string' && (body as Record<string, string>)['senha']) ||
+    '';
+
+  const senha = senhaBruta.trim();
+
+  if (!senha) {
+    throw new AuthError('Senha de confirmacao do administrador eh obrigatoria para excluir.', 400);
+  }
+
+  return senha;
+}
+
+export async function verificarPermissaoDeletar(
+  req: VercelRequest,
+  usuario: JwtUsuarioPayload,
+): Promise<void> {
   if (usuario.tipo_usuario !== 'admin') {
     throw new AuthError('Apenas administradores podem deletar dados.', 403);
+  }
+
+  let senhaConfirmacao: string;
+  try {
+    senhaConfirmacao = obterSenhaConfirmacaoAdmin(req);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new AuthError('Corpo da requisicao invalido.', 400);
+    }
+    throw error;
+  }
+
+  const resultado = await pool.query<{ senha_hash: string }>(
+    'SELECT senha_hash FROM usuarios WHERE id = $1 LIMIT 1',
+    [usuario.id],
+  );
+
+  if (resultado.rowCount !== 1) {
+    throw new AuthError('Administrador autenticado nao encontrado.', 401);
+  }
+
+  const senhaValida = await validarSenha(senhaConfirmacao, resultado.rows[0].senha_hash);
+
+  if (!senhaValida) {
+    throw new AuthError('Senha de confirmacao invalida.', 403);
   }
 }

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { AuthError, autenticarRequisicao, verificarAdminAutorizado, verificarPermissaoDeletar } from '../api/_lib/auth';
-import pool from '../api/_lib/db';
+import { AuthError, autenticarRequisicao, extrairIdDaUrl, verificarPermissaoDeletar } from '../api/_lib/auth.js';
+import pool from '../api/_lib/db.js';
 
 interface ClienteListagem {
   id: string;
@@ -24,71 +24,62 @@ interface EditarClienteBody {
   observacoes?: string;
 }
 
-function extrairIdDaUrl(req: VercelRequest): string {
-  const { id } = req.query;
-
-  if (!id || Array.isArray(id)) {
-    throw new AuthError('ID invalido.', 400);
+export async function listarClientes(req: VercelRequest, res: VercelResponse) {
+  try {
+    autenticarRequisicao(req);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return res.status(error.statusCode).json({ erro: error.message });
+    }
+    return res.status(401).json({ erro: 'Requer autenticacao.' });
   }
 
-  return id;
+  try {
+    const { q, data_inicio, data_fim } = req.query;
+    const termoBusca = typeof q === 'string' ? q.trim() : '';
+    const dataInicio = typeof data_inicio === 'string' ? data_inicio.trim() : '';
+    const dataFim = typeof data_fim === 'string' ? data_fim.trim() : '';
+
+    if (dataInicio && dataFim && new Date(dataInicio) > new Date(dataFim)) {
+      return res.status(400).json({ erro: 'data_inicio não pode ser maior que data_fim.' });
+    }
+
+    const valores: string[] = [];
+    const condicoes: string[] = [];
+
+    if (termoBusca) {
+      valores.push(`%${termoBusca}%`);
+      condicoes.push(`(nome ILIKE $${valores.length} OR telefone ILIKE $${valores.length})`);
+    }
+
+    if (dataInicio) {
+      valores.push(dataInicio);
+      condicoes.push(`criado_em >= $${valores.length}`);
+    }
+
+    if (dataFim) {
+      valores.push(dataFim);
+      condicoes.push(`criado_em <= $${valores.length}`);
+    }
+
+    const whereClause = condicoes.length > 0 ? ` WHERE ${condicoes.join(' AND ')}` : '';
+    const queryTexto = `SELECT id, nome, telefone, observacoes, criado_em FROM clientes${whereClause} ORDER BY criado_em DESC LIMIT 50`;
+
+    const resultado = await pool.query<ClienteListagem>(queryTexto, valores);
+
+    return res.status(200).json({
+      total: resultado.rowCount ?? 0,
+      clientes: resultado.rows,
+    });
+    
+  } catch (error) {
+    console.error('Erro ao listar clientes:', error);
+    return res.status(500).json({ erro: 'Erro interno ao buscar clientes.' });
+  }
 }
-
-export async function listarClientes(req: VercelRequest, res: VercelResponse) {
-	try {
-		autenticarRequisicao(req);
-	} catch (error) {
-		if (error instanceof AuthError) {
-			return res.status(error.statusCode).json({ erro: error.message });
-		}
-		return res.status(401).json({ erro: 'Requer autenticacao.' });
-	}
-
-	const { data_inicio, data_fim } = req.query;
-
-	if (data_inicio && data_fim && new Date(data_inicio as string) > new Date(data_fim as string)) {
-		return res.status(400).json({ erro: 'data_inicio não pode ser maior que data_fim.' });
-	}
-
-	try {
-		const values: any[] = [];
-		const conditions: string[] = [];
-
-		if (data_inicio) {
-			values.push(data_inicio);
-			conditions.push(`criado_em >= $${values.length}`);
-		}
-
-		if (data_fim) {
-			values.push(data_fim);
-			conditions.push(`criado_em <= $${values.length}`);
-		}
-
-		const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-		
-		const query = `
-			SELECT id, nome, telefone, observacoes, criado_em 
-			FROM clientes 
-			${whereClause}
-			ORDER BY criado_em DESC
-		`;
-
-		const resultado = await pool.query<ClienteListagem>(query, values);
-
-		return res.status(200).json({
-			total: resultado.rowCount ?? 0,
-			clientes: resultado.rows,
-		});
-	} catch (error) {
-		console.error('Erro ao listar clientes:', error);
-		return res.status(500).json({ erro: 'Erro interno ao buscar clientes.' });
-	}
-}
-
 export async function criarCliente(req: VercelRequest, res: VercelResponse) {
   try {
-    const usuarioLogado = autenticarRequisicao(req);
-    verificarAdminAutorizado(usuarioLogado);
+    autenticarRequisicao(req);
   } catch (error) {
     if (error instanceof AuthError) {
       return res.status(error.statusCode).json({ erro: error.message });
@@ -100,7 +91,7 @@ export async function criarCliente(req: VercelRequest, res: VercelResponse) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body as CriarClienteBody);
 
     if (typeof body.nome !== 'string' || !body.nome.trim()) {
-      return res.status(400).json({ erro: 'Nome do cliente eh obrigatorio.' });
+      return res.status(400).json({ erro: 'Nome do cliente é obrigatorio.' });
     }
 
     const nome = body.nome.trim();
@@ -197,7 +188,7 @@ export async function deletarCliente(req: VercelRequest, res: VercelResponse) {
   try {
     id = extrairIdDaUrl(req);
     const usuarioLogado = autenticarRequisicao(req);
-    verificarPermissaoDeletar(usuarioLogado);
+    await verificarPermissaoDeletar(req, usuarioLogado);
   } catch (error) {
     if (error instanceof AuthError) {
       return res.status(error.statusCode).json({ erro: error.message });
@@ -221,3 +212,6 @@ export async function deletarCliente(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ erro: 'Erro interno ao excluir cliente.' });
   }
 }
+   
+
+   

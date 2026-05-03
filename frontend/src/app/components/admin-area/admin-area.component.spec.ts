@@ -9,9 +9,11 @@ describe('AdminAreaComponent', () => {
   let fixture: ComponentFixture<AdminAreaComponent>;
   let component: AdminAreaComponent;
   let AuthServiceSpy: {
+    possuiToken: ReturnType<typeof vi.fn>;
     validarSessao: ReturnType<typeof vi.fn>;
     logout: ReturnType<typeof vi.fn>;
     removerToken: ReturnType<typeof vi.fn>;
+    obterSessaoAutenticada: ReturnType<typeof vi.fn>;
   };
   let routerSpy: {
     navigateByUrl: ReturnType<typeof vi.fn>;
@@ -19,11 +21,14 @@ describe('AdminAreaComponent', () => {
 
   beforeEach(async () => {
     AuthServiceSpy = {
+      possuiToken: vi.fn().mockReturnValue(false),
       validarSessao: vi.fn(),
       logout: vi.fn(),
       removerToken: vi.fn(),
+      obterSessaoAutenticada: vi.fn(),
     };
     AuthServiceSpy.validarSessao.mockReturnValue(of(false));
+    AuthServiceSpy.obterSessaoAutenticada.mockReturnValue(null);
     routerSpy = {
       navigateByUrl: vi.fn(),
     };
@@ -60,17 +65,88 @@ describe('AdminAreaComponent', () => {
     expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/login');
   });
 
-  it('executa logout e redireciona para home quando ha sessao', () => {
+  it('executa logout e redireciona para vitrine quando ha sessao', () => {
     AuthServiceSpy.validarSessao.mockReturnValue(of(true));
+    AuthServiceSpy.possuiToken.mockReturnValue(true);
+    AuthServiceSpy.obterSessaoAutenticada.mockReturnValue({
+      id: 1,
+      nome: 'Administrador',
+      email: 'admin@teste.com',
+      tipo_usuario: 'admin',
+    });
     AuthServiceSpy.logout.mockReturnValue(of({ mensagem: 'Logout realizado com sucesso.' }));
     component.sessaoAtiva = true;
+    component.usuarioLogado = {
+      nome: 'Administrador',
+      tipo_usuario: 'admin',
+    };
 
     fixture.detectChanges();
 
-    const botao = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    const botoes = fixture.nativeElement.querySelectorAll('button');
+    const botao = botoes[1] as HTMLButtonElement;
     botao.click();
 
     expect(AuthServiceSpy.logout).toHaveBeenCalled();
     expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/');
+  });
+
+  it('exibe identificacao de admin quando ha sessao', () => {
+    AuthServiceSpy.validarSessao.mockReturnValue(of(true));
+    AuthServiceSpy.possuiToken.mockReturnValue(true);
+    AuthServiceSpy.obterSessaoAutenticada.mockReturnValue({
+      id: 1,
+      nome: 'Xyz',
+      email: 'admin@teste.com',
+      tipo_usuario: 'admin',
+    });
+
+    fixture = TestBed.createComponent(AdminAreaComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const botoes = fixture.nativeElement.querySelectorAll('button');
+    const identificacao = botoes[0] as HTMLButtonElement;
+    expect(identificacao.textContent?.trim()).toBe('Admin Xyz');
+  });
+
+  it('exibe identificacao de operador quando ha sessao', () => {
+    AuthServiceSpy.validarSessao.mockReturnValue(of(true));
+    AuthServiceSpy.possuiToken.mockReturnValue(true);
+    AuthServiceSpy.obterSessaoAutenticada.mockReturnValue({
+      id: 2,
+      nome: 'Xyz',
+      email: 'operador@teste.com',
+      tipo_usuario: 'operador',
+    });
+
+    fixture = TestBed.createComponent(AdminAreaComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const botoes = fixture.nativeElement.querySelectorAll('button');
+    const identificacao = botoes[0] as HTMLButtonElement;
+    expect(identificacao.textContent?.trim()).toBe('Operador(a) Xyz');
+  });
+
+  it('navega para dashboard ao clicar no usuario autenticado', () => {
+    AuthServiceSpy.validarSessao.mockReturnValue(of(true));
+    AuthServiceSpy.possuiToken.mockReturnValue(true);
+    AuthServiceSpy.obterSessaoAutenticada.mockReturnValue({
+      id: 1,
+      nome: 'Xyz',
+      email: 'admin@teste.com',
+      tipo_usuario: 'admin',
+    });
+
+    fixture = TestBed.createComponent(AdminAreaComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const botoes = fixture.nativeElement.querySelectorAll('button');
+    const identificacao = botoes[0] as HTMLButtonElement;
+    identificacao.click();
+
+    expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/dashboard');
   });
 });

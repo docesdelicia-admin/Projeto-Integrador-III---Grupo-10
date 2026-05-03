@@ -2,12 +2,14 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
   AuthError,
   autenticarRequisicao,
+  extrairIdDaUrl,
   verificarAdminAutorizado,
   verificarPermissaoAcesso,
-} from '../api/_lib/auth';
-import pool from '../api/_lib/db';
-import { gerarSenhaHash } from '../api/_lib/password';
-import type { CriarUsuarioInput, JwtUsuarioPayload, TipoUsuario, Usuario } from '../api/_lib/types';
+  verificarPermissaoDeletar,
+} from '../api/_lib/auth.js';
+import pool from '../api/_lib/db.js';
+import { gerarSenhaHash, validarSenha } from '../api/_lib/password.js';
+import type { CriarUsuarioInput, JwtUsuarioPayload, TipoUsuario, Usuario } from '../api/_lib/types.js';
 
 interface CriarUsuarioBody {
   nome?: string;
@@ -21,22 +23,7 @@ interface EditarUsuarioBody {
   email?: string;
   senha?: string;
   tipo_usuario?: TipoUsuario;
-}
-
-function extrairIdDaUrl(req: VercelRequest): number {
-  const { id } = req.query;
-
-  if (!id || Array.isArray(id)) {
-    throw new AuthError('ID invalido.', 400);
-  }
-
-  const parsed = Number(id);
-
-  if (!Number.isFinite(parsed)) {
-    throw new AuthError('ID deve ser um numero valido.', 400);
-  }
-
-  return parsed;
+  senha_atual?: string;
 }
 
 function obterBodyCriacao(req: VercelRequest): CriarUsuarioBody {
@@ -223,6 +210,26 @@ export async function editarUsuario(req: VercelRequest, res: VercelResponse) {
     }
 
     const body = obterBodyEdicao(req);
+    const editandoProprioUsuario = usuarioLogado.id === String(id);
+
+    if (editandoProprioUsuario) {
+      if (typeof body.senha_atual !== 'string' || !body.senha_atual.trim()) {
+        return res.status(400).json({ erro: 'senha_atual e obrigatoria para alterar seus dados.' });
+      }
+
+      const resultadoSenha = await pool.query<{ senha_hash: string }>(
+        'SELECT senha_hash FROM usuarios WHERE id = $1 LIMIT 1',
+        [id],
+      );
+
+      if (resultadoSenha.rowCount !== 1) {
+        return res.status(404).json({ erro: 'Usuario nao encontrado.' });
+      }
+
+      if (!(await validarSenha(body.senha_atual.trim(), resultadoSenha.rows[0].senha_hash))) {
+        return res.status(400).json({ erro: 'Senha atual incorreta.' });
+      }
+    }
 
     const campos: { chave: string; valor: unknown }[] = [];
 
@@ -267,7 +274,7 @@ export async function editarUsuario(req: VercelRequest, res: VercelResponse) {
     const valores = campos.map((campo) => campo.valor);
 
     const resultado = await pool.query<Omit<Usuario, 'senha'>>(
-      `UPDATE usuarios SET ${setClauses} WHERE id = $${campos.length + 1} RETURNING id, nome, email, tipo_usuario, criado_em`,
+      `UPDATE usuarios SET ${setClauses}, atualizado_em = NOW() WHERE id = $${campos.length + 1} RETURNING id, nome, email, tipo_usuario, criado_em`,
       [...valores, id],
     );
 
@@ -312,13 +319,7 @@ export async function deletarUsuario(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ erro: 'Requer autenticacao.' });
     }
 
-    try {
-      verificarAdminAutorizado(usuarioLogado);
-    } catch (error) {
-      if (error instanceof AuthError) {
-        return res.status(error.statusCode).json({ erro: error.message });
-      }
-    }
+    await verificarPermissaoDeletar(req, usuarioLogado);
 
     const resultado = await pool.query('DELETE FROM usuarios WHERE id = $1', [id]);
 

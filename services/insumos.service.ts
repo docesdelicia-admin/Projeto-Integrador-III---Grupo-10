@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { AuthError, autenticarRequisicao, verificarAdminAutorizado, verificarPermissaoDeletar } from '../api/_lib/auth';
-import pool from '../api/_lib/db';
+import { AuthError, autenticarRequisicao, extrairIdDaUrl, verificarPermissaoDeletar } from '../api/_lib/auth.js';
+import pool from '../api/_lib/db.js';
 
 interface InsumoListagem {
 	id: string;
@@ -12,15 +12,6 @@ interface InsumoListagem {
 
 interface Insumo extends InsumoListagem {}
 
-interface EstoqueInsumoListagem {
-	id: string;
-	insumo_id: string;
-	nome_insumo: string;
-	quantidade_disponivel: string;
-	quantidade_minima: string;
-	ultima_atualizacao: string;
-}
-
 interface CriarInsumoBody {
 	nome?: string;
 	descricao?: string;
@@ -31,16 +22,6 @@ interface EditarInsumoBody {
 	nome?: string;
 	descricao?: string;
 	unidade_medida?: string;
-}
-
-function extrairIdDaUrl(req: VercelRequest): string {
-	const { id } = req.query;
-
-	if (!id || Array.isArray(id)) {
-		throw new AuthError('ID invalido.', 400);
-	}
-
-	return id;
 }
 
 export async function listarInsumos(req: VercelRequest, res: VercelResponse) {
@@ -58,46 +39,17 @@ export async function listarInsumos(req: VercelRequest, res: VercelResponse) {
 		'SELECT id, nome, descricao, unidade_medida, criado_em FROM insumos ORDER BY criado_em DESC',
 	);
 
+	res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=86400');
+
 	return res.status(200).json({
 		total: resultado.rowCount ?? 0,
 		insumos: resultado.rows,
 	});
 }
 
-export async function listarEstoqueInsumos(req: VercelRequest, res: VercelResponse) {
-	try {
-		autenticarRequisicao(req);
-	} catch (error) {
-		if (error instanceof AuthError) {
-			return res.status(error.statusCode).json({ erro: error.message });
-		}
-
-		return res.status(401).json({ erro: 'Requer autenticacao.' });
-	}
-
-	const resultado = await pool.query<EstoqueInsumoListagem>(
-		`SELECT
-			ei.id,
-			ei.insumo_id,
-			i.nome AS nome_insumo,
-			ei.quantidade_disponivel,
-			ei.quantidade_minima,
-			ei.ultima_atualizacao
-		 FROM estoque_insumos ei
-		 INNER JOIN insumos i ON i.id = ei.insumo_id
-		 ORDER BY i.nome`,
-	);
-
-	return res.status(200).json({
-		total: resultado.rowCount ?? 0,
-		estoque_insumos: resultado.rows,
-	});
-}
-
 export async function criarInsumo(req: VercelRequest, res: VercelResponse) {
 	try {
-		const usuarioLogado = autenticarRequisicao(req);
-		verificarAdminAutorizado(usuarioLogado);
+		autenticarRequisicao(req);
 	} catch (error) {
 		if (error instanceof AuthError) {
 			return res.status(error.statusCode).json({ erro: error.message });
@@ -109,11 +61,11 @@ export async function criarInsumo(req: VercelRequest, res: VercelResponse) {
 		const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body as CriarInsumoBody);
 
 		if (typeof body.nome !== 'string' || !body.nome.trim()) {
-			return res.status(400).json({ erro: 'Nome do insumo eh obrigatorio.' });
+			return res.status(400).json({ erro: 'Nome do insumo é obrigatorio.' });
 		}
 
 		if (typeof body.unidade_medida !== 'string' || !body.unidade_medida.trim()) {
-			return res.status(400).json({ erro: 'Unidade de medida eh obrigatoria.' });
+			return res.status(400).json({ erro: 'Unidade de medida éobrigatoria.' });
 		}
 
 		const nome = body.nome.trim();
@@ -220,7 +172,7 @@ export async function deletarInsumo(req: VercelRequest, res: VercelResponse) {
 	try {
 		id = extrairIdDaUrl(req);
 		const usuarioLogado = autenticarRequisicao(req);
-		verificarPermissaoDeletar(usuarioLogado);
+		await verificarPermissaoDeletar(req, usuarioLogado);
 	} catch (error) {
 		if (error instanceof AuthError) {
 			return res.status(error.statusCode).json({ erro: error.message });

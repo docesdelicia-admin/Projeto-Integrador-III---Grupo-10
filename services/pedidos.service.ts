@@ -1,10 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { AuthError, autenticarRequisicao } from '../api/_lib/auth';
-import pool from '../api/_lib/db';
+import { AuthError, autenticarRequisicao, extrairIdDaUrl, verificarPermissaoDeletar } from '../api/_lib/auth.js';
+import pool from '../api/_lib/db.js';
 
 interface PedidoListagem {
 	id: string;
 	cliente_id: string;
+	cliente_nome: string | null;
 	data_pedido: string;
 	data_entrega: string | null;
 	status: 'novo' | 'em_producao' | 'entregue' | 'cancelado';
@@ -16,6 +17,7 @@ interface Pedido extends PedidoListagem {}
 
 interface CriarPedidoBody {
 	cliente_id?: string;
+	cliente_nome?: string;
 	data_pedido?: string;
 	data_entrega?: string | null;
 	status?: string;
@@ -23,20 +25,11 @@ interface CriarPedidoBody {
 }
 
 interface EditarPedidoBody {
+	cliente_nome?: string;
 	data_pedido?: string;
 	data_entrega?: string | null;
 	status?: string;
 	observacoes?: string;
-}
-
-function extrairIdDaUrl(req: VercelRequest): string {
-	const { id } = req.query;
-
-	if (!id || Array.isArray(id)) {
-		throw new AuthError('ID invalido.', 400);
-	}
-
-	return id;
 }
 
 export async function listarPedidos(req: VercelRequest, res: VercelResponse) {
@@ -49,76 +42,91 @@ export async function listarPedidos(req: VercelRequest, res: VercelResponse) {
 		return res.status(401).json({ erro: 'Requer autenticacao.' });
 	}
 
-	const { data_inicio, data_fim, status } = req.query;
+	const {
+		cliente_id,
+		status,
+		data_inicio,
+		data_fim,
+		page = '1',
+		page_size = '10',
+	} = req.query;
 
-	if (data_inicio && data_fim && new Date(data_inicio as string) > new Date(data_fim as string)) {
-		return res.status(400).json({ erro: 'data_inicio não pode ser maior que data_fim.' });
+	// Validação do filtro de status
+	const statusStr = typeof status === 'string' ? status.trim().toLowerCase() : '';
+	if (statusStr && !['novo', 'em_producao', 'entregue', 'cancelado'].includes(statusStr)) {
+		return res.status(400).json({ erro: 'Filtro de status invalido. Use: novo, em_producao, entregue, cancelado.' });
 	}
 
-	try {
-		const values: any[] = [];
-		const conditions: string[] = [];
+	const filtros: string[] = [];
+	const valores: unknown[] = [];
 
-		if (data_inicio) {
-			values.push(data_inicio);
-			conditions.push(`p.data_pedido >= $${values.length}`);
-		}
-
-		if (data_fim) {
-			values.push(data_fim);
-			conditions.push(`p.data_pedido <= $${values.length}`);
-		}
-
-		if (status) {
-			values.push(status);
-			conditions.push(`p.status = $${values.length}`);
-		}
-
-		const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
-	
-		const query = `
-			SELECT 
-				p.*,
-				COALESCE(SUM(i.quantidade * i.preco_unitario), 0) as valor_total,
-				COALESCE(
-					json_agg(
-						json_build_object(
-							'id', i.id,
-							'produto_id', i.produto_id,
-							'quantidade', i.quantidade,
-							'preco_unitario', i.preco_unitario
-						)
-					) FILTER (WHERE i.id IS NOT NULL), '[]'
-				) as itens
-			FROM pedidos p
-			LEFT JOIN itens_pedido i ON p.id = i.pedido_id
-			${whereClause}
-			GROUP BY p.id
-			ORDER BY p.data_pedido DESC
-		`;
-
-		const resultado = await pool.query<PedidoListagem>(query, values);
-
-		return res.status(200).json({
-			total: resultado.rowCount ?? 0,
-			pedidos: resultado.rows,
-		});
-	} catch (error) {
-		console.error('Erro ao listar pedidos:', error);
-		return res.status(500).json({ erro: 'Erro interno ao buscar pedidos.' });
+	// Filtro por cliente
+	if (cliente_id && typeof cliente_id === 'string' && cliente_id.trim()) {
+		valores.push(cliente_id.trim());
+		filtros.push(`cliente_id = $${valores.length}`);
 	}
-}
-	const resultado = await pool.query<PedidoListagem>(
-		'SELECT id, cliente_id, data_pedido, data_entrega, status, observacoes, criado_em FROM pedidos ORDER BY criado_em DESC',
-	);
+
+	// Filtro por status
+	if (statusStr) {
+		valores.push(statusStr);
+		filtros.push(`status = $${valores.length}`);
+	}
+
+	// Filtro por período - data início
+	if (data_inicio && typeof data_inicio === 'string' && data_inicio.trim()) {
+		valores.push(data_inicio.trim());
+		filtros.push(`data_pedido >= $${valores.length}`);
+	}
+
+	// Filtro por período - data fim
+	if (data_fim && typeof data_fim === 'string' && data_fim.trim()) {
+		valores.push(data_fim.trim());
+		filtros.push(`data_pedido <= $${valores.length}`);
+	}
+
+	const whereClause = filtros.length > 0 ? `WHERE ${filtros.join(' AND ')}` : '';
+
+	// Parsing de paginação com page e page_size
+	const parsedPage = Math.max(Number(page) || 1, 1);
+	const parsedPageSize = Math.min(Math.max(Number(page_size) || 10, 1), 100);
+	const parsedOffset = (parsedPage - 1) * parsedPageSize;
+
+	// Query para contar total de registros
+	const countQuery = `SELECT COUNT(*) as total FROM pedidos ${whereClause}`;
+	const countResult = await pool.query(countQuery, valores);
+	const totalRegistros = Number(countResult.rows[0]?.total ?? 0);
+
+	// Query principal com paginação
+	valores.push(parsedPageSize, parsedOffset);
+
+	const query = `
+		SELECT
+			id,
+			cliente_id,
+			cliente_nome,
+			data_pedido,
+			data_entrega,
+			status,
+			observacoes,
+			criado_em
+		FROM pedidos
+		${whereClause}
+		ORDER BY criado_em DESC
+		LIMIT $${valores.length - 1}
+		OFFSET $${valores.length}
+	`;
+
+	const resultado = await pool.query<PedidoListagem>(query, valores);
+
+	res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
 
 	return res.status(200).json({
-		total: resultado.rowCount ?? 0,
+		total: totalRegistros,
+		page: parsedPage,
+		page_size: parsedPageSize,
 		pedidos: resultado.rows,
 	});
 }
-
 export async function criarPedido(req: VercelRequest, res: VercelResponse) {
 	try {
 		autenticarRequisicao(req);
@@ -133,14 +141,15 @@ export async function criarPedido(req: VercelRequest, res: VercelResponse) {
 		const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body as CriarPedidoBody);
 
 		if (typeof body.cliente_id !== 'string' || !body.cliente_id.trim()) {
-			return res.status(400).json({ erro: 'cliente_id eh obrigatorio.' });
+			return res.status(400).json({ erro: 'cliente_id é obrigatorio.' });
 		}
 
 		if (typeof body.data_pedido !== 'string' || !body.data_pedido.trim()) {
-			return res.status(400).json({ erro: 'data_pedido eh obrigatoria.' });
+			return res.status(400).json({ erro: 'data_pedido éobrigatoria.' });
 		}
 
 		const clienteId = body.cliente_id.trim();
+		const clienteNome = body.cliente_nome ? String(body.cliente_nome).trim() : null;
 		const dataPedido = body.data_pedido.trim();
 		const dataEntrega = body.data_entrega ? String(body.data_entrega).trim() : null;
 		const status = body.status ? String(body.status).trim().toLowerCase() : 'novo';
@@ -152,8 +161,8 @@ export async function criarPedido(req: VercelRequest, res: VercelResponse) {
 		}
 
 		const resultado = await pool.query<Pedido>(
-			'INSERT INTO pedidos (cliente_id, data_pedido, data_entrega, status, observacoes) VALUES ($1, $2, $3, $4, $5) RETURNING id, cliente_id, data_pedido, data_entrega, status, observacoes, criado_em',
-			[clienteId, dataPedido, dataEntrega, status, observacoes],
+			'INSERT INTO pedidos (cliente_id, cliente_nome, data_pedido, data_entrega, status, observacoes) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, cliente_id, cliente_nome, data_pedido, data_entrega, status, observacoes, criado_em',
+			[clienteId, clienteNome, dataPedido, dataEntrega, status, observacoes],
 		);
 
 		if (resultado.rowCount !== 1) {
@@ -194,6 +203,11 @@ export async function editarPedido(req: VercelRequest, res: VercelResponse) {
 
 		const campos: { chave: string; valor: unknown }[] = [];
 
+		if (body.cliente_nome !== undefined) {
+			const clienteNome = body.cliente_nome ? String(body.cliente_nome).trim() : null;
+			campos.push({ chave: 'cliente_nome', valor: clienteNome });
+		}
+
 		if (body.data_pedido !== undefined) {
 			if (typeof body.data_pedido !== 'string' || !body.data_pedido.trim()) {
 				return res.status(400).json({ erro: 'data_pedido deve ser uma string nao-vazia.' });
@@ -227,7 +241,7 @@ export async function editarPedido(req: VercelRequest, res: VercelResponse) {
 		const valores = campos.map((campo) => campo.valor);
 
 		const resultado = await pool.query<Pedido>(
-			`UPDATE pedidos SET ${setClauses} WHERE id = $${campos.length + 1} RETURNING id, cliente_id, data_pedido, data_entrega, status, observacoes, criado_em`,
+			`UPDATE pedidos SET ${setClauses} WHERE id = $${campos.length + 1} RETURNING id, cliente_id, cliente_nome, data_pedido, data_entrega, status, observacoes, criado_em`,
 			[...valores, id],
 		);
 
@@ -253,11 +267,7 @@ export async function deletarPedido(req: VercelRequest, res: VercelResponse) {
 	try {
 		id = extrairIdDaUrl(req);
 		const usuarioLogado = autenticarRequisicao(req);
-		
-		// Apenas admin pode deletar
-		if (usuarioLogado.tipo_usuario !== 'admin') {
-			throw new AuthError('Apenas administradores podem deletar pedidos.', 403);
-		}
+		await verificarPermissaoDeletar(req, usuarioLogado);
 	} catch (error) {
 		if (error instanceof AuthError) {
 			return res.status(error.statusCode).json({ erro: error.message });

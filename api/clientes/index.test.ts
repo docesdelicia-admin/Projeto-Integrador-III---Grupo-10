@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createMockReq, createMockRes } from '../tests/http-mocks';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { createMockReq, createMockRes } from '../tests/http-mocks.js';
 
 const mockedAutenticarRequisicao = vi.hoisted(() => vi.fn());
 const mockedPoolQuery = vi.hoisted(() => vi.fn());
 
-vi.mock('../_lib/auth', async () => {
-  const actual = await vi.importActual<typeof import('../_lib/auth')>('../_lib/auth');
+vi.mock('../_lib/auth.js', async () => {
+  const actual = await vi.importActual<typeof import('../_lib/auth.js')>('../_lib/auth.js');
 
   return {
     ...actual,
@@ -13,7 +14,7 @@ vi.mock('../_lib/auth', async () => {
   };
 });
 
-vi.mock('../_lib/db', () => ({
+vi.mock('../_lib/db.js', () => ({
   default: {
     query: mockedPoolQuery,
   },
@@ -27,7 +28,10 @@ describe('GET /api/clientes', () => {
   });
 
   it('retorna 405 quando o metodo nao e GET', async () => {
-    const { default: handler } = await import('./index');
+    const handler = (await import('./index.js')).default as unknown as (
+      req: VercelRequest,
+      res: VercelResponse,
+    ) => Promise<unknown>;
     const { res, state } = createMockRes();
     const req = createMockReq({ method: 'OPTIONS' });
 
@@ -38,7 +42,10 @@ describe('GET /api/clientes', () => {
   });
 
   it('retorna lista de clientes quando autenticado', async () => {
-    const { default: handler } = await import('./index');
+    const handler = (await import('./index.js')).default as unknown as (
+      req: VercelRequest,
+      res: VercelResponse,
+    ) => Promise<unknown>;
 
     mockedAutenticarRequisicao.mockReturnValue({
       sub: '1',
@@ -82,8 +89,11 @@ describe('GET /api/clientes', () => {
   });
 
   it('retorna erro de autenticacao quando token invalido', async () => {
-    const { AuthError } = await import('../_lib/auth');
-    const { default: handler } = await import('./index');
+    const { AuthError } = await import('../_lib/auth.js');
+    const handler = (await import('./index.js')).default as unknown as (
+      req: VercelRequest,
+      res: VercelResponse,
+    ) => Promise<unknown>;
 
     mockedAutenticarRequisicao.mockImplementation(() => {
       throw new AuthError('Token invalido ou expirado.', 401);

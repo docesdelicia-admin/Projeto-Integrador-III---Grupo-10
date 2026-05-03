@@ -1,0 +1,42 @@
+<article class="produto-card">
+  <div class="capa" [style.background-image]="'url(' + fotoAtual + ')'" aria-hidden="true"></div>
+  <div class="conteudo">
+    <h3>{{ produto.nome }}</h3>
+    <p>{{ produto.descricao }}</p>
+    <strong>{{ precoFormatado }}</strong>
+    <button type="button" (click)="abrirModal()">Ver detalhes</button>
+  </div>
+</article>
+
+@if (modalAberto) {
+<div class="modal-backdrop" role="presentation" (click)="fecharModal()">
+  <section class="modal" role="dialog" aria-modal="true" [attr.aria-label]="produto.nome"
+    (click)="$event.stopPropagation()">
+    <header>
+      <h4>{{ produto.nome }}</h4>
+      <button type="button" class="fechar" aria-label="Fechar" (click)="fecharModal()">x</button>
+    </header>
+
+    <div class="carrossel" aria-label="Galeria de fotos">
+      <button type="button" class="controle" aria-label="Foto anterior" (click)="fotoAnterior()">&#8249;</button>
+      <img [src]="fotoAtual" [alt]="'Foto de ' + produto.nome" />
+      <button type="button" class="controle" aria-label="Proxima foto" (click)="proximaFoto()">&#8250;</button>
+    </div>
+
+    <div class="indicadores">
+      @for (foto of produto.fotos; track foto; let i = $index) {
+      <button type="button" [class.ativo]="i === indiceFoto" [attr.aria-label]="'Ir para foto ' + (i + 1)"
+        (click)="irParaFoto(i)">
+      </button>
+      }
+    </div>
+
+    <p class="descricao">{{ produto.descricao }}</p>
+    <p class="preco">{{ precoFormatado }}</p>
+
+    <button type="button" class="cta" title="Em breve integracao com WhatsApp e email">
+      Solicite seu orcamento
+    </button>
+  </section>
+</div>
+}

@@ -3,6 +3,7 @@
 CREATE TABLE IF NOT EXISTS produtos (
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	nome VARCHAR(160) NOT NULL,
+	categoria VARCHAR(120),
 	descricao TEXT,
 	preco NUMERIC(12, 2) NOT NULL CHECK (preco >= 0),
 	fotos TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
@@ -12,7 +13,11 @@ CREATE TABLE IF NOT EXISTS produtos (
 	CONSTRAINT uq_produtos_nome UNIQUE (nome)
 );
 
+ALTER TABLE IF EXISTS produtos
+	ADD COLUMN IF NOT EXISTS categoria VARCHAR(120);
+
 CREATE INDEX IF NOT EXISTS idx_produtos_nome ON produtos (nome);
+CREATE INDEX IF NOT EXISTS idx_produtos_categoria ON produtos (categoria);
 CREATE INDEX IF NOT EXISTS idx_produtos_ativo ON produtos (ativo);
 
 DO $$
