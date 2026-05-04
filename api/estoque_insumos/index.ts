@@ -1,16 +1,39 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { listarEstoqueInsumos } from '../../services/estoque-insumos.service.js';
+import {
+  listarEstoqueInsumos,
+  entradaEstoqueHandler,
+  saidaEstoqueHandler,
+  ajusteEstoqueHandler
+} from '../../services/estoque-insumos.service.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  switch (req.method) {
-    case 'GET':
+  const url = req.url || '';
+
+  try {
+    if (req.method === 'GET') {
       return await listarEstoqueInsumos(req, res);
-    case 'POST':
-    case 'PUT':
-    case 'DELETE':
+    }
+
+    if (req.method === 'POST' && url.includes('/entrada')) {
+      return await entradaEstoqueHandler(req, res);
+    }
+
+    if (req.method === 'POST' && url.includes('/saida')) {
+      return await saidaEstoqueHandler(req, res);
+    }
+
+    if (req.method === 'PATCH' && url.includes('/ajuste')) {
+      return await ajusteEstoqueHandler(req, res);
+    }
+
+    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method || '')) {
       return res.status(501).json({ erro: 'Funcionalidade ainda nao implementada.' });
-    default:
-      res.setHeader('Allow', 'GET, POST, PUT, DELETE');
-      return res.status(405).json({ erro: 'Metodo nao permitido' });
+    }
+
+    res.setHeader('Allow', 'GET, POST, PATCH');
+    return res.status(405).json({ erro: 'Metodo nao permitido' });
+
+  } catch (err: any) {
+    return res.status(err.status || 500).json({ erro: err.message });
   }
 }
