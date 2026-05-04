@@ -50,6 +50,17 @@
             </button>
           </div>
 
+          <div class="validacao-senha">
+            <p id="password-strength-text"></p>
+            <p id="tip">Sua senha deve conter:</p>
+          <ul>
+            <li id="regra-comprimento" class="invalido">Pelo menos 8 caracteres</li>
+            <li id="regra-maiuscula" class="invalido">Uma letra maiúscula</li>
+            <li id="regra-numero" class="invalido">Pelo menos um número</li>
+            <li id="regra-especial" class="invalido">Um caractere especial</li>
+          </ul>
+        </div>
+
           <label for="senhaConfirmacao">Confirmar nova senha</label>
           <div class="campo-senha">
             <input id="senhaConfirmacao" [type]="mostrarSenhaConfirmacao ? 'text' : 'password'"

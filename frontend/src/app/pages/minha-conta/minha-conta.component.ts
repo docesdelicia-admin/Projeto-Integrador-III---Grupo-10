@@ -27,6 +27,33 @@ export class MinhaContaPage implements OnInit {
   private readonly usuariosService = inject(UsuariosService);
   private readonly toastService = inject(ToastService);
 
+  atualizarRegrasSenha = (password: string): void => {
+  
+  const regraComprimento = document.querySelector("#regra-comprimento") as HTMLElement;
+  const regraMaiuscula = document.querySelector("#regra-maiuscula") as HTMLElement;
+  const regraNumero = document.querySelector("#regra-numero") as HTMLElement;
+  const regraEspecial = document.querySelector("#regra-especial") as HTMLElement;
+
+  if (!regraComprimento || !regraMaiuscula || !regraNumero || !regraEspecial) return;
+
+  const temOitoCaracteres: boolean = password.length >= 8;
+  const temMaiuscula: boolean = /[A-Z]/.test(password);
+  const temNumero: boolean = /[0-9]/.test(password);
+  const temEspecial: boolean = /[^a-zA-Z0-9]/.test(password);
+
+  regraComprimento.classList.toggle("valido", temOitoCaracteres);
+  regraComprimento.classList.toggle("invalido", !temOitoCaracteres);
+
+  regraMaiuscula.classList.toggle("valido", temMaiuscula);
+  regraMaiuscula.classList.toggle("invalido", !temMaiuscula);
+
+  regraNumero.classList.toggle("valido", temNumero);
+  regraNumero.classList.toggle("invalido", !temNumero);
+
+  regraEspecial.classList.toggle("valido", temEspecial);
+  regraEspecial.classList.toggle("invalido", !temEspecial);
+};
+
   readonly formConta = this.formBuilder.nonNullable.group({
     nome: ['', [Validators.required, Validators.maxLength(120)]],
     email: ['', [Validators.required, Validators.email]],
