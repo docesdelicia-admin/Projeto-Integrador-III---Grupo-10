@@ -55,7 +55,7 @@ describe('TabelaComponent', () => {
     expect(valor).toBe('Sim');
 
     const valor2 = component.obterValorCelula(linhasTesteMock[1], colunasTesteMock[2]);
-    expect(valor2).toBe('Nao');
+    expect(valor2).toBe('Não');
   });
 
   it('formata arrays como string separada por virgula', () => {
