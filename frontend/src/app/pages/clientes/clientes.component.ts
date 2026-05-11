@@ -11,6 +11,7 @@ import {
   TabelaLinha,
   TabelaComponent,
 } from '../../components/tabela/tabela.component';
+import { ModalComponent } from '../../components/modal/modal.component';
 
 import { AuthService } from '../../services/auth.service';
 import { Cliente, ClientesService } from '../../services/clientes.service';
@@ -26,6 +27,7 @@ import { ToastService } from '../../services/toast.service';
     SidebarComponent,
     TabelaComponent,
     PasswordConfirmModalComponent,
+    ModalComponent,
   ],
   templateUrl: './clientes.component.html',
   styleUrl: './clientes.component.scss',

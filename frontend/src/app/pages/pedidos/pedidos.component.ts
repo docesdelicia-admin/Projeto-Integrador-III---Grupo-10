@@ -17,6 +17,7 @@ import { AuthService } from '../../services/auth.service';
 import { Cliente, ClientesService } from '../../services/clientes.service';
 import { Pedido, PedidosService, PedidoStatus } from '../../services/pedidos.service';
 import { ToastService } from '../../services/toast.service';
+import { ModalComponent } from '../../components/modal/modal.component';
 
 type EtapaCriacao = 'escolha' | 'novo-cliente' | 'buscar-cliente' | 'dados-pedido';
 
@@ -30,6 +31,7 @@ type EtapaCriacao = 'escolha' | 'novo-cliente' | 'buscar-cliente' | 'dados-pedid
     SidebarComponent,
     TabelaComponent,
     PasswordConfirmModalComponent,
+    ModalComponent,
   ],
   templateUrl: './pedidos.component.html',
   styleUrl: './pedidos.component.scss',

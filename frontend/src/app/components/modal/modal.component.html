@@ -1,38 +1,29 @@
-@if (aberto) {
-<div class="modal-backdrop" role="presentation" (click)="aoClicarFora()">
-  <section class="modal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
-    <header class="modal-card__header">
-      <div>
-        <p class="modal-card__eyebrow" *ngIf="descricao">{{ descricao }}</p>
-        <h2>{{ titulo }}</h2>
-      </div>
+<div *ngIf="aberto" class="modal-backdrop" role="presentation" (click)="aoClicarFora()">
+  <section class="modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
 
-      <button type="button" class="modal-card__close" (click)="fechar.emit()" aria-label="Fechar modal">
-        ×
-      </button>
+    <header class="modal-header modal-default-header" *ngIf="titulo || descricao">
+      <h2>{{ titulo }}</h2>
+      <p class="modal-subtitulo" *ngIf="descricao">{{ descricao }}</p>
     </header>
 
-    <div class="modal-card__body">
+    <div class="modal-body">
       <ng-content></ng-content>
     </div>
 
-    <footer class="modal-card__footer">
-      @if (modoEdicao) {
-      <button type="button" class="modal-button modal-button--ghost" (click)="cancelar.emit()">
-        Cancelar
-      </button>
-      <button type="button" class="modal-button modal-button--primary" (click)="salvar.emit()">
-        Salvar
-      </button>
-      } @else {
-      @if (mostrarBotaoEditar) {
-      <button type="button" class="modal-button modal-button--ghost" (click)="editar.emit()">Editar</button>
-      }
-      @if (mostrarBotaoFechar) {
-      <button type="button" class="modal-button modal-button--ghost" (click)="fechar.emit()">Fechar</button>
-      }
-      }
+    <footer class="modal-footer modal-default-footer" *ngIf="!temFooterProjetado">
+      <ng-container *ngIf="(modoEdicao || acaoPrimariaLabel); else notEdicao">
+        <button type="button" class="botao-secundario" (click)="cancelar.emit()">Cancelar</button>
+        <button type="button" class="botao-principal" (click)="salvar.emit()">
+          {{ acaoPrimariaLabel ?? 'Salvar' }}
+        </button>
+      </ng-container>
+      <ng-template #notEdicao>
+        <button *ngIf="mostrarBotaoEditar" type="button" class="botao-secundario"
+          (click)="editar.emit()">Editar</button>
+        <button *ngIf="!mostrarBotaoEditar && mostrarBotaoFechar" type="button" class="botao-secundario"
+          (click)="fechar.emit()">Fechar</button>
+      </ng-template>
     </footer>
+
   </section>
 </div>
-}

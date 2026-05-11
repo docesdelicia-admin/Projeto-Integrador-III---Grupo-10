@@ -41,9 +41,10 @@
       <app-modal [aberto]="modalUsuarioAberto"
         [titulo]="modoFormulario === 'criar' ? 'Novo usuario' : (usuarioSelecionado?.nome ?? 'Usuario')"
         [descricao]="modoFormulario === 'criar' ? 'Cadastrar novo acesso' : 'Gerenciamento de usuario'"
-        [modoEdicao]="formularioEmModoEdicao" [mostrarBotaoEditar]="modoFormulario === 'editar' && !modoEdicaoUsuario"
-        (fechar)="fecharModalUsuario()" (editar)="ativarEdicaoUsuario()" (salvar)="salvarUsuario()"
-        (cancelar)="cancelarEdicaoUsuario()">
+        [modoEdicao]="formularioEmModoEdicao"
+        [mostrarBotaoEditar]="modoFormulario === 'editar' && !formularioEmModoEdicao"
+        [acaoPrimariaLabel]="modoFormulario === 'criar' ? 'Cadastrar' : null" (fechar)="fecharModalUsuario()"
+        (editar)="ativarEdicaoUsuario()" (salvar)="salvarUsuario()" (cancelar)="cancelarEdicaoUsuario()">
 
         <form class="usuario-form" [formGroup]="formUsuario">
 

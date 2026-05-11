@@ -13,8 +13,10 @@ export class ModalComponent {
   @Input() titulo = '';
   @Input() descricao = '';
   @Input() modoEdicao = false;
-  @Input() mostrarBotaoEditar = true;
+  @Input() mostrarBotaoEditar = false;
   @Input() mostrarBotaoFechar = true;
+  @Input() acaoPrimariaLabel?: string | null;
+  @Input() temFooterProjetado = false;
 
   @Output() fechar = new EventEmitter<void>();
   @Output() editar = new EventEmitter<void>();

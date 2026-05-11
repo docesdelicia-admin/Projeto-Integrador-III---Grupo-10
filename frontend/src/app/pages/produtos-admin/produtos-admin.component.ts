@@ -12,6 +12,7 @@ import {
 } from '../../components/tabela/tabela.component';
 import { AuthService } from '../../services/auth.service';
 import { Produto, ProdutoPayload, ProdutosService } from '../../services/produtos.service';
+import { ModalComponent } from '../../components/modal/modal.component';
 
 @Component({
   selector: 'app-produtos-admin',
@@ -23,6 +24,7 @@ import { Produto, ProdutoPayload, ProdutosService } from '../../services/produto
     SidebarComponent,
     TabelaComponent,
     PasswordConfirmModalComponent,
+    ModalComponent,
   ],
   templateUrl: './produtos-admin.component.html',
   styleUrl: './produtos-admin.component.scss',
