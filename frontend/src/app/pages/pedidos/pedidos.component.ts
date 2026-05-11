@@ -18,6 +18,7 @@ import { Cliente, ClientesService } from '../../services/clientes.service';
 import { Pedido, PedidosService, PedidoStatus } from '../../services/pedidos.service';
 import { ToastService } from '../../services/toast.service';
 import { ModalComponent } from '../../components/modal/modal.component';
+import { FiltroCampo, FiltrosComponent } from '../../components/filtros/filtros.component';
 
 type EtapaCriacao = 'escolha' | 'novo-cliente' | 'buscar-cliente' | 'dados-pedido';
 
@@ -32,6 +33,7 @@ type EtapaCriacao = 'escolha' | 'novo-cliente' | 'buscar-cliente' | 'dados-pedid
     TabelaComponent,
     PasswordConfirmModalComponent,
     ModalComponent,
+    FiltrosComponent,
   ],
   templateUrl: './pedidos.component.html',
   styleUrl: './pedidos.component.scss',
@@ -72,6 +74,29 @@ export class PedidosPage implements OnInit {
   readonly linhas = signal<TabelaLinha[]>([]);
   readonly carregando = signal(false);
   readonly isAdmin = signal(false);
+  readonly filtrosAtuais = signal<Record<string, string>>(this.criarFiltrosPadrao());
+
+  readonly camposFiltro: FiltroCampo[] = [
+    {
+      key: 'cliente',
+      label: 'Cliente',
+      type: 'text',
+      placeholder: 'Buscar por nome do cliente...',
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'multicheck',
+      options: [
+        { label: 'Novo', value: 'novo' },
+        { label: 'Em produção', value: 'em_producao' },
+        { label: 'Entregue', value: 'entregue' },
+        { label: 'Cancelado', value: 'cancelado' },
+      ],
+    },
+    { key: 'data_inicio', label: 'Data inicial', type: 'date' },
+    { key: 'data_fim', label: 'Data final', type: 'date' },
+  ];
 
   // ── Modal novo pedido ────────────────────────────────────────────────────────
 
@@ -140,22 +165,40 @@ export class PedidosPage implements OnInit {
 
   ngOnInit(): void {
     this.isAdmin.set(this.authService.isAdmin());
-    this.carregarPedidos();
+    this.carregarPedidos(this.filtrosAtuais());
     this.configurarBuscaCliente();
   }
 
   // ── Carregar pedidos ────────────────────────────────────────────────────────
 
-  private carregarPedidos(): void {
+  onFiltrosChange(filtros: Record<string, string>): void {
+    this.filtrosAtuais.set({ ...filtros });
+    this.carregarPedidos(filtros);
+  }
+
+  private carregarPedidos(filtros: Record<string, string>): void {
     this.carregando.set(true);
-    const cacheKey = 'todos';
+    const cacheKey = JSON.stringify(filtros);
     if (this.cachePedidos.has(cacheKey)) {
       this.linhas.set(this.cachePedidos.get(cacheKey)!);
       this.carregando.set(false);
       return;
     }
+
+    const filtrosServico = {
+      status: filtros['status']
+        ? (filtros['status']
+            .split(',')
+            .map((status) => status.trim())
+            .filter(Boolean) as PedidoStatus[])
+        : undefined,
+      cliente: filtros['cliente']?.trim() || undefined,
+      dataInicio: filtros['data_inicio'] || undefined,
+      dataFim: filtros['data_fim'] || undefined,
+    };
+
     this.pedidosService
-      .listar()
+      .listar(filtrosServico)
       .pipe(finalize(() => this.carregando.set(false)))
       .subscribe({
         next: (res) => {
@@ -328,7 +371,7 @@ export class PedidosPage implements OnInit {
           this.modalNovoPedidoAberto.set(false);
           this.toastService.sucesso('Pedido cadastrado com sucesso.');
           this.cachePedidos.clear(); // Limpa cache ao criar novo pedido
-          this.carregarPedidos();
+          this.carregarPedidos(this.filtrosAtuais());
         },
         error: (err: Error) => {
           this.erroPedido.set(err.message);
@@ -387,7 +430,7 @@ export class PedidosPage implements OnInit {
           this.modalVisualizarAberto.set(false);
           this.pedidoSelecionado.set(null);
           this.toastService.sucesso('Pedido atualizado com sucesso.');
-          this.carregarPedidos();
+          this.carregarPedidos(this.filtrosAtuais());
         },
         error: (err: Error) => {
           this.erroEdicao.set(err.message);
@@ -423,7 +466,7 @@ export class PedidosPage implements OnInit {
           this.modalVisualizarAberto.set(false);
           this.pedidoSelecionado.set(null);
           this.toastService.sucesso('Pedido cancelado com sucesso.');
-          this.carregarPedidos();
+          this.carregarPedidos(this.filtrosAtuais());
         },
         error: (err: Error) => {
           this.toastService.erro(err.message);
@@ -459,5 +502,23 @@ export class PedidosPage implements OnInit {
       cancelado: 'Cancelado',
     };
     return mapa[valor as PedidoStatus] ?? '-';
+  }
+
+  private criarFiltrosPadrao(): Record<string, string> {
+    const hoje = new Date();
+    const inicio = new Date(hoje);
+    inicio.setDate(hoje.getDate() - 7);
+
+    const paraIsoData = (data: Date): string => {
+      const tzOffset = data.getTimezoneOffset() * 60_000;
+      return new Date(data.getTime() - tzOffset).toISOString().slice(0, 10);
+    };
+
+    return {
+      cliente: '',
+      status: 'novo,em_producao',
+      data_inicio: paraIsoData(inicio),
+      data_fim: paraIsoData(hoje),
+    };
   }
 }

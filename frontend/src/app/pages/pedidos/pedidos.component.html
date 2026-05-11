@@ -15,6 +15,11 @@
         </button>
       </section>
 
+      <app-filtros [titulo]="'Filtrar pedidos'" [campos]="camposFiltro" [valoresIniciais]="filtrosAtuais()"
+        [labelConfirmar]="'Aplicar filtros'" [labelCancelar]="'Limpar filtros'"
+        (filtrosChange)="onFiltrosChange($event)">
+      </app-filtros>
+
       @if (carregando()) {
       <p class="carregando">Carregando pedidos...</p>
       } @else {
@@ -113,8 +118,10 @@
     </li>
     }
   </ul>
-  } @else if (termoBuscaCliente().length >= 2 && !buscandoCliente()) {
+  } @else if (termoBuscaCliente().length >= 3 && !buscandoCliente()) {
   <p class="sem-resultados">Nenhum cliente encontrado.</p>
+  } @else if (!buscandoCliente()) {
+  <p class="sem-resultados">Digite pelo menos 3 caracteres para buscar um cliente.</p>
   }
 
   @if (erroCliente()) {

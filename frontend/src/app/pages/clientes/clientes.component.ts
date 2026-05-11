@@ -16,6 +16,7 @@ import { ModalComponent } from '../../components/modal/modal.component';
 import { AuthService } from '../../services/auth.service';
 import { Cliente, ClientesService } from '../../services/clientes.service';
 import { ToastService } from '../../services/toast.service';
+import { FiltroCampo, FiltrosComponent } from '../../components/filtros/filtros.component';
 
 @Component({
   selector: 'app-clientes',
@@ -28,6 +29,7 @@ import { ToastService } from '../../services/toast.service';
     TabelaComponent,
     PasswordConfirmModalComponent,
     ModalComponent,
+    FiltrosComponent,
   ],
   templateUrl: './clientes.component.html',
   styleUrl: './clientes.component.scss',
@@ -50,6 +52,19 @@ export class ClientesPage implements OnInit {
   readonly clientes = signal<Cliente[]>([]);
   readonly carregando = signal(false);
   readonly isAdmin = signal(false);
+  readonly filtroExecutado = signal(false);
+  readonly filtrosAtuais = signal<Record<string, string>>(this.criarFiltrosPadrao());
+
+  readonly camposFiltro: FiltroCampo[] = [
+    {
+      key: 'q',
+      label: 'Nome / Telefone',
+      type: 'text',
+      placeholder: 'Buscar cliente...',
+    },
+    { key: 'data_inicio', label: 'Data inicial', type: 'date' },
+    { key: 'data_fim', label: 'Data final', type: 'date' },
+  ];
 
   get linhas(): () => TabelaLinha[] {
     return () => this.clientes().map((c) => ({ ...c }) as TabelaLinha);
@@ -91,15 +106,33 @@ export class ClientesPage implements OnInit {
 
   ngOnInit(): void {
     this.isAdmin.set(this.authService.isAdmin());
-    this.carregarClientes();
+    this.carregarClientes(this.filtrosAtuais());
   }
 
   // ── Carregar ─────────────────────────────────────────────────────────────────
 
-  private carregarClientes(): void {
+  onFiltrosChange(filtros: Record<string, string>): void {
+    this.filtroExecutado.set(true);
+    this.filtrosAtuais.set({ ...filtros });
+    this.carregarClientes(filtros);
+  }
+
+  mensagemSemDadosTabela(): string {
+    if (!this.filtroExecutado()) {
+      return 'Use os filtros para buscar clientes.';
+    }
+
+    return 'Nenhum cliente encontrado para os filtros informados.';
+  }
+
+  private carregarClientes(filtros: Record<string, string>): void {
     this.carregando.set(true);
     this.clientesService
-      .listar()
+      .listar({
+        q: filtros['q']?.trim() || undefined,
+        dataInicio: filtros['data_inicio'] || undefined,
+        dataFim: filtros['data_fim'] || undefined,
+      })
       .pipe(finalize(() => this.carregando.set(false)))
       .subscribe({
         next: (res) => this.clientes.set(res.clientes ?? []),
@@ -166,7 +199,7 @@ export class ClientesPage implements OnInit {
         this.toastService.sucesso(
           this.modoEdicao() ? 'Cliente atualizado com sucesso.' : 'Cliente cadastrado com sucesso.',
         );
-        this.carregarClientes();
+        this.carregarClientes(this.filtrosAtuais());
       },
       error: (err: Error) => this.erroFormulario.set(err.message),
     });
@@ -208,7 +241,7 @@ export class ClientesPage implements OnInit {
           this.modalExclusaoAberto.set(false);
           this.clientePendenteExclusao.set(null);
           this.toastService.sucesso('Cliente excluído com sucesso.');
-          this.carregarClientes();
+          this.carregarClientes(this.filtrosAtuais());
         },
         error: (err: Error) => {
           this.toastService.erro(err.message);
@@ -237,5 +270,22 @@ export class ClientesPage implements OnInit {
     return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(
       data,
     );
+  }
+
+  private criarFiltrosPadrao(): Record<string, string> {
+    const hoje = new Date();
+    const inicio = new Date(hoje);
+    inicio.setDate(hoje.getDate() - 7);
+
+    const paraIsoData = (data: Date): string => {
+      const tzOffset = data.getTimezoneOffset() * 60_000;
+      return new Date(data.getTime() - tzOffset).toISOString().slice(0, 10);
+    };
+
+    return {
+      q: '',
+      data_inicio: paraIsoData(inicio),
+      data_fim: paraIsoData(hoje),
+    };
   }
 }

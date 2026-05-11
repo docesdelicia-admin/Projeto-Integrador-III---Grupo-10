@@ -15,12 +15,17 @@
         </button>
       </section>
 
+      <app-filtros [titulo]="'Filtrar clientes'" [campos]="camposFiltro" [valoresIniciais]="filtrosAtuais()"
+        [labelConfirmar]="'Aplicar filtros'" [labelCancelar]="'Limpar filtros'"
+        (filtrosChange)="onFiltrosChange($event)">
+      </app-filtros>
+
       @if (carregando()) {
       <p class="carregando">Carregando clientes...</p>
       } @else {
       <app-tabela [colunas]="colunasTabela" [linhas]="linhas()" [acaoEditar]="acaoEditarCliente"
         [acaoExcluir]="acaoExcluirCliente" [excluirDesabilitado]="excluirDesabilitado"
-        mensagemSemDados="Nenhum cliente cadastrado.">
+        [mensagemSemDados]="mensagemSemDadosTabela()">
       </app-tabela>
       }
     </main>

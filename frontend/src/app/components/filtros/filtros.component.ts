@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-export type FiltroTipo = 'text' | 'date' | 'select';
+export type FiltroTipo = 'text' | 'date' | 'select' | 'multicheck';
 
 export interface FiltroOpcao {
   label: string;
@@ -47,6 +47,7 @@ export class FiltrosComponent implements OnChanges {
   @Output() acaoCustomizada = new EventEmitter<string>();
 
   valores: Record<string, string> = {};
+  dropdownAbertoKey: string | null = null;
 
   get acoesOrdenadas(): FiltroAcao[] {
     const acoesNormalizadas = this.acoes.map((acao) => this.normalizarAcao(acao));
@@ -113,6 +114,54 @@ export class FiltrosComponent implements OnChanges {
     }
 
     this.acaoCustomizada.emit(acao.id);
+  }
+
+  isOpcaoSelecionada(campoKey: string, opcaoValue: string): boolean {
+    const selecionadas = (this.valores[campoKey] ?? '')
+      .split(',')
+      .map((valor) => valor.trim())
+      .filter(Boolean);
+
+    return selecionadas.includes(opcaoValue);
+  }
+
+  alternarOpcao(campoKey: string, opcaoValue: string, marcada: boolean): void {
+    const selecionadas = new Set(
+      (this.valores[campoKey] ?? '')
+        .split(',')
+        .map((valor) => valor.trim())
+        .filter(Boolean),
+    );
+
+    if (marcada) {
+      selecionadas.add(opcaoValue);
+    } else {
+      selecionadas.delete(opcaoValue);
+    }
+
+    this.valores[campoKey] = Array.from(selecionadas).join(',');
+  }
+
+  toggleDropdown(campoKey: string): void {
+    this.dropdownAbertoKey = this.dropdownAbertoKey === campoKey ? null : campoKey;
+  }
+
+  resumoMulticheck(campo: FiltroCampo): string {
+    const selecionadas = (this.valores[campo.key] ?? '')
+      .split(',')
+      .map((valor) => valor.trim())
+      .filter(Boolean);
+
+    if (selecionadas.length === 0) {
+      return 'Selecionar opcoes';
+    }
+
+    if (selecionadas.length === 1) {
+      const opcao = (campo.options ?? []).find((item) => item.value === selecionadas[0]);
+      return opcao?.label ?? selecionadas[0];
+    }
+
+    return `${selecionadas.length} selecionados`;
   }
 
   private inicializarValores(): void {

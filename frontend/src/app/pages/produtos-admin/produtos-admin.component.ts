@@ -13,6 +13,7 @@ import {
 import { AuthService } from '../../services/auth.service';
 import { Produto, ProdutoPayload, ProdutosService } from '../../services/produtos.service';
 import { ModalComponent } from '../../components/modal/modal.component';
+import { FiltroCampo, FiltrosComponent } from '../../components/filtros/filtros.component';
 
 @Component({
   selector: 'app-produtos-admin',
@@ -25,6 +26,7 @@ import { ModalComponent } from '../../components/modal/modal.component';
     TabelaComponent,
     PasswordConfirmModalComponent,
     ModalComponent,
+    FiltrosComponent,
   ],
   templateUrl: './produtos-admin.component.html',
   styleUrl: './produtos-admin.component.scss',
@@ -86,9 +88,36 @@ export class ProdutosAdminPage implements OnInit {
   readonly modalConfirmacaoExclusaoAberto = signal(false);
   readonly produtoPendenteExclusao = signal<Produto | null>(null);
   readonly carregandoExclusao = signal(false);
+  readonly filtrosAtuais = signal<Record<string, string>>({
+    nome: '',
+    categoria: '',
+    ativo: '',
+    data_inicio: '',
+    data_fim: '',
+  });
+
+  readonly camposFiltro: FiltroCampo[] = [
+    { key: 'nome', label: 'Nome', type: 'text', placeholder: 'Buscar por nome...' },
+    { key: 'categoria', label: 'Categoria', type: 'text', placeholder: 'Filtrar categoria...' },
+    {
+      key: 'ativo',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { label: 'Ativo', value: 'true' },
+        { label: 'Inativo', value: 'false' },
+      ],
+    },
+    { key: 'data_inicio', label: 'Data inicial', type: 'date' },
+    { key: 'data_fim', label: 'Data final', type: 'date' },
+  ];
 
   get linhasTabela(): TabelaLinha[] {
-    return this.produtos().map((produto) => ({ ...produto }) as TabelaLinha);
+    return this.produtosFiltrados().map((produto) => ({ ...produto }) as TabelaLinha);
+  }
+
+  onFiltrosChange(filtros: Record<string, string>): void {
+    this.filtrosAtuais.set({ ...filtros });
   }
 
   ngOnInit(): void {
@@ -412,5 +441,29 @@ export class ProdutosAdminPage implements OnInit {
       dateStyle: 'short',
       timeStyle: 'short',
     }).format(data);
+  }
+
+  private produtosFiltrados(): Produto[] {
+    const filtros = this.filtrosAtuais();
+    const nome = filtros['nome']?.trim().toLowerCase() ?? '';
+    const categoria = filtros['categoria']?.trim().toLowerCase() ?? '';
+    const ativo = filtros['ativo'];
+    const dataInicio = filtros['data_inicio'];
+    const dataFim = filtros['data_fim'];
+
+    return this.produtos().filter((produto) => {
+      const nomeValido = !nome || produto.nome.toLowerCase().includes(nome);
+      const categoriaValida =
+        !categoria || (produto.categoria ?? '').toLowerCase().includes(categoria);
+      const ativoValido =
+        !ativo || (ativo === 'true' ? produto.ativo === true : produto.ativo === false);
+
+      const criadoEmIso =
+        typeof produto.criado_em === 'string' ? produto.criado_em.slice(0, 10) : '';
+      const dataInicioValida = !dataInicio || (!!criadoEmIso && criadoEmIso >= dataInicio);
+      const dataFimValida = !dataFim || (!!criadoEmIso && criadoEmIso <= dataFim);
+
+      return nomeValido && categoriaValida && ativoValido && dataInicioValida && dataFimValida;
+    });
   }
 }

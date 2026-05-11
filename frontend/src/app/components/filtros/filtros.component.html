@@ -5,7 +5,7 @@
 
   <div class="filtros__grid">
     @for (campo of campos; track campo.key) {
-    <label>
+    <div class="filtro-campo">
       <span>{{ campo.label }}</span>
 
       @if (campo.type === 'select') {
@@ -15,10 +15,29 @@
         <option [value]="opcao.value">{{ opcao.label }}</option>
         }
       </select>
+      } @else if (campo.type === 'multicheck') {
+      <div class="filtros__dropdown">
+        <button type="button" class="filtros__dropdown-trigger" (click)="toggleDropdown(campo.key)">
+          <span>{{ resumoMulticheck(campo) }}</span>
+          <span class="filtros__dropdown-icon">▾</span>
+        </button>
+
+        @if (dropdownAbertoKey === campo.key) {
+        <div class="filtros__dropdown-menu">
+          @for (opcao of campo.options ?? []; track opcao.value) {
+          <label class="filtros__checkbox-item">
+            <input type="checkbox" [checked]="isOpcaoSelecionada(campo.key, opcao.value)"
+              (change)="alternarOpcao(campo.key, opcao.value, $any($event.target).checked)" />
+            <span>{{ opcao.label }}</span>
+          </label>
+          }
+        </div>
+        }
+      </div>
       } @else {
       <input [type]="campo.type" [(ngModel)]="valores[campo.key]" [placeholder]="campo.placeholder ?? ''" />
       }
-    </label>
+    </div>
     }
   </div>
 

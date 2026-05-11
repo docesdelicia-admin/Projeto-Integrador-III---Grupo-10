@@ -15,6 +15,11 @@
         </button>
       </section>
 
+      <app-filtros [titulo]="'Filtrar produtos'" [campos]="camposFiltro" [valoresIniciais]="filtrosAtuais()"
+        [labelConfirmar]="'Aplicar filtros'" [labelCancelar]="'Limpar filtros'"
+        (filtrosChange)="onFiltrosChange($event)">
+      </app-filtros>
+
       @if (mensagemSucesso()) {
       <p class="feedback sucesso">{{ mensagemSucesso() }}</p>
       }
