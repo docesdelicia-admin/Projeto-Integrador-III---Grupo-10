@@ -1,7 +1,10 @@
 <header class="app-header">
-  <a class="brand" routerLink="/" aria-label="Ir para a pagina inicial">
-    <img class="brand-logo" src="/logo.png" alt="Logo Doces Delicia" />
-    <span class="brand-text">{{ titulo }}</span>
+  <a class="brand" routerLink="/" aria-label="Doces Delícia — ir para a página inicial">
+    <img class="brand-logo" src="/logo.png" alt="Logo Doces Delícia" />
+    <div class="brand-info">
+      <span class="brand-name">{{ titulo }}</span>
+      <span class="brand-tagline">sabores que ficam na memória</span>
+    </div>
   </a>
 
   @if (exibirBusca) {

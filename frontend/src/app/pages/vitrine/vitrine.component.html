@@ -2,11 +2,12 @@
   <app-header></app-header>
 
   <main class="vitrine-main">
-    <section class="vitrine-hero" aria-label="Apresentacao da marca">
+    <section class="vitrine-hero" aria-label="Apresentação da marca">
+      <p class="kicker">Bem-vinda à vitrine</p>
       <h1>{{ titulo }}</h1>
       <p>
-        Vitrine de sabores organizada por categorias, com
-        opcoes para celebrar, presentear e transformar momentos em memoria afetiva.
+        Vitrine de sabores organizada por categorias, com opções para
+        celebrar, presentear e transformar momentos em memória afetiva.
       </p>
     </section>
 
@@ -18,7 +19,7 @@
     } @else if (erroCarregamento() && categorias().length === 0) {
     <section class="estado-vitrine estado-erro" aria-live="assertive">
       <p class="kicker">Erro</p>
-      <h2>Nao foi possivel carregar os produtos</h2>
+      <h2>Não foi possível carregar os produtos</h2>
       <p>{{ erroCarregamento() }}</p>
     </section>
     } @else {
@@ -31,7 +32,13 @@
           <p>{{ categoria.descricao }}</p>
         </div>
 
-        <app-produto-card [produto]="categoria.produto"></app-produto-card>
+        <div class="produtos-scroll" role="list" [attr.aria-label]="'Produtos de ' + categoria.titulo">
+          @for (produto of categoria.produtos; track produto.id) {
+          <div role="listitem">
+            <app-produto-card [produto]="produto"></app-produto-card>
+          </div>
+          }
+        </div>
       </article>
       }
     </section>

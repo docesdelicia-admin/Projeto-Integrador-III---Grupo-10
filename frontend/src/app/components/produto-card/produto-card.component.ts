@@ -3,6 +3,7 @@ import { Component, Input } from '@angular/core';
 import { ModalComponent } from '../modal/modal.component';
 
 export interface ProdutoVitrine {
+  id: string;
   nome: string;
   descricao: string;
   preco: number;

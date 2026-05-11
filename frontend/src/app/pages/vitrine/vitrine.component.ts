@@ -10,7 +10,7 @@ import { criarSlidesPadrao } from '../../utils/produto-slides';
 interface CategoriaVitrine {
   titulo: string;
   descricao: string;
-  produto: ProdutoVitrine;
+  produtos: ProdutoVitrine[];
 }
 
 @Component({
@@ -68,18 +68,17 @@ export class VitrinePage implements OnInit {
     }
 
     return Array.from(grupos.entries()).map(([categoria, listaProdutos]) => {
-      const produtoPrincipal = listaProdutos[0];
-
       return {
         titulo: categoria,
-        descricao: produtoPrincipal.descricao ?? 'Selecao de produtos organizada por categoria.',
-        produto: this.converterProdutoParaVitrine(produtoPrincipal),
+        descricao: listaProdutos[0].descricao ?? 'Selecao de produtos organizada por categoria.',
+        produtos: listaProdutos.map((produto) => this.converterProdutoParaVitrine(produto)),
       };
     });
   }
 
   private converterProdutoParaVitrine(produto: Produto): ProdutoVitrine {
     return {
+      id: produto.id,
       nome: produto.nome,
       descricao: produto.descricao ?? 'Descricao nao informada.',
       preco: Number(produto.preco),

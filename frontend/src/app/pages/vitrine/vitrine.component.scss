@@ -1,11 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Nunito:wght@300;400;600&display=swap');
+
 :host {
   display: block;
   min-height: 100dvh;
-  font-family: 'Poppins', 'Segoe UI', sans-serif;
-  background:
-    radial-gradient(circle at 12% 8%, #ffd7ea 0%, transparent 40%),
-    radial-gradient(circle at 92% 88%, #ffd3e7 0%, transparent 42%),
-    linear-gradient(150deg, #fff6fb 0%, #ffe7f2 100%);
+  font-family: 'Nunito', sans-serif;
+  background: #fdf6f9;
 }
 
 .vitrine-shell {
@@ -18,101 +17,157 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 2rem;
-  padding: 2rem 1rem 3rem;
-  width: min(75rem, 100%);
+  gap: 1.5rem;
+  padding: 2rem 2.5rem 4rem;
+  width: min(80rem, 100%);
   margin: 0 auto;
 }
 
+// ── Hero ─────────────────────────────────────────────────────────────────────
+
 .vitrine-hero {
-  border: 1px solid #efc2d9;
-  border-radius: 1.15rem;
-  padding: 1.2rem;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 16px 38px rgba(170, 65, 112, 0.14);
+  padding: 1.75rem 2rem;
+  border: 0.5px solid #edccd9;
+  border-radius: 1rem;
+  background: #ffffff;
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 2.8vw, 2rem);
+    font-weight: 700;
+    color: #1e0f16;
+    margin: 0.25rem 0 0.5rem;
+    line-height: 1.2;
+  }
+
+  p {
+    margin: 0;
+    color: #7a4a62;
+    line-height: 1.6;
+    font-weight: 300;
+    font-size: 0.88rem;
+    max-width: 62ch;
+  }
 }
 
 .kicker {
   margin: 0;
-  color: #af2e68;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  color: #993556;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  font-size: 0.8rem;
+  font-size: 0.67rem;
 }
 
-.vitrine-hero h1 {
-  margin: 0.4rem 0;
-  font-family: 'Space Grotesk', 'Poppins', sans-serif;
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
-  color: #8d1e54;
-}
-
-.vitrine-hero p {
-  margin: 0;
-  color: #6d3350;
-  line-height: 1.45;
-}
+// ── Seções ────────────────────────────────────────────────────────────────────
 
 .secoes-grid {
-  display: grid;
-  gap: 1.1rem;
-}
-
-.estado-vitrine {
-  display: grid;
-  gap: 0.5rem;
-  padding: 1.2rem;
-  border: 1px solid #efc2d9;
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.68);
-  box-shadow: 0 14px 32px rgba(170, 65, 112, 0.1);
-}
-
-.estado-vitrine h2 {
-  margin: 0;
-  font-family: 'Space Grotesk', 'Poppins', sans-serif;
-  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
-  color: #8d1e54;
-}
-
-.estado-vitrine p {
-  margin: 0;
-  color: #6d3350;
-  line-height: 1.45;
-}
-
-.estado-erro {
-  border-color: #f0a8bf;
-  background: rgba(255, 245, 248, 0.88);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .secao-card {
-  display: grid;
-  gap: 1rem;
-  padding: 1rem;
-  border: 1px solid #efc2d9;
+  border: 0.5px solid #edccd9;
   border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.62);
-  box-shadow: 0 14px 32px rgba(170, 65, 112, 0.1);
+  background: #ffffff;
+  overflow: hidden;
 }
 
-.secao-header h2 {
-  margin: 0.25rem 0;
-  font-family: 'Space Grotesk', 'Poppins', sans-serif;
-  font-size: clamp(1.3rem, 2.5vw, 1.75rem);
-  color: #8d1e54;
+.secao-header {
+  padding: 1.25rem 1.75rem 0.9rem;
+  border-bottom: 0.5px solid #f5e0ea;
+
+  h2 {
+    margin: 0.2rem 0 0.15rem;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    font-weight: 700;
+    color: #1e0f16;
+  }
+
+  p {
+    margin: 0;
+    color: #7a4a62;
+    font-size: 0.83rem;
+    font-weight: 300;
+    line-height: 1.5;
+  }
 }
 
-.secao-header p {
-  margin: 0;
-  color: #6d3350;
-  line-height: 1.45;
+// ── Carrossel horizontal ──────────────────────────────────────────────────────
+
+.produtos-scroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 1.25rem 1.75rem 1.5rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: #edccd9 transparent;
+
+  &::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #edccd9;
+    border-radius: 999px;
+  }
+
+  > * {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
 }
 
-@media (max-width: 560px) {
+// ── Estados ───────────────────────────────────────────────────────────────────
+
+.estado-vitrine {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1.5rem 2rem;
+  border: 0.5px solid #edccd9;
+  border-radius: 1rem;
+  background: #ffffff;
+
+  h2 {
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1e0f16;
+  }
+
+  p {
+    margin: 0;
+    color: #7a4a62;
+    font-size: 0.88rem;
+    font-weight: 300;
+  }
+}
+
+.estado-erro {
+  border-color: #f0b3b3;
+  background: #fff7f7;
+}
+
+// ── Responsivo ────────────────────────────────────────────────────────────────
+
+@media (max-width: 640px) {
   .vitrine-main {
-    padding: 1rem 0.8rem 2rem;
+    padding: 1rem 1rem 3rem;
+  }
+
+  .vitrine-hero {
+    padding: 1.25rem;
+  }
+
+  .secao-header {
+    padding: 1rem 1.1rem 0.75rem;
+  }
+
+  .produtos-scroll {
+    padding: 1rem 1.1rem 1.25rem;
   }
 }
