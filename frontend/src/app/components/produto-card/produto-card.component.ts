@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { ModalComponent } from '../modal/modal.component';
 
 export interface ProdutoVitrine {
   nome: string;
@@ -11,7 +12,7 @@ export interface ProdutoVitrine {
 @Component({
   selector: 'app-produto-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ModalComponent],
   templateUrl: './produto-card.component.html',
   styleUrl: './produto-card.component.scss',
 })

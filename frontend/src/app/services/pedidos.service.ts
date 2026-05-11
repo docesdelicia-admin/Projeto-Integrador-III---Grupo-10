@@ -23,7 +23,8 @@ interface ListaPedidosResponse {
 }
 
 export interface PedidosFiltro {
-  status?: PedidoStatus;
+  status?: PedidoStatus[];
+  cliente?: string;
   dataInicio?: string;
   dataFim?: string;
 }
@@ -178,10 +179,26 @@ export class PedidosService {
   }
 
   private pedidoCombinaComFiltro(cacheKey: string, pedido: Pedido): boolean {
-    const [, status, intervalo] = cacheKey.split(':');
+    const [, statusToken, intervalo, cliente] = cacheKey.split(':');
 
-    const combinaStatus = status === 'all' || pedido.status === status;
+    const statusList =
+      !statusToken || statusToken === 'all'
+        ? []
+        : statusToken
+            .split(',')
+            .map((status) => status.trim())
+            .filter(Boolean);
+
+    const combinaStatus = statusList.length === 0 || statusList.includes(pedido.status);
     if (!combinaStatus) {
+      return false;
+    }
+
+    const combinaCliente =
+      !cliente ||
+      cliente === 'all' ||
+      (pedido.cliente_nome ?? '').toLowerCase().includes(decodeURIComponent(cliente).toLowerCase());
+    if (!combinaCliente) {
       return false;
     }
 
@@ -199,18 +216,23 @@ export class PedidosService {
   }
 
   private criarChaveCache(filtros: PedidosFiltro): string {
-    const status = filtros.status ?? 'all';
+    const status = filtros.status?.length ? filtros.status.join(',') : 'all';
     const inicio = filtros.dataInicio ?? 'na';
     const fim = filtros.dataFim ?? 'na';
+    const cliente = encodeURIComponent(filtros.cliente?.trim() || 'all');
 
-    return `${this.prefixoChave}${status}:${inicio}-${fim}`;
+    return `${this.prefixoChave}${status}:${inicio}-${fim}:${cliente}`;
   }
 
   private criarHttpParams(filtros: PedidosFiltro): HttpParams {
     let params = new HttpParams();
 
-    if (filtros.status) {
-      params = params.set('status', filtros.status);
+    if (filtros.status?.length) {
+      params = params.set('status', filtros.status.join(','));
+    }
+
+    if (filtros.cliente?.trim()) {
+      params = params.set('cliente', filtros.cliente.trim());
     }
 
     if (filtros.dataInicio) {

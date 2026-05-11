@@ -17,6 +17,12 @@ interface ListaClientesResponse {
   clientes: Cliente[];
 }
 
+export interface ClientesFiltro {
+  q?: string;
+  dataInicio?: string;
+  dataFim?: string;
+}
+
 export interface ClientePayload {
   nome: string;
   telefone?: string;
@@ -45,9 +51,11 @@ export class ClientesService {
     private readonly cacheStore: CacheStoreService,
   ) {}
 
-  listar(): Observable<ListaClientesResponse> {
-    const key = `${this.prefixoChave}all`;
+  listar(filtros: ClientesFiltro = {}): Observable<ListaClientesResponse> {
+    const key = this.criarChaveCache(filtros);
+    const params = this.criarHttpParams(filtros);
     const request$ = this.http.get<ListaClientesResponse>(this.apiUrl, {
+      params,
       withCredentials: true,
     });
     return this.cacheStore
@@ -55,6 +63,32 @@ export class ClientesService {
       .pipe(
         catchError((error) => throwError(() => new Error(this.extrairMensagemErro(error?.error)))),
       );
+  }
+
+  private criarChaveCache(filtros: ClientesFiltro): string {
+    const q = filtros.q?.trim() || 'all';
+    const inicio = filtros.dataInicio || 'na';
+    const fim = filtros.dataFim || 'na';
+
+    return `${this.prefixoChave}${q}:${inicio}-${fim}`;
+  }
+
+  private criarHttpParams(filtros: ClientesFiltro): HttpParams {
+    let params = new HttpParams();
+
+    if (filtros.q?.trim()) {
+      params = params.set('q', filtros.q.trim());
+    }
+
+    if (filtros.dataInicio) {
+      params = params.set('data_inicio', filtros.dataInicio);
+    }
+
+    if (filtros.dataFim) {
+      params = params.set('data_fim', filtros.dataFim);
+    }
+
+    return params;
   }
 
   buscar(termo: string): Observable<Cliente[]> {

@@ -44,6 +44,7 @@ export async function listarPedidos(req: VercelRequest, res: VercelResponse) {
 
 	const {
 		cliente_id,
+		cliente,
 		status,
 		data_inicio,
 		data_fim,
@@ -53,7 +54,14 @@ export async function listarPedidos(req: VercelRequest, res: VercelResponse) {
 
 	// Validação do filtro de status
 	const statusStr = typeof status === 'string' ? status.trim().toLowerCase() : '';
-	if (statusStr && !['novo', 'em_producao', 'entregue', 'cancelado'].includes(statusStr)) {
+	const statusValores = statusStr
+		? statusStr
+				.split(',')
+				.map((item) => item.trim())
+				.filter(Boolean)
+		: [];
+
+	if (statusValores.some((item) => !['novo', 'em_producao', 'entregue', 'cancelado'].includes(item))) {
 		return res.status(400).json({ erro: 'Filtro de status invalido. Use: novo, em_producao, entregue, cancelado.' });
 	}
 
@@ -66,10 +74,19 @@ export async function listarPedidos(req: VercelRequest, res: VercelResponse) {
 		filtros.push(`cliente_id = $${valores.length}`);
 	}
 
+	if (cliente && typeof cliente === 'string' && cliente.trim()) {
+		valores.push(`%${cliente.trim()}%`);
+		filtros.push(`LOWER(cliente_nome) LIKE LOWER($${valores.length})`);
+	}
+
 	// Filtro por status
-	if (statusStr) {
-		valores.push(statusStr);
+	if (statusValores.length === 1) {
+		valores.push(statusValores[0]);
 		filtros.push(`status = $${valores.length}`);
+	} else if (statusValores.length > 1) {
+		const placeholders = statusValores.map((_, indice) => `$${valores.length + indice + 1}`);
+		valores.push(...statusValores);
+		filtros.push(`status IN (${placeholders.join(', ')})`);
 	}
 
 	// Filtro por período - data início
