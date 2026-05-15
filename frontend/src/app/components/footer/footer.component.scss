@@ -1,4 +1,5 @@
 .container {
+  width: 100%;
   height: auto;
   border-top: 0.5px solid #edccd9;
   background: #ffd1e1;
@@ -78,9 +79,15 @@
 }
 
 @media (max-width: 1024px) {
+  .footer__inner {
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
   .footer__contatos {
     flex-direction: column;
     align-items: stretch;
+    width: 100%;
   }
 
   .footer__admin {
@@ -94,6 +101,24 @@
 
 @media (max-width: 640px) {
   .container {
-    padding: 2rem 1.5rem 1.5rem;
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .footer__inner {
+    gap: 1rem;
+  }
+
+  .footer__bloco p {
+    font-size: 0.9rem;
+  }
+
+  .contato-item {
+    min-width: 0;
+    width: 100%;
+    padding: 0.9rem 0.95rem;
+  }
+
+  .contato-item__action {
+    width: 100%;
   }
 }

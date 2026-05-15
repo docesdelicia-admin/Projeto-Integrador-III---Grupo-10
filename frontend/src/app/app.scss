@@ -2,6 +2,12 @@
   display: block;
 }
 
+.app-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Global app layout (header + sidebar + main + footer) */
 .app-layout {
   flex: 1;
@@ -9,7 +15,7 @@
   flex-direction: column;
   align-items: start;
   width: 100%;
-  min-height: 70vh;
+  min-height: 0;
 }
 
 .app-layout.admin-area {
@@ -19,6 +25,7 @@
   padding: 1rem;
   width: 100%;
   max-width: 100vw;
+  flex: 1;
   background:
     radial-gradient(circle at 80% 10%, #ffe2c1 0%, transparent 35%),
     linear-gradient(160deg, #fff8ec 0%, #ffeedd 100%);
@@ -28,8 +35,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  width: stretch;
-  height: stretch;
+  width: 100%;
+  min-height: 0;
 }
 
 .app-layout.admin-area .app-main {
@@ -37,6 +44,11 @@
   border: 1px solid #e5c6a9;
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.78);
+}
+
+app-footer {
+  margin-top: auto;
+  width: 100%;
 }
 
 @media (max-width: 1024px) {

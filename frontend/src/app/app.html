@@ -1,14 +1,16 @@
 <app-header *ngIf="!login" />
 
-<div class="app-layout" [class.admin-area]="adminArea">
+<div class="app-shell">
+  <div class="app-layout" [class.admin-area]="adminArea">
 
-  <app-sidebar *ngIf="adminArea" />
+    <app-sidebar *ngIf="adminArea" />
 
-  <main class="app-main">
-    <router-outlet></router-outlet>
-  </main>
+    <main class="app-main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <app-footer *ngIf="!login"></app-footer>
 </div>
-
-<app-footer *ngIf="!login"></app-footer>
 
 <app-toast-container></app-toast-container>
