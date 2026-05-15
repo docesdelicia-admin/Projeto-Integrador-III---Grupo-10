@@ -1,4 +1,7 @@
-<aside class="sidebar" aria-label="Navegacao interna">
+<div *ngIf="sidebarService.aberto()" class="sidebar-overlay" (click)="sidebarService.close()" aria-hidden="true"></div>
+
+<aside class="sidebar" [class.aberto]="sidebarService.aberto()" aria-label="Navegacao interna">
+  <button class="btn-fechar" aria-label="Fechar menu" (click)="sidebarService.close()">✕</button>
   <p class="sidebar-titulo">{{ saudacaoUsuario }}</p>
 
   <nav>

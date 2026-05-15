@@ -12,8 +12,10 @@ import {
 } from '../../components/tabela/tabela.component';
 import { AuthService } from '../../services/auth.service';
 import { Produto, ProdutoPayload, ProdutosService } from '../../services/produtos.service';
+import { ToastService } from '../../services/toast.service';
 import { ModalComponent } from '../../components/modal/modal.component';
 import { FiltroCampo, FiltrosComponent } from '../../components/filtros/filtros.component';
+import { FooterComponent } from '../../components/footer/footer.component';
 
 @Component({
   selector: 'app-produtos-admin',
@@ -21,8 +23,7 @@ import { FiltroCampo, FiltrosComponent } from '../../components/filtros/filtros.
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    HeaderComponent,
-    SidebarComponent,
+
     TabelaComponent,
     PasswordConfirmModalComponent,
     ModalComponent,
@@ -35,6 +36,7 @@ export class ProdutosAdminPage implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly produtosService = inject(ProdutosService);
   private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
 
   readonly formProduto = this.formBuilder.nonNullable.group({
     nome: ['', [Validators.required, Validators.maxLength(160)]],
@@ -73,14 +75,12 @@ export class ProdutosAdminPage implements OnInit {
   readonly excluirDesabilitado = (): boolean => !this.isAdmin();
 
   readonly produtos = signal<Produto[]>([]);
-  readonly carregandoTabela = signal(false);
+  carregandoTabela = false;
   readonly carregandoFormulario = signal(false);
   readonly modalAberto = signal(false);
   readonly modoEdicao = signal(false);
   readonly isAdmin = signal(false);
   readonly idProdutoEdicao = signal<string | null>(null);
-  readonly mensagemSucesso = signal('');
-  readonly mensagemErro = signal('');
   readonly arquivosSelecionados = signal<File[]>([]);
   readonly fotosExistentesEdicao = signal<string[]>([]);
   readonly previewsNovos = signal<string[]>([]);
@@ -129,8 +129,6 @@ export class ProdutosAdminPage implements OnInit {
   }
 
   abrirModalCadastro(): void {
-    this.mensagemErro.set('');
-    this.mensagemSucesso.set('');
     this.modoEdicao.set(false);
     this.idProdutoEdicao.set(null);
     this.formProduto.reset({
@@ -156,9 +154,6 @@ export class ProdutosAdminPage implements OnInit {
   }
 
   async salvarProduto(): Promise<void> {
-    this.mensagemErro.set('');
-    this.mensagemSucesso.set('');
-
     if (this.formProduto.invalid) {
       this.formProduto.markAllAsTouched();
       return;
@@ -170,7 +165,7 @@ export class ProdutosAdminPage implements OnInit {
     try {
       fotos = await this.prepararFotosParaPayload();
     } catch (error) {
-      this.mensagemErro.set(
+      this.toastService.erro(
         error instanceof Error ? error.message : 'Falha ao processar os arquivos selecionados.',
       );
       return;
@@ -198,26 +193,26 @@ export class ProdutosAdminPage implements OnInit {
           ? 'Produto atualizado com sucesso.'
           : 'Produto cadastrado com sucesso.';
         this.modalAberto.set(false);
-        this.mensagemSucesso.set(mensagem);
+        this.toastService.sucesso(mensagem);
         this.carregarProdutos();
       },
       error: (error: Error) => {
-        this.mensagemErro.set(error.message);
+        this.toastService.erro(error.message);
       },
     });
   }
 
   private carregarProdutos(): void {
-    this.carregandoTabela.set(true);
+    this.carregandoTabela = true;
     this.produtosService
       .listar()
-      .pipe(finalize(() => this.carregandoTabela.set(false)))
+      .pipe(finalize(() => (this.carregandoTabela = false)))
       .subscribe({
         next: (resposta) => {
           this.produtos.set(resposta.produtos);
         },
         error: (error: Error) => {
-          this.mensagemErro.set(error.message);
+          this.toastService.erro(error.message);
         },
       });
   }
@@ -228,8 +223,6 @@ export class ProdutosAdminPage implements OnInit {
       return;
     }
 
-    this.mensagemErro.set('');
-    this.mensagemSucesso.set('');
     this.modoEdicao.set(true);
     this.idProdutoEdicao.set(produto.id);
     this.formProduto.reset({
@@ -294,7 +287,7 @@ export class ProdutosAdminPage implements OnInit {
 
   private excluirProduto(linha: TabelaLinha): void {
     if (!this.isAdmin()) {
-      this.mensagemErro.set('Apenas administradores podem deletar dados.');
+      this.toastService.erro('Apenas administradores podem deletar dados.');
       return;
     }
 
@@ -324,8 +317,6 @@ export class ProdutosAdminPage implements OnInit {
       return;
     }
 
-    this.mensagemErro.set('');
-    this.mensagemSucesso.set('');
     this.carregandoExclusao.set(true);
 
     this.produtosService
@@ -335,11 +326,11 @@ export class ProdutosAdminPage implements OnInit {
         next: () => {
           this.modalConfirmacaoExclusaoAberto.set(false);
           this.produtoPendenteExclusao.set(null);
-          this.mensagemSucesso.set('Produto excluido com sucesso.');
+          this.toastService.sucesso('Produto excluido com sucesso.');
           this.carregarProdutos();
         },
         error: (error: Error) => {
-          this.mensagemErro.set(error.message);
+          this.toastService.erro(error.message);
         },
       });
   }
@@ -348,14 +339,14 @@ export class ProdutosAdminPage implements OnInit {
     const id = linha['id'];
 
     if (typeof id !== 'string') {
-      this.mensagemErro.set('Nao foi possivel identificar o produto selecionado.');
+      this.toastService.erro('Nao foi possivel identificar o produto selecionado.');
       return null;
     }
 
     const produto = this.produtos().find((item) => item.id === id);
 
     if (!produto) {
-      this.mensagemErro.set('Produto nao encontrado na lista atual.');
+      this.toastService.erro('Produto nao encontrado na lista atual.');
       return null;
     }
 

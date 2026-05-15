@@ -19,6 +19,7 @@ import { Pedido, PedidosService, PedidoStatus } from '../../services/pedidos.ser
 import { ToastService } from '../../services/toast.service';
 import { ModalComponent } from '../../components/modal/modal.component';
 import { FiltroCampo, FiltrosComponent } from '../../components/filtros/filtros.component';
+import { FooterComponent } from '../../components/footer/footer.component';
 
 type EtapaCriacao = 'escolha' | 'novo-cliente' | 'buscar-cliente' | 'dados-pedido';
 
@@ -28,8 +29,7 @@ type EtapaCriacao = 'escolha' | 'novo-cliente' | 'buscar-cliente' | 'dados-pedid
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    HeaderComponent,
-    SidebarComponent,
+
     TabelaComponent,
     PasswordConfirmModalComponent,
     ModalComponent,
@@ -72,7 +72,7 @@ export class PedidosPage implements OnInit {
   ];
 
   readonly linhas = signal<TabelaLinha[]>([]);
-  readonly carregando = signal(false);
+  carregando = false;
   readonly isAdmin = signal(false);
   readonly filtrosAtuais = signal<Record<string, string>>(this.criarFiltrosPadrao());
 
@@ -110,7 +110,6 @@ export class PedidosPage implements OnInit {
     observacoes: [''],
   });
   readonly salvandoCliente = signal(false);
-  readonly erroCliente = signal('');
 
   // Etapa: buscar cliente
   readonly termoBuscaCliente = signal('');
@@ -129,7 +128,6 @@ export class PedidosPage implements OnInit {
     observacoes: [''],
   });
   readonly salvandoPedido = signal(false);
-  readonly erroPedido = signal('');
 
   // ── Modal visualizar/editar pedido ──────────────────────────────────────────
 
@@ -147,7 +145,6 @@ export class PedidosPage implements OnInit {
     observacoes: [''],
   });
   readonly salvandoEdicao = signal(false);
-  readonly erroEdicao = signal('');
 
   // ── Modal confirmação cancelamento ──────────────────────────────────────────
 
@@ -177,11 +174,18 @@ export class PedidosPage implements OnInit {
   }
 
   private carregarPedidos(filtros: Record<string, string>): void {
-    this.carregando.set(true);
+    this.carregando = true;
     const cacheKey = JSON.stringify(filtros);
     if (this.cachePedidos.has(cacheKey)) {
       this.linhas.set(this.cachePedidos.get(cacheKey)!);
-      this.carregando.set(false);
+      this.carregando = false;
+      // Limpar filtros de data após carregar do cache
+      this.filtrosAtuais.set({
+        status: filtros['status'] || '',
+        cliente: filtros['cliente'] || '',
+        data_inicio: '',
+        data_fim: '',
+      });
       return;
     }
 
@@ -199,12 +203,19 @@ export class PedidosPage implements OnInit {
 
     this.pedidosService
       .listar(filtrosServico)
-      .pipe(finalize(() => this.carregando.set(false)))
+      .pipe(finalize(() => (this.carregando = false)))
       .subscribe({
         next: (res) => {
           const mapped = this.mapearPedidos(res.pedidos ?? []);
           this.linhas.set(mapped);
           this.cachePedidos.set(cacheKey, mapped);
+          // Limpar filtros de data após carregar
+          this.filtrosAtuais.set({
+            status: filtros['status'] || '',
+            cliente: filtros['cliente'] || '',
+            data_inicio: '',
+            data_fim: '',
+          });
         },
         error: (err: Error) => {
           this.toastService.erro(err.message);
@@ -224,8 +235,6 @@ export class PedidosPage implements OnInit {
     this.clienteSelecionado.set(null);
     this.termoBuscaCliente.set('');
     this.resultadosBuscaCliente.set([]);
-    this.erroCliente.set('');
-    this.erroPedido.set('');
     this.formNovoCliente.reset({ nome: '', telefone: '', observacoes: '' });
     this.formPedido.reset({ data_pedido: '', data_entrega: '', status: 'novo', observacoes: '' });
     this.modalNovoPedidoAberto.set(true);
@@ -239,7 +248,6 @@ export class PedidosPage implements OnInit {
   voltarParaEscolha(): void {
     this.etapaCriacao.set('escolha');
     this.clienteSelecionado.set(null);
-    this.erroCliente.set('');
     this.termoBuscaCliente.set('');
     this.resultadosBuscaCliente.set([]);
     this.formNovoCliente.reset({ nome: '', telefone: '', observacoes: '' });
@@ -261,7 +269,6 @@ export class PedidosPage implements OnInit {
       return;
     }
 
-    this.erroCliente.set('');
     this.salvandoCliente.set(true);
 
     const v = this.formNovoCliente.getRawValue();
@@ -280,7 +287,7 @@ export class PedidosPage implements OnInit {
           this.etapaCriacao.set('dados-pedido');
         },
         error: (err: Error) => {
-          this.erroCliente.set(err.message);
+          this.toastService.erro(err.message);
         },
       });
   }
@@ -321,7 +328,7 @@ export class PedidosPage implements OnInit {
           }
         },
         error: (err: Error) => {
-          this.erroCliente.set(err.message);
+          this.toastService.erro(err.message);
           this.buscandoCliente.set(false);
         },
       });
@@ -330,7 +337,6 @@ export class PedidosPage implements OnInit {
   onTermoBuscaCliente(event: Event): void {
     const termo = (event.target as HTMLInputElement).value;
     this.termoBuscaCliente.set(termo);
-    this.erroCliente.set('');
     this.buscaSubject.next(termo);
   }
 
@@ -351,7 +357,6 @@ export class PedidosPage implements OnInit {
     const cliente = this.clienteSelecionado();
     if (!cliente) return;
 
-    this.erroPedido.set('');
     this.salvandoPedido.set(true);
 
     const v = this.formPedido.getRawValue();
@@ -374,7 +379,7 @@ export class PedidosPage implements OnInit {
           this.carregarPedidos(this.filtrosAtuais());
         },
         error: (err: Error) => {
-          this.erroPedido.set(err.message);
+          this.toastService.erro(err.message);
         },
       });
   }
@@ -385,7 +390,6 @@ export class PedidosPage implements OnInit {
     // Busca o Pedido tipado a partir da linha para ter acesso seguro às propriedades
     const pedido = linha as unknown as Pedido;
     this.pedidoSelecionado.set(pedido);
-    this.erroEdicao.set('');
 
     this.formEdicaoPedido.reset({
       data_pedido: this.formatarParaDatetimeLocal(pedido.data_pedido),
@@ -412,7 +416,6 @@ export class PedidosPage implements OnInit {
     const pedido = this.pedidoSelecionado();
     if (!pedido?.id) return;
 
-    this.erroEdicao.set('');
     this.salvandoEdicao.set(true);
 
     const v = this.formEdicaoPedido.getRawValue();
@@ -433,7 +436,7 @@ export class PedidosPage implements OnInit {
           this.carregarPedidos(this.filtrosAtuais());
         },
         error: (err: Error) => {
-          this.erroEdicao.set(err.message);
+          this.toastService.erro(err.message);
         },
       });
   }

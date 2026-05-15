@@ -1,41 +1,3 @@
-:host {
-  display: block;
-  min-height: 100dvh;
-  font-family: 'Poppins', 'Segoe UI', sans-serif;
-  background:
-    radial-gradient(circle at 80% 10%, #ffe2c1 0%, transparent 35%),
-    linear-gradient(160deg, #fff8ec 0%, #ffeedd 100%);
-}
-
-.conta-shell {
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-}
-
-.conta-layout {
-  flex: 1;
-  width: min(78rem, 100%);
-  margin: 0 auto;
-  padding: 1.4rem 1rem 2.2rem;
-  display: grid;
-  grid-template-columns: 15rem 1fr;
-  gap: 1rem;
-}
-
-.conta-main {
-  border: 1px solid #e5c6a9;
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.78);
-  padding: 1.1rem;
-}
-
-h1 {
-  margin: 0;
-  color: #4f2a17;
-}
-
-.descricao,
 .perfil {
   margin: 0.45rem 0 0;
   color: #6f5037;
@@ -173,52 +135,6 @@ input:focus {
   cursor: not-allowed;
 }
 
-.mensagem {
-  margin: 0.8rem 0 0;
-  color: #246742;
-  font-weight: 600;
-}
-
-.tabela-wrapper {
-  margin-top: 1.5rem;
-  overflow-x: auto;
-}
-
-.tabela-wrapper h2 {
-  margin: 0 0 0.8rem;
-  color: #4f2a17;
-  font-size: 1.2rem;
-}
-
-.tabela-dados {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-}
-
-.tabela-dados thead {
-  background: #f5ede2;
-  border-bottom: 2px solid #e5c6a9;
-}
-
-.tabela-dados th {
-  padding: 0.75rem;
-  text-align: left;
-  font-weight: 600;
-  color: #5f3d27;
-  font-size: 0.9rem;
-}
-
-.tabela-dados td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #f0e6d8;
-  color: #6b4a31;
-}
-
-.tabela-dados tbody tr:hover {
-  background: #faf6f1;
-}
-
 .formulario-senha {
   margin-top: 1rem;
   padding: 1.2rem;
@@ -259,30 +175,10 @@ input:focus {
   background: linear-gradient(135deg, #4caf50, #388e3c);
 }
 
-.modal-acoes button:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
 .botao-secundario {
   background: linear-gradient(135deg, #999, #777);
 }
 
 .botao-principal {
   background: linear-gradient(135deg, #d96f35, #bf3b2b);
-}
-
-@media (max-width: 900px) {
-  .conta-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-acoes {
-    justify-content: stretch;
-    flex-direction: column;
-  }
-
-  .modal-acoes button {
-    width: 100%;
-  }
 }

@@ -10,8 +10,7 @@ import {
   TabelaComponent,
   TabelaLinha,
 } from '../../components/tabela/tabela.component';
-import { HeaderComponent } from '../../components/header/header.component';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+
 import { PasswordConfirmModalComponent } from '../../components/password-confirm-modal/password-confirm-modal.component';
 
 import { AuthService } from '../../services/auth.service';
@@ -31,8 +30,6 @@ type ModoFormularioUsuario = 'criar' | 'editar';
     TabelaComponent,
     ModalComponent,
     FiltrosComponent,
-    HeaderComponent,
-    SidebarComponent,
     PasswordConfirmModalComponent,
   ],
   templateUrl: './usuarios.component.html',
@@ -44,9 +41,6 @@ export class UsuariosPage implements OnInit {
   carregando = false;
   salvando = false;
   excluindo = false;
-
-  erroMensagem = '';
-  sucessoMensagem = '';
 
   // modais
   usuarioSelecionado: UsuarioListaItem | null = null;
@@ -167,7 +161,6 @@ export class UsuariosPage implements OnInit {
   // carregar dados
   private carregarUsuarios(): void {
     this.carregando = true;
-    this.erroMensagem = '';
 
     this.usuariosService
       .listar()
@@ -177,7 +170,7 @@ export class UsuariosPage implements OnInit {
           this.usuarios = res.usuarios ?? [];
         },
         error: (err: Error) => {
-          this.erroMensagem = err.message;
+          this.toast.erro(err.message);
         },
       });
   }

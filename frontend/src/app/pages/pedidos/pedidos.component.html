@@ -1,37 +1,18 @@
-<div class="pedidos-shell">
-  <app-header [modoBusca]="'campo'"></app-header>
+<section class="topo">
+  <h1>Pedidos</h1>
+  <button type="button" class="botao-principal" (click)="abrirModalNovoPedido()">
+    Novo pedido
+  </button>
+</section>
 
-  <div class="pedidos-layout">
-    <app-sidebar></app-sidebar>
+<app-filtros [titulo]="'Filtrar pedidos'" [campos]="camposFiltro" [valoresIniciais]="filtrosAtuais()"
+  [labelConfirmar]="'Aplicar filtros'" [labelCancelar]="'Limpar filtros'" (filtrosChange)="onFiltrosChange($event)">
+</app-filtros>
 
-    <main class="pedidos-main">
-      <section class="topo">
-        <div>
-          <h1>Pedidos</h1>
-          <p>Gerencie os pedidos realizados.</p>
-        </div>
-        <button type="button" class="botao-principal" (click)="abrirModalNovoPedido()">
-          Novo pedido
-        </button>
-      </section>
+<app-tabela [colunas]="colunasTabela" [linhas]="linhas()" [acaoEditar]="acaoEditarPedido"
+  mensagemSemDados="Nenhum pedido encontrado." [carregando]="carregando" mensagemCarregando="Carregando pedidos...">
+</app-tabela>
 
-      <app-filtros [titulo]="'Filtrar pedidos'" [campos]="camposFiltro" [valoresIniciais]="filtrosAtuais()"
-        [labelConfirmar]="'Aplicar filtros'" [labelCancelar]="'Limpar filtros'"
-        (filtrosChange)="onFiltrosChange($event)">
-      </app-filtros>
-
-      @if (carregando()) {
-      <p class="carregando">Carregando pedidos...</p>
-      } @else {
-      <app-tabela [colunas]="colunasTabela" [linhas]="linhas()" [acaoEditar]="acaoEditarPedido"
-        mensagemSemDados="Nenhum pedido encontrado.">
-      </app-tabela>
-      }
-    </main>
-  </div>
-</div>
-
-<!-- ───────────────────────── MODAL NOVO PEDIDO ───────────────────────── -->
 <app-modal [aberto]="modalNovoPedidoAberto()" (fechar)="fecharModalNovoPedido()" [temFooterProjetado]="true">
 
   <!-- ETAPA 0: escolha cliente novo ou existente -->
@@ -76,9 +57,6 @@
     <label for="cliente-obs">Observações</label>
     <textarea id="cliente-obs" rows="2" formControlName="observacoes" placeholder="Observações opcionais"></textarea>
 
-    @if (erroCliente()) {
-    <p class="feedback erro">{{ erroCliente() }}</p>
-    }
 
     <div class="modal-footer">
       <button type="button" class="botao-secundario" (click)="voltarParaEscolha()" [disabled]="salvandoCliente()">
@@ -124,9 +102,6 @@
   <p class="sem-resultados">Digite pelo menos 3 caracteres para buscar um cliente.</p>
   }
 
-  @if (erroCliente()) {
-  <p class="feedback erro">{{ erroCliente() }}</p>
-  }
 
   <div class="modal-footer-simples">
     <button type="button" class="botao-secundario" (click)="voltarParaEscolha()">Voltar</button>
@@ -164,9 +139,6 @@
     <label for="obs-pedido">Observações</label>
     <textarea id="obs-pedido" rows="3" formControlName="observacoes"></textarea>
 
-    @if (erroPedido()) {
-    <p class="feedback erro">{{ erroPedido() }}</p>
-    }
 
     <div class="modal-footer">
       <button type="button" class="botao-secundario" (click)="fecharModalNovoPedido()" [disabled]="salvandoPedido()">
@@ -181,7 +153,6 @@
 
 </app-modal>
 
-<!-- ───────────────────────── MODAL VISUALIZAR/EDITAR PEDIDO ───────────────────────── -->
 <app-modal [aberto]="modalVisualizarAberto()" (fechar)="fecharModalVisualizar()" [temFooterProjetado]="true">
   <div class="modal-header">
     <h2>Pedido</h2>
@@ -207,9 +178,6 @@
     <label for="edit-obs">Observações</label>
     <textarea id="edit-obs" rows="3" formControlName="observacoes"></textarea>
 
-    @if (erroEdicao()) {
-    <p class="feedback erro">{{ erroEdicao() }}</p>
-    }
 
     <div class="modal-footer">
       <button type="button" class="botao-cancelar-pedido" (click)="solicitarCancelamentoPedido()"
@@ -228,7 +196,6 @@
   </form>
 </app-modal>
 
-<!-- ───────────────────────── MODAL CONFIRMAÇÃO CANCELAMENTO ───────────────────────── -->
 <app-password-confirm-modal [aberto]="modalConfirmaCancelamentoAberto()" titulo="Confirmar cancelamento"
   [mensagem]="'Digite sua senha para cancelar o pedido de ' + nomeClientePedido() + '.'"
   textoConfirmar="Confirmar cancelamento" [salvando]="salvandoCancelamento()"

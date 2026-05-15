@@ -25,6 +25,14 @@
     border-color: #c9608a;
     transform: translateY(-2px);
   }
+
+  @media (max-width: 480px) {
+    width: 170px;
+  }
+
+  @media (max-width: 360px) {
+    width: 150px;
+  }
 }
 
 // ── Capa — foto protagonista ──────────────────────────────────────────────────
@@ -49,6 +57,14 @@
 
   .produto-card:hover &::after {
     background: rgba(30, 15, 22, 0.04);
+  }
+
+  @media (max-width: 480px) {
+    height: 140px;
+  }
+
+  @media (max-width: 360px) {
+    height: 120px;
   }
 }
 
@@ -75,6 +91,16 @@
   flex-direction: column;
   gap: 0.65rem;
   flex: 1;
+
+  @media (max-width: 480px) {
+    padding: 0.6rem 0.7rem 0.7rem;
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 360px) {
+    padding: 0.5rem 0.6rem 0.6rem;
+    gap: 0.4rem;
+  }
 }
 
 .conteudo-topo {
@@ -96,6 +122,14 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+
+    @media (max-width: 480px) {
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 360px) {
+      font-size: 0.78rem;
+    }
   }
 
   p {
@@ -110,6 +144,14 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+
+    @media (max-width: 480px) {
+      font-size: 0.7rem;
+    }
+
+    @media (max-width: 360px) {
+      font-size: 0.65rem;
+    }
   }
 }
 
@@ -128,6 +170,14 @@
   font-weight: 700;
   color: #1e0f16;
   white-space: nowrap;
+
+  @media (max-width: 480px) {
+    font-size: 0.88rem;
+  }
+
+  @media (max-width: 360px) {
+    font-size: 0.8rem;
+  }
 }
 
 .btn-detalhes {
@@ -148,6 +198,16 @@
   &:hover {
     background: #fbeaf0;
     border-color: #c9608a;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.6rem;
+  }
+
+  @media (max-width: 360px) {
+    font-size: 0.6rem;
+    padding: 0.2rem 0.5rem;
   }
 }
 

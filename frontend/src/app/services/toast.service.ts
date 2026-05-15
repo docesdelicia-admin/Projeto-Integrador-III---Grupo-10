@@ -37,6 +37,6 @@ export class ToastService {
     const id = ++this.ultimoId;
     this.listaToast.update((listaAtual) => [...listaAtual, { id, tipo, texto }]);
 
-    setTimeout(() => this.remover(id), 3500);
+    setTimeout(() => this.remover(id), 5000);
   }
 }

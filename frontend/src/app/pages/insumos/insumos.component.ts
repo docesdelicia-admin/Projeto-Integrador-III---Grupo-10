@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { HeaderComponent } from '../../components/header/header.component';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+
 import { AuthService } from '../../services/auth.service';
 import { Insumo, InsumosService } from '../../services/insumos.service';
 import {
@@ -13,7 +12,7 @@ import {
 @Component({
   selector: 'app-insumos',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, SidebarComponent, TabelaComponent],
+  imports: [CommonModule, TabelaComponent],
   templateUrl: './insumos.component.html',
   styleUrl: './insumos.component.scss',
 })
@@ -29,7 +28,7 @@ export class InsumosPage implements OnInit {
   ];
 
   readonly linhas = signal<TabelaLinha[]>([]);
-  readonly carregando = signal(false);
+  carregando = false;
   readonly isAdmin = signal(false);
   readonly mensagemErro = signal('');
 
@@ -42,7 +41,7 @@ export class InsumosPage implements OnInit {
     const insumosEmCache = this.insumosService.obterInsumosEmCache();
     this.linhas.set(insumosEmCache.map((insumo: Insumo) => ({ ...insumo }) as TabelaLinha));
 
-    this.carregando.set(this.linhas().length === 0);
+    this.carregando = this.linhas().length === 0;
     this.mensagemErro.set('');
 
     this.insumosService.listar().subscribe({
@@ -50,12 +49,12 @@ export class InsumosPage implements OnInit {
         this.linhas.set(
           (resposta.insumos ?? []).map((insumo: Insumo) => ({ ...insumo }) as TabelaLinha),
         );
-        this.carregando.set(false);
+        this.carregando = false;
       },
       error: (error: Error) => {
         this.mensagemErro.set(error.message);
         this.linhas.set([]);
-        this.carregando.set(false);
+        this.carregando = false;
       },
     });
   }
