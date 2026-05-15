@@ -7,6 +7,7 @@ describe('ProdutoCardComponent', () => {
   let component: ProdutoCardComponent;
 
   const produtoMock: ProdutoVitrine = {
+    id: '1',
     nome: 'Bolo Chocolate',
     descricao: 'Bolo delicioso de chocolate',
     preco: 99.9,

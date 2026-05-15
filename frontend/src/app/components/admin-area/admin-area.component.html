@@ -3,18 +3,19 @@
   <span class="admin-area__label">{{ rotulo }}</span>
   }
 
+  <div class="admin-area__acoes">
+    @if (temSessaoAtiva()) {
+    @if (!estaNaAreaAdministrativa()) {
+    <button type="button" class="admin-area__usuario" (click)="irParaDashboard()" [disabled]="carregando">
+      {{ obterIdentificacaoUsuario() }}
+    </button>
+    }
 
-  @if (temSessaoAtiva()) {
-  @if (!estaNaAreaAdministrativa()) {
-  <button type="button" class="admin-area__usuario" (click)="irParaDashboard()" [disabled]="carregando">
-    {{ obterIdentificacaoUsuario() }}
-  </button>
-  }
-
-  <button type="button" (click)="logout()" [disabled]="carregando">
-    {{ carregando ? 'Saindo...' : 'Logout' }}
-  </button>
-  } @else {
-  <button type="button" (click)="irParaLogin()" [disabled]="carregando">Login</button>
-  }
+    <button type="button" class="admin-area__botao" (click)="logout()" [disabled]="carregando">
+      {{ carregando ? 'Saindo...' : 'Logout' }}
+    </button>
+    } @else {
+    <button type="button" class="admin-area__botao" (click)="irParaLogin()" [disabled]="carregando">Login</button>
+    }
+  </div>
 </div>

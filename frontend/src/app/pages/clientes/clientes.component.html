@@ -1,38 +1,23 @@
-<div class="clientes-shell">
-  <app-header [modoBusca]="'campo'"></app-header>
+<section class="topo">
 
-  <div class="clientes-layout">
-    <app-sidebar></app-sidebar>
+  <h1>Clientes</h1>
 
-    <main class="clientes-main">
-      <section class="topo">
-        <div>
-          <h1>Clientes</h1>
-          <p>Gerencie os clientes cadastrados.</p>
-        </div>
-        <button type="button" class="botao-principal" (click)="abrirModalCadastro()">
-          Novo cliente
-        </button>
-      </section>
+  <button type="button" class="botao-principal" (click)="abrirModalCadastro()">
+    Novo cliente
+  </button>
+</section>
 
-      <app-filtros [titulo]="'Filtrar clientes'" [campos]="camposFiltro" [valoresIniciais]="filtrosAtuais()"
-        [labelConfirmar]="'Aplicar filtros'" [labelCancelar]="'Limpar filtros'"
-        (filtrosChange)="onFiltrosChange($event)">
-      </app-filtros>
+<app-filtros [titulo]="'Filtrar clientes'" [campos]="camposFiltro" [valoresIniciais]="filtrosAtuais()"
+  [labelConfirmar]="'Aplicar filtros'" [labelCancelar]="'Limpar filtros'" (filtrosChange)="onFiltrosChange($event)">
+</app-filtros>
 
-      @if (carregando()) {
-      <p class="carregando">Carregando clientes...</p>
-      } @else {
-      <app-tabela [colunas]="colunasTabela" [linhas]="linhas()" [acaoEditar]="acaoEditarCliente"
-        [acaoExcluir]="acaoExcluirCliente" [excluirDesabilitado]="excluirDesabilitado"
-        [mensagemSemDados]="mensagemSemDadosTabela()">
-      </app-tabela>
-      }
-    </main>
-  </div>
-</div>
+<app-tabela [colunas]="colunasTabela" [linhas]="linhas()" [acaoEditar]="acaoEditarCliente"
+  [acaoExcluir]="acaoExcluirCliente" [excluirDesabilitado]="excluirDesabilitado"
+  [mensagemSemDados]="mensagemSemDadosTabela()" [carregando]="carregando" mensagemCarregando="Carregando clientes...">
+</app-tabela>
 
-<!-- ───────────────────────── MODAL CADASTRO / EDIÇÃO ───────────────────────── -->
+
+
 <app-modal [aberto]="modalAberto()" [titulo]="modoEdicao() ? 'Editar cliente' : 'Novo cliente'"
   [modoEdicao]="modoEdicao()" [acaoPrimariaLabel]="!modoEdicao() ? 'Cadastrar' : null" (fechar)="fecharModal()"
   (salvar)="salvarCliente()" (cancelar)="fecharModal()">
@@ -52,13 +37,10 @@
     <label for="cliente-obs">Observações</label>
     <textarea id="cliente-obs" rows="3" formControlName="observacoes" placeholder="Observações opcionais"></textarea>
 
-    @if (erroFormulario()) {
-    <p class="feedback erro">{{ erroFormulario() }}</p>
-    }
   </form>
 </app-modal>
 
-<!-- ───────────────────────── MODAL CONFIRMAÇÃO EXCLUSÃO ───────────────────────── -->
+
 <app-password-confirm-modal [aberto]="modalExclusaoAberto()" titulo="Confirmar exclusão"
   [mensagem]="'Digite sua senha para excluir o cliente ' + (clientePendenteExclusao()?.nome ?? '') + '.'"
   textoConfirmar="Confirmar exclusão" [salvando]="excluindo()" (cancelar)="fecharModalExclusao()"

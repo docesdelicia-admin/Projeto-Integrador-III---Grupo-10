@@ -9,7 +9,6 @@
 }
 
 .login-page {
-  min-height: 100dvh;
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   gap: 2rem;
@@ -184,7 +183,7 @@ input:focus {
   color: #bf3b2b;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .login-page {
     grid-template-columns: 1fr;
     padding: 1rem;

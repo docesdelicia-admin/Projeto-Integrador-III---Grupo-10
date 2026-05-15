@@ -91,21 +91,27 @@ describe('VitrinePage', () => {
   });
 
   it('cada produto tem preco positivo', () => {
-    component.categorias().forEach((categoria: { produto: { preco: number } }) => {
-      expect(categoria.produto.preco).toBeGreaterThan(0);
+    component.categorias().forEach((categoria: { produtos: { preco: number }[] }) => {
+      categoria.produtos.forEach((produto) => {
+        expect(produto.preco).toBeGreaterThan(0);
+      });
     });
   });
 
   it('cada produto tem minimo 3 fotos', () => {
-    component.categorias().forEach((categoria: { produto: { fotos: string[] } }) => {
-      expect(categoria.produto.fotos.length).toBeGreaterThanOrEqual(3);
+    component.categorias().forEach((categoria: { produtos: { fotos: string[] }[] }) => {
+      categoria.produtos.forEach((produto) => {
+        expect(produto.fotos.length).toBeGreaterThanOrEqual(3);
+      });
     });
   });
 
   it('todas as fotos sao data URLs SVG', () => {
-    component.categorias().forEach((categoria: { produto: { fotos: string[] } }) => {
-      categoria.produto.fotos.forEach((foto: string) => {
-        expect(foto).toMatch(/^data:image\/svg\+xml/);
+    component.categorias().forEach((categoria: { produtos: { fotos: string[] }[] }) => {
+      categoria.produtos.forEach((produto) => {
+        produto.fotos.forEach((foto: string) => {
+          expect(foto).toMatch(/^data:image\/svg\+xml/);
+        });
       });
     });
   });
@@ -119,19 +125,19 @@ describe('VitrinePage', () => {
     const bolos = component
       .categorias()
       .find(
-        (categoria: { titulo: string; produto: { preco: number } }) =>
+        (categoria: { titulo: string; produtos: { preco: number }[] }) =>
           categoria.titulo === 'Bolos personalizados',
       );
-    expect(bolos?.produto.preco).toBe(179.9);
+    expect(bolos?.produtos[0].preco).toBe(179.9);
   });
 
   it('Doces no pote tem preco esperado', () => {
     const doces = component
       .categorias()
       .find(
-        (categoria: { titulo: string; produto: { preco: number } }) =>
+        (categoria: { titulo: string; produtos: { preco: number }[] }) =>
           categoria.titulo === 'Doces no pote',
       );
-    expect(doces?.produto.preco).toBe(19.9);
+    expect(doces?.produtos[0].preco).toBe(19.9);
   });
 });

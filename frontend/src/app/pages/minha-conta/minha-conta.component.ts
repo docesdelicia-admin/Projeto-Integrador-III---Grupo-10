@@ -11,13 +11,7 @@ import { UsuariosService } from '../../services/usuarios.service';
 @Component({
   selector: 'app-minha-conta',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    HeaderComponent,
-    SidebarComponent,
-    PasswordConfirmModalComponent,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, PasswordConfirmModalComponent],
   templateUrl: './minha-conta.component.html',
   styleUrl: './minha-conta.component.scss',
 })

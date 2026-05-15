@@ -1,33 +1,47 @@
-<article class="produto-card">
-  <div class="capa" [style.background-image]="'url(' + fotoAtual + ')'" aria-hidden="true"></div>
+<article class="produto-card" (click)="abrirModal()">
+  <div class="capa" [style.background-image]="fotoAtual ? 'url(' + fotoAtual + ')' : null"
+    [class.capa--vazia]="!fotoAtual" aria-hidden="true">
+    @if (!fotoAtual) {
+    <span class="capa-inicial">{{ produto.nome[0] }}</span>
+    }
+  </div>
+
   <div class="conteudo">
-    <h3>{{ produto.nome }}</h3>
-    <p>{{ produto.descricao }}</p>
-    <strong>{{ precoFormatado }}</strong>
-    <button type="button" (click)="abrirModal()">Ver detalhes</button>
+    <div class="conteudo-topo">
+      <h3>{{ produto.nome }}</h3>
+      <p>{{ produto.descricao }}</p>
+    </div>
+    <div class="conteudo-rodape">
+      <strong class="preco">{{ precoFormatado }}</strong>
+      <button type="button" class="btn-detalhes" (click)="abrirModal(); $event.stopPropagation()">
+        Ver detalhes
+      </button>
+    </div>
   </div>
 </article>
 
 <app-modal [aberto]="modalAberto" [titulo]="produto.nome" (fechar)="fecharModal()" [mostrarBotaoEditar]="false">
-
   <div class="carrossel" aria-label="Galeria de fotos">
-    <button type="button" class="controle" aria-label="Foto anterior" (click)="fotoAnterior()">&#8249;</button>
+    <button type="button" class="controle" aria-label="Foto anterior" (click)="fotoAnterior()">
+      &#8249;
+    </button>
     <img [src]="fotoAtual" [alt]="'Foto de ' + produto.nome" />
-    <button type="button" class="controle" aria-label="Proxima foto" (click)="proximaFoto()">&#8250;</button>
+    <button type="button" class="controle" aria-label="Próxima foto" (click)="proximaFoto()">
+      &#8250;
+    </button>
   </div>
 
-  <div class="indicadores">
+  <div class="indicadores" aria-hidden="true">
     @for (foto of produto.fotos; track foto; let i = $index) {
     <button type="button" [class.ativo]="i === indiceFoto" [attr.aria-label]="'Ir para foto ' + (i + 1)"
-      (click)="irParaFoto(i)">
-    </button>
+      (click)="irParaFoto(i)"></button>
     }
   </div>
 
-  <p class="descricao">{{ produto.descricao }}</p>
-  <p class="preco">{{ precoFormatado }}</p>
+  <p class="modal-descricao">{{ produto.descricao }}</p>
+  <p class="modal-preco">{{ precoFormatado }}</p>
 
-  <button type="button" class="cta" title="Em breve integracao com WhatsApp e email">
-    Solicite seu orcamento
+  <button type="button" class="cta" title="Em breve integração com WhatsApp e e-mail">
+    Solicite seu orçamento
   </button>
 </app-modal>

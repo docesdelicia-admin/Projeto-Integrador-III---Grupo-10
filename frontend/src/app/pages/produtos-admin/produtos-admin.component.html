@@ -1,44 +1,19 @@
-<div class="produtos-shell">
-  <app-header [modoBusca]="'campo'"></app-header>
+<section class="topo">
+  <h1>Cadastro de produtos</h1>
+  <button type="button" class="botao-principal" (click)="abrirModalCadastro()">
+    Cadastrar novo produto
+  </button>
+</section>
 
-  <div class="produtos-layout">
-    <app-sidebar></app-sidebar>
+<app-filtros [titulo]="'Filtrar produtos'" [campos]="camposFiltro" [valoresIniciais]="filtrosAtuais()"
+  [labelConfirmar]="'Aplicar filtros'" [labelCancelar]="'Limpar filtros'" (filtrosChange)="onFiltrosChange($event)">
+</app-filtros>
 
-    <main class="produtos-main">
-      <section class="topo">
-        <div>
-          <h1>Cadastro de produtos</h1>
-        </div>
-
-        <button type="button" class="botao-principal" (click)="abrirModalCadastro()">
-          Cadastrar novo produto
-        </button>
-      </section>
-
-      <app-filtros [titulo]="'Filtrar produtos'" [campos]="camposFiltro" [valoresIniciais]="filtrosAtuais()"
-        [labelConfirmar]="'Aplicar filtros'" [labelCancelar]="'Limpar filtros'"
-        (filtrosChange)="onFiltrosChange($event)">
-      </app-filtros>
-
-      @if (mensagemSucesso()) {
-      <p class="feedback sucesso">{{ mensagemSucesso() }}</p>
-      }
-
-      @if (mensagemErro()) {
-      <p class="feedback erro">{{ mensagemErro() }}</p>
-      }
-
-      @if (carregandoTabela()) {
-      <p class="carregando">Carregando produtos...</p>
-      } @else {
-      <app-tabela [colunas]="colunasTabela" [linhas]="linhasTabela" [acaoEditar]="acaoEditarProduto"
-        [acaoExcluir]="acaoExcluirProduto" [excluirDesabilitado]="excluirDesabilitado"
-        mensagemSemDados="Nenhum produto cadastrado.">
-      </app-tabela>
-      }
-    </main>
-  </div>
-</div>
+<app-tabela [colunas]="colunasTabela" [linhas]="linhasTabela" [acaoEditar]="acaoEditarProduto"
+  [acaoExcluir]="acaoExcluirProduto" [excluirDesabilitado]="excluirDesabilitado"
+  mensagemSemDados="Nenhum produto cadastrado." [carregando]="carregandoTabela"
+  mensagemCarregando="Carregando produtos...">
+</app-tabela>
 
 <app-password-confirm-modal [aberto]="modalConfirmacaoExclusaoAberto()" titulo="Confirmar exclusao"
   [mensagem]="'Digite sua senha atual para excluir o produto ' + (produtoPendenteExclusao()?.nome ?? '') + '.'"
@@ -123,6 +98,5 @@
     <small class="erro">Informe um preco maior ou igual a zero.</small>
     }
 
-    <!-- footer handled by ModalComponent (Cancelar / Salvar) -->
   </form>
 </app-modal>

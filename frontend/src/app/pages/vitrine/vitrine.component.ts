@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { HeaderComponent } from '../../components/header/header.component';
+import { FooterComponent } from '../../components/footer/footer.component';
 import {
   ProdutoCardComponent,
   ProdutoVitrine,
@@ -10,19 +11,17 @@ import { criarSlidesPadrao } from '../../utils/produto-slides';
 interface CategoriaVitrine {
   titulo: string;
   descricao: string;
-  produto: ProdutoVitrine;
+  produtos: ProdutoVitrine[];
 }
 
 @Component({
   selector: 'app-vitrine',
   standalone: true,
-  imports: [HeaderComponent, ProdutoCardComponent],
+  imports: [ProdutoCardComponent],
   templateUrl: './vitrine.component.html',
   styleUrl: './vitrine.component.scss',
 })
 export class VitrinePage implements OnInit {
-  readonly titulo = 'Doces Delicia No Pote: Conheca nossos produtos';
-
   readonly categorias = signal<CategoriaVitrine[]>([]);
   readonly carregando = signal(true);
   readonly atualizandoEmSegundoPlano = signal(false);
@@ -68,18 +67,17 @@ export class VitrinePage implements OnInit {
     }
 
     return Array.from(grupos.entries()).map(([categoria, listaProdutos]) => {
-      const produtoPrincipal = listaProdutos[0];
-
       return {
         titulo: categoria,
-        descricao: produtoPrincipal.descricao ?? 'Selecao de produtos organizada por categoria.',
-        produto: this.converterProdutoParaVitrine(produtoPrincipal),
+        descricao: listaProdutos[0].descricao ?? 'Selecao de produtos organizada por categoria.',
+        produtos: listaProdutos.map((produto) => this.converterProdutoParaVitrine(produto)),
       };
     });
   }
 
   private converterProdutoParaVitrine(produto: Produto): ProdutoVitrine {
     return {
+      id: produto.id,
       nome: produto.nome,
       descricao: produto.descricao ?? 'Descricao nao informada.',
       preco: Number(produto.preco),

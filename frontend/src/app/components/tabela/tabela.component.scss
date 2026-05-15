@@ -4,6 +4,7 @@
   overflow-x: auto;
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(4px);
+  margin-top: 1.5rem;
 }
 
 /* TABELA */
@@ -219,7 +220,7 @@ tr:has(.sem-dados) {
 }
 
 /* RESPONSIVO */
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .tabela {
     min-width: 520px;
   }

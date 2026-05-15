@@ -4,10 +4,64 @@
 
 .sidebar {
   border: 1px solid #e5c6a9;
-  border-radius: 0;
-  background: rgba(255, 255, 255, 0.8);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 1);
   box-shadow: 0 12px 26px rgba(87, 48, 24, 0.1);
   padding: 0.75rem 0.5rem;
+}
+
+/* Mobile overlay + off-canvas behavior */
+.sidebar-overlay {
+  display: none;
+}
+
+.btn-fechar {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  :host {
+    display: block;
+  }
+  .sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    width: 16rem;
+    max-width: 80%;
+    transform: translateX(110%);
+    transition: transform 0.25s ease;
+    border-radius: 0;
+    z-index: 1001;
+    padding-top: 2.5rem;
+  }
+
+  .sidebar.aberto {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+  }
+
+  .btn-fechar {
+    display: block;
+    position: absolute;
+    right: 0.5rem;
+    top: 0.35rem;
+    background: transparent;
+    border: 0;
+    font-size: 1.1rem;
+    color: #5f3d27;
+  }
 }
 
 .sidebar-titulo {

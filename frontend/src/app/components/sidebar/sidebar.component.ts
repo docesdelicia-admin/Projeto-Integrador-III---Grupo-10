@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { SidebarService } from '../../services/sidebar.service';
 
 interface SidebarItem {
   label: string;
@@ -18,6 +19,7 @@ interface SidebarItem {
 })
 export class SidebarComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  readonly sidebarService = inject(SidebarService);
 
   readonly itens: SidebarItem[] = [
     { label: 'Dashboard', path: '/dashboard' },

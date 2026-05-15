@@ -3,9 +3,8 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
 
-import { HeaderComponent } from '../../components/header/header.component';
 import { PasswordConfirmModalComponent } from '../../components/password-confirm-modal/password-confirm-modal.component';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+
 import {
   TabelaColuna,
   TabelaLinha,
@@ -24,8 +23,7 @@ import { FiltroCampo, FiltrosComponent } from '../../components/filtros/filtros.
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    HeaderComponent,
-    SidebarComponent,
+
     TabelaComponent,
     PasswordConfirmModalComponent,
     ModalComponent,
@@ -50,7 +48,7 @@ export class ClientesPage implements OnInit {
   ];
 
   readonly clientes = signal<Cliente[]>([]);
-  readonly carregando = signal(false);
+  carregando = false;
   readonly isAdmin = signal(false);
   readonly filtroExecutado = signal(false);
   readonly filtrosAtuais = signal<Record<string, string>>(this.criarFiltrosPadrao());
@@ -76,7 +74,6 @@ export class ClientesPage implements OnInit {
   readonly modoEdicao = signal(false);
   readonly idClienteEdicao = signal<string | null>(null);
   readonly salvando = signal(false);
-  readonly erroFormulario = signal('');
 
   readonly formCliente = this.fb.nonNullable.group({
     nome: ['', [Validators.required, Validators.maxLength(160)]],
@@ -126,16 +123,24 @@ export class ClientesPage implements OnInit {
   }
 
   private carregarClientes(filtros: Record<string, string>): void {
-    this.carregando.set(true);
+    this.carregando = true;
     this.clientesService
       .listar({
         q: filtros['q']?.trim() || undefined,
         dataInicio: filtros['data_inicio'] || undefined,
         dataFim: filtros['data_fim'] || undefined,
       })
-      .pipe(finalize(() => this.carregando.set(false)))
+      .pipe(finalize(() => (this.carregando = false)))
       .subscribe({
-        next: (res) => this.clientes.set(res.clientes ?? []),
+        next: (res) => {
+          this.clientes.set(res.clientes ?? []);
+          // Limpar filtros de data após carregar
+          this.filtrosAtuais.set({
+            q: filtros['q'] || '',
+            data_inicio: '',
+            data_fim: '',
+          });
+        },
         error: (err: Error) => this.toastService.erro(err.message),
       });
   }
@@ -145,7 +150,6 @@ export class ClientesPage implements OnInit {
   abrirModalCadastro(): void {
     this.modoEdicao.set(false);
     this.idClienteEdicao.set(null);
-    this.erroFormulario.set('');
     this.formCliente.reset({ nome: '', telefone: '', observacoes: '' });
     this.modalAberto.set(true);
   }
@@ -156,7 +160,6 @@ export class ClientesPage implements OnInit {
 
     this.modoEdicao.set(true);
     this.idClienteEdicao.set(cliente.id);
-    this.erroFormulario.set('');
     this.formCliente.reset({
       nome: cliente.nome,
       telefone: cliente.telefone ?? '',
@@ -178,7 +181,6 @@ export class ClientesPage implements OnInit {
       return;
     }
 
-    this.erroFormulario.set('');
     this.salvando.set(true);
 
     const v = this.formCliente.getRawValue();
@@ -201,7 +203,7 @@ export class ClientesPage implements OnInit {
         );
         this.carregarClientes(this.filtrosAtuais());
       },
-      error: (err: Error) => this.erroFormulario.set(err.message),
+      error: (err: Error) => this.toastService.erro(err.message),
     });
   }
 
