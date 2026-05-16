@@ -4,7 +4,7 @@
 
 .filtros {
   padding: 1rem;
-  border: 1px solid rgba(20, 48, 74, 0.12);
+  border: 1px solid rgba(153, 53, 86, 0.15);
   border-radius: 1rem;
   background: #ffffff;
   min-width: 0;
@@ -13,7 +13,7 @@
 .filtros__header h3 {
   margin: 0 0 0.8rem;
   font-size: 1rem;
-  color: #17324d;
+  color: #993556;
 }
 
 .filtros__grid {
@@ -31,7 +31,7 @@
   span {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #415d77;
+    color: #993556;
   }
 }
 
@@ -40,17 +40,17 @@ select {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  border: 1px solid rgba(20, 48, 74, 0.15);
+  border: 1px solid rgba(153, 53, 86, 0.15);
   border-radius: 0.7rem;
   padding: 0.55rem 0.7rem;
   font: inherit;
-  color: #17324d;
+  color: #2a2a2a;
   background: #fff;
 
   &:focus {
     outline: none;
-    border-color: #2f7ca1;
-    box-shadow: 0 0 0 3px rgba(47, 124, 161, 0.14);
+    border-color: #993556;
+    box-shadow: 0 0 0 3px rgba(153, 53, 86, 0.2);
   }
 }
 
@@ -62,11 +62,11 @@ select {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  border: 1px solid rgba(20, 48, 74, 0.15);
+  border: 1px solid rgba(153, 53, 86, 0.15);
   border-radius: 0.7rem;
   padding: 0.55rem 0.7rem;
   font: inherit;
-  color: #17324d;
+  color: #2a2a2a;
   background: #fff;
   display: flex;
   justify-content: space-between;
@@ -77,13 +77,13 @@ select {
 
   &:focus {
     outline: none;
-    border-color: #2f7ca1;
-    box-shadow: 0 0 0 3px rgba(47, 124, 161, 0.14);
+    border-color: #993556;
+    box-shadow: 0 0 0 3px rgba(153, 53, 86, 0.2);
   }
 }
 
 .filtros__dropdown-icon {
-  color: #415d77;
+  color: #993556;
   font-size: 0.78rem;
 }
 
@@ -97,11 +97,11 @@ select {
   overflow-y: auto;
   display: grid;
   gap: 0.35rem;
-  border: 1px solid rgba(20, 48, 74, 0.15);
+  border: 1px solid rgba(153, 53, 86, 0.15);
   border-radius: 0.7rem;
   padding: 0.55rem 0.7rem;
   background: #fff;
-  box-shadow: 0 8px 18px rgba(23, 50, 77, 0.14);
+  box-shadow: 0 8px 18px rgba(153, 53, 86, 0.06);
 }
 
 .filtros__checkbox-item {
@@ -118,7 +118,7 @@ select {
 
   span {
     font-size: 0.85rem;
-    color: #17324d;
+    color: #2a2a2a;
     font-weight: 500;
   }
 }
@@ -149,13 +149,13 @@ select {
 }
 
 .botao-principal {
-  background: linear-gradient(135deg, #d96f35, #bf3b2b);
+  background: linear-gradient(135deg, #993556, #7a2740);
   color: #fff;
 }
 
 .botao-secundario {
-  background: #f7ddc3;
-  color: #6a4023;
+  background: #f4c0d1;
+  color: #993556;
 }
 
 @media (max-width: 1024px) {

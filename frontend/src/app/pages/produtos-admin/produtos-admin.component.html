@@ -16,14 +16,16 @@
 </app-tabela>
 
 <app-password-confirm-modal [aberto]="modalConfirmacaoExclusaoAberto()" titulo="Confirmar exclusao"
-  [mensagem]="'Digite sua senha atual para excluir o produto ' + (produtoPendenteExclusao()?.nome ?? '') + '.'"
+  [mensagem]="'Digite sua senha atual para excluir o produto: ' + (produtoPendenteExclusao()?.nome ?? '') + '.'"
   textoConfirmar="Confirmar exclusao" [salvando]="carregandoExclusao()" (cancelar)="cancelarConfirmacaoExclusao()"
   (confirmar)="confirmarExclusaoComSenha($event)">
 </app-password-confirm-modal>
 
 <app-modal [aberto]="modalAberto()" [titulo]="modoEdicao() ? 'Editar produto' : 'Cadastrar produto'"
-  [descricao]="modoEdicao() ? 'Editar produto existente' : 'Cadastrar novo produto'" [modoEdicao]="modoEdicao()"
-  (fechar)="fecharModal()" (salvar)="salvarProduto()" (cancelar)="fecharModal()">
+  [modoEdicao]="modoEdicao()"
+  [acaoPrimariaLabel]="carregandoFormulario() ? 'Salvando...' : (modoEdicao() ? 'Salvar' : 'Cadastrar')"
+  (fechar)="fecharModal()"
+  (salvar)="salvarProduto()" (cancelar)="fecharModal()">
   <form [formGroup]="formProduto" novalidate>
     <label for="nome">Nome</label>
     <input id="nome" type="text" formControlName="nome" maxlength="160" />

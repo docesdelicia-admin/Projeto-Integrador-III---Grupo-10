@@ -22,10 +22,7 @@ api/
 |  |- index.ts     # /api/auth (POST login, GET sessao)
 |- clientes/
 |  |- index.ts     # /api/clientes (GET protegido)
-|- insumos/
-|  |- index.ts     # /api/insumos (GET)
-|- estoque_insumos/
-|  |- index.ts     # /api/estoque_insumos (GET)
+
 |- pedidos/
 |  |- index.ts     # /api/pedidos (GET)
 |- produtos/
@@ -50,11 +47,6 @@ api/
 - `POST /api/clientes`: cria cliente (admin)
 - `PUT /api/clientes?id=<id>`: edita cliente (autenticado)
 - `DELETE /api/clientes?id=<id>`: deleta cliente (admin com confirmacao de senha)
-- `GET /api/insumos`: lista insumos (autenticado)
-- `POST /api/insumos`: cria insumo (admin)
-- `PUT /api/insumos?id=<id>`: edita insumo (autenticado)
-- `DELETE /api/insumos?id=<id>`: deleta insumo (admin com confirmacao de senha)
-- `GET /api/estoque_insumos`: lista estoque (autenticado)
 - `GET /api/pedidos`: lista pedidos (autenticado)
 - `POST /api/pedidos`: cria pedido (autenticado)
 - `PUT /api/pedidos?id=<id>`: edita pedido (autenticado)
@@ -91,7 +83,7 @@ Formato aceito no corpo da requisicao:
 ### Admin (tipo_usuario = "admin")
 - ✅ Criar, editar e **excluir** r usuários
 - ✅ Criar, editar e **excluir** produtos
-- ✅ Criar, editar e **excluir** insumos
+- ✅ Criar e editar produtos (mas não pode excluir → 403)
 - ✅ Criar, editar e **excluir** clientes
 - ✅ Criar, editar e **excluir** pedidos
 - ✅ Listar/consultar todas as rotas
@@ -99,7 +91,7 @@ Formato aceito no corpo da requisicao:
 ### Operador (tipo_usuario = "operador")
 - ❌ Não pode criar, editar ou excluir usuários
 - ✅ Criar e editar produtos (mas não pode excluir → 403)
-- ✅ Criar e editar insumos (mas não pode excluir → 403)
+- ✅ Criar e editar produtos (mas não pode excluir → 403)
 - ✅ Criar e editar clientes (mas não pode excluir → 403)
 - ✅ Criar e editar pedidos (alterando status para `cancelado` para "deletar", mas não pode deletar → 403)
 - ✅ Consultar/listar todas as rotas
@@ -111,7 +103,7 @@ Formato aceito no corpo da requisicao:
 |---------|--------|----------|
 | Sem token | 401 | `{"erro": "Token nao enviado."}` |
 | Token inválido | 401 | `{"erro": "Token invalido ou expirado."}` |
-| Operador tenta deletar (produtos/insumos/clientes) | 403 | `{"erro": "Apenas administradores podem deletar dados."}` |
+| Operador tenta deletar (produtos/clientes) | 403 | `{"erro": "Apenas administradores podem deletar dados."}` |
 | Operador tenta deletar pedido | 403 | `{"erro": "Apenas administradores podem deletar pedidos."}` |
 | Operador tenta editar outro usuário | 403 | `{"erro": "Acesso Restrito a Administradores."}` |
 | Método não suportado | 405 | `{"erro": "Metodo nao permitido"}` |

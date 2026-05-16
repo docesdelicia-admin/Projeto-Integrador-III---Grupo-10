@@ -66,4 +66,11 @@ export class ProdutoCardComponent {
       currency: 'BRL',
     }).format(this.produto.preco);
   }
+
+  solicitarOrcamento(): void {
+    const numeroWhatsApp = '5511963101084';
+    const mensagem = `Gostaria de um orçamento para o produto: ${this.produto.nome}`;
+    const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+    window.open(urlWhatsApp, '_blank');
+  }
 }

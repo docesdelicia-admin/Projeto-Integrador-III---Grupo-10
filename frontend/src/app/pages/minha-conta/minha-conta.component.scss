@@ -1,6 +1,6 @@
 .perfil {
   margin: 0.45rem 0 0;
-  color: #6f5037;
+  color: #6a6055;
 }
 
 form {
@@ -13,9 +13,9 @@ form {
 .senha-bloco {
   margin-top: 1.25rem;
   padding: 1rem;
-  border: 1px solid #e5c6a9;
+  border: 1px solid rgba(153, 53, 86, 0.15);
   border-radius: 0.9rem;
-  background: #fffaf4;
+  background: #ffffff;
   border: 0;
   display: grid;
   gap: 0.75rem;
@@ -24,7 +24,7 @@ form {
 
 .senha-bloco h2 {
   margin: 0;
-  color: #4f2a17;
+  color: #993556;
   font-size: 1.1rem;
 }
 
@@ -54,7 +54,7 @@ form {
   padding: 0;
   border-radius: 0.55rem;
   background: transparent;
-  color: #6a6055;
+  color: #993556;
   display: grid;
   place-items: center;
 }
@@ -70,7 +70,7 @@ form {
 }
 
 .botao-olho:hover {
-  background: rgba(217, 111, 53, 0.12);
+  background: rgba(153, 53, 86, 0.12);
 }
 
 .botao-alterar-senha {
@@ -79,7 +79,7 @@ form {
   border: 0;
   padding: 0;
   background: transparent;
-  color: #bf3b2b;
+  color: #993556;
   font-weight: 700;
   cursor: pointer;
 }
@@ -89,12 +89,12 @@ form {
 }
 
 label {
-  color: #5a3a21;
+  color: #993556;
   font-weight: 600;
 }
 
 input {
-  border: 1px solid #dfd3c4;
+  border: 1px solid rgba(153, 53, 86, 0.15);
   border-radius: 0.75rem;
   padding: 0.8rem 0.9rem;
   font-size: 1rem;
@@ -105,8 +105,8 @@ input {
 
 input:focus {
   outline: none;
-  border-color: #db8f4c;
-  box-shadow: 0 0 0 3px rgba(219, 143, 76, 0.2);
+  border-color: #993556;
+  box-shadow: 0 0 0 3px rgba(153, 53, 86, 0.2);
 }
 
 .submit-button {
@@ -118,7 +118,7 @@ input:focus {
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  background: linear-gradient(135deg, #d96f35, #bf3b2b);
+  background: linear-gradient(135deg, #993556, #7a2740);
   color: #fff;
   transition:
     transform 0.15s ease,
@@ -138,14 +138,14 @@ input:focus {
 .formulario-senha {
   margin-top: 1rem;
   padding: 1.2rem;
-  background: #fef9f3;
-  border: 1px solid #e5c6a9;
+  background: #ffffff;
+  border: 1px solid rgba(153, 53, 86, 0.15);
   border-radius: 0.8rem;
 }
 
 .formulario-senha h3 {
   margin: 0 0 1rem 0;
-  color: #4f2a17;
+  color: #993556;
   font-size: 1.05rem;
 }
 
@@ -168,17 +168,17 @@ input:focus {
 }
 
 .formulario-senha-acoes button.cancelar {
-  background: linear-gradient(135deg, #999, #777);
+  background: linear-gradient(135deg, #b85a7c, #993556);
 }
 
 .formulario-senha-acoes button.confirmar {
-  background: linear-gradient(135deg, #4caf50, #388e3c);
+  background: linear-gradient(135deg, #993556, #7a2740);
 }
 
 .botao-secundario {
-  background: linear-gradient(135deg, #999, #777);
+  background: linear-gradient(135deg, #b85a7c, #993556);
 }
 
 .botao-principal {
-  background: linear-gradient(135deg, #d96f35, #bf3b2b);
+  background: linear-gradient(135deg, #993556, #7a2740);
 }

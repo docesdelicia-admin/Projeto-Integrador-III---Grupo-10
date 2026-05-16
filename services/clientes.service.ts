@@ -54,12 +54,12 @@ export async function listarClientes(req: VercelRequest, res: VercelResponse) {
 
     if (dataInicio) {
       valores.push(dataInicio);
-      condicoes.push(`criado_em >= $${valores.length}`);
+      condicoes.push(`criado_em >= ($${valores.length})::date`);
     }
 
     if (dataFim) {
       valores.push(dataFim);
-      condicoes.push(`criado_em <= $${valores.length}`);
+      condicoes.push(`criado_em < (($${valores.length})::date + INTERVAL '1 day')`);
     }
 
     const whereClause = condicoes.length > 0 ? ` WHERE ${condicoes.join(' AND ')}` : '';

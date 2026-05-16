@@ -103,13 +103,16 @@ export class PedidosService {
       );
   }
 
-  excluir(id: string): Observable<{ mensagem: string }> {
+  excluir(id: string, senhaAtual: string): Observable<{ mensagem: string }> {
     this.removeOrderFromCache(id);
 
     return this.http
       .delete<{
         mensagem: string;
-      }>(`${this.apiUrl}?id=${encodeURIComponent(id)}`, { withCredentials: true })
+      }>(`${this.apiUrl}?id=${encodeURIComponent(id)}`, {
+        withCredentials: true,
+        body: { senha_atual: senhaAtual },
+      })
       .pipe(
         catchError((error) => {
           this.cacheStore.invalidateByPrefix(this.prefixoChave);

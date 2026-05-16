@@ -110,7 +110,7 @@ export class ProdutosService {
       );
   }
 
-  private invalidarCacheLista(): void {
+  invalidarCacheLista(): void {
     this.cacheStore.invalidate(this.chaveCacheLista);
     this.cacheStore.invalidate(this.chaveCacheListaPublica);
   }

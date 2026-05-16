@@ -1,6 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { listarPedidos, criarPedido, editarPedido, deletarPedido } from '../../services/pedidos.service.js';
 
+const allowedMethods = 'GET, POST, PUT, DELETE';
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   switch (req.method) {
     case 'GET':
@@ -12,7 +14,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     case 'DELETE':
       return await deletarPedido(req, res);
     default:
-      res.setHeader('Allow', 'GET, POST, PUT, DELETE');
+      res.setHeader('Allow', allowedMethods);
       return res.status(405).json({ erro: 'Metodo nao permitido' });
   }
 }

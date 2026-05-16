@@ -6,6 +6,7 @@
   min-height: 100%;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(135deg, #fbeaf0 0%, #fbeaf0 50%, #fbeaf0 100%);
 }
 
 /* Global app layout (header + sidebar + main + footer) */
@@ -26,9 +27,6 @@
   width: 100%;
   max-width: 100vw;
   flex: 1;
-  background:
-    radial-gradient(circle at 80% 10%, #ffe2c1 0%, transparent 35%),
-    linear-gradient(160deg, #fff8ec 0%, #ffeedd 100%);
 }
 
 .app-main {

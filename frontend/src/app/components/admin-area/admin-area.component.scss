@@ -17,7 +17,7 @@
   height: 100%;
   box-sizing: border-box;
   padding: 1rem 1.1rem;
-  border: 1px solid #edccd9;
+  border: 1px solid rgba(153, 53, 86, 0.15);
   border-radius: 1rem;
   background: #ffffff;
   color: #993556;
@@ -59,25 +59,25 @@
   border: 0;
   border-radius: 0.8rem;
   padding: 0.65rem 0.9rem;
-  background: #fff7fa;
+  background: #fbeaf0;
   color: #993556;
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
   font-family: inherit;
-  border: 1px solid #edccd9;
+  border: 1px solid rgba(153, 53, 86, 0.15);
 
   &:hover {
     transform: translateY(-1px);
     background: #993556;
-    color: #fff7fa;
+    color: #ffffff;
   }
 }
 
 .admin-area__usuario {
-  background: #fff7fa;
+  background: #fbeaf0;
   color: #993556;
-  border: 1px solid #edccd9;
+  border: 1px solid rgba(153, 53, 86, 0.15);
 }
 
 .admin-area__botao {

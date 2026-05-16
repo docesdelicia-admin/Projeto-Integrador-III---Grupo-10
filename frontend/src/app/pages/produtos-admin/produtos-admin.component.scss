@@ -11,7 +11,7 @@
   height: 36px;
   object-fit: cover;
   border-radius: 5px;
-  border: 1.5px solid #dfbe9f;
+  border: 1.5px solid rgba(153, 53, 86, 0.15);
   flex-shrink: 0;
   display: block;
 }
@@ -19,8 +19,8 @@
 :host ::ng-deep .tabela-fotos-extra {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #6a4023;
-  background: #f7ddc3;
+  color: #993556;
+  background: #f4c0d1;
   border-radius: 4px;
   padding: 2px 5px;
   white-space: nowrap;
@@ -39,7 +39,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  color: #6a4023;
+  color: #993556;
   font-size: 0.88rem;
   font-weight: 600;
 }
@@ -53,13 +53,13 @@
 .label-fotos-existentes {
   margin: 0;
   font-weight: 600;
-  color: #5a3a21;
+  color: #993556;
   font-size: 0.88rem;
 }
 
 .fotos-existentes {
   margin: 0;
-  color: #6a4023;
+  color: #6a6055;
   font-size: 0.88rem;
 }
 
@@ -75,12 +75,12 @@
   }
 
   &::-webkit-scrollbar-track {
-    background: #f7ddc3;
+    background: #fbeaf0;
     border-radius: 2px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #d8ab85;
+    background: #f4c0d1;
     border-radius: 2px;
   }
 }
@@ -90,11 +90,11 @@
 }
 
 .dropzone {
-  border: 2px dashed #d8ab85;
+  border: 2px dashed rgba(153, 53, 86, 0.25);
   border-radius: 0.8rem;
   padding: 1rem;
-  background: #fff5e8;
-  color: #6a4023;
+  background: #fbeaf0;
+  color: #993556;
   text-align: center;
   cursor: pointer;
   transition:
@@ -103,8 +103,8 @@
 }
 
 .dropzone.ativa {
-  border-color: #d96f35;
-  background: #ffe9d3;
+  border-color: #993556;
+  background: #f4c0d1;
 }
 
 .dropzone p {
@@ -141,11 +141,11 @@
   }
 
   &.nova {
-    border-color: #d96f35;
+    border-color: #993556;
   }
 
   &.existente {
-    border-color: #dfbe9f;
+    border-color: rgba(153, 53, 86, 0.15);
   }
 
   &:hover .btn-remover-foto {
@@ -157,7 +157,7 @@
   position: absolute;
   bottom: 3px;
   left: 3px;
-  background: #d96f35;
+  background: #993556;
   color: #fff;
   font-size: 0.6rem;
   font-weight: 700;
@@ -175,7 +175,7 @@
   height: 100%;
   border: 0;
   border-radius: 0;
-  background: rgba(79, 42, 23, 0.6);
+  background: rgba(153, 53, 86, 0.6);
   color: #fff;
   font-size: 1.1rem;
   font-weight: 700;

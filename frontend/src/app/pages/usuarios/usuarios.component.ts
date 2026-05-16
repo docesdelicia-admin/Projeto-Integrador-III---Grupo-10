@@ -301,7 +301,9 @@ export class UsuariosPage implements OnInit {
       next: () => {
         this.toast.sucesso('Usuário criado');
         this.fecharModalUsuario();
-        this.carregarUsuarios();
+        this.usuariosService.invalidarCacheListagem();
+        this.carregando = true;
+        window.setTimeout(() => this.carregarUsuarios(), 500);
         this.salvando = false;
       },
       error: (err: Error) => {
@@ -318,7 +320,9 @@ export class UsuariosPage implements OnInit {
       next: () => {
         this.toast.sucesso('Usuário atualizado');
         this.fecharModalUsuario();
-        this.carregarUsuarios();
+        this.usuariosService.invalidarCacheListagem();
+        this.carregando = true;
+        window.setTimeout(() => this.carregarUsuarios(), 500);
         this.salvando = false;
       },
       error: (err: Error) => {

@@ -19,7 +19,8 @@
 
 
 <app-modal [aberto]="modalAberto()" [titulo]="modoEdicao() ? 'Editar cliente' : 'Novo cliente'"
-  [modoEdicao]="modoEdicao()" [acaoPrimariaLabel]="!modoEdicao() ? 'Cadastrar' : null" (fechar)="fecharModal()"
+  [modoEdicao]="modoEdicao()"
+  [acaoPrimariaLabel]="salvando() ? 'Salvando...' : (!modoEdicao() ? 'Cadastrar' : null)" (fechar)="fecharModal()"
   (salvar)="salvarCliente()" (cancelar)="fecharModal()">
 
   <form [formGroup]="formCliente" novalidate>

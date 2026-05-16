@@ -19,7 +19,7 @@
       </ng-container>
       <ng-template #notEdicao>
         <button *ngIf="mostrarBotaoEditar" type="button" class="botao-secundario"
-          (click)="editar.emit()">Editar</button>
+          (click)="editar.emit()">Salvar</button>
         <button *ngIf="!mostrarBotaoEditar && mostrarBotaoFechar" type="button" class="botao-secundario"
           (click)="fechar.emit()">Fechar</button>
       </ng-template>

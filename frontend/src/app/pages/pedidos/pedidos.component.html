@@ -10,7 +10,8 @@
 </app-filtros>
 
 <app-tabela [colunas]="colunasTabela" [linhas]="linhas()" [acaoEditar]="acaoEditarPedido"
-  mensagemSemDados="Nenhum pedido encontrado." [carregando]="carregando" mensagemCarregando="Carregando pedidos...">
+  [acaoExcluir]="acaoExcluirPedido" mensagemSemDados="Nenhum pedido encontrado." [carregando]="carregando"
+  mensagemCarregando="Carregando pedidos...">
 </app-tabela>
 
 <app-modal [aberto]="modalNovoPedidoAberto()" (fechar)="fecharModalNovoPedido()" [temFooterProjetado]="true">
@@ -196,8 +197,12 @@
   </form>
 </app-modal>
 
-<app-password-confirm-modal [aberto]="modalConfirmaCancelamentoAberto()" titulo="Confirmar cancelamento"
-  [mensagem]="'Digite sua senha para cancelar o pedido de ' + nomeClientePedido() + '.'"
-  textoConfirmar="Confirmar cancelamento" [salvando]="salvandoCancelamento()"
+<app-password-confirm-modal [aberto]="modalConfirmaCancelamentoAberto()"
+  [titulo]="acaoConfirmacaoPedido() === 'excluir' ? 'Confirmar exclusão' : 'Confirmar cancelamento'"
+  [mensagem]="acaoConfirmacaoPedido() === 'excluir'
+    ? 'Digite sua senha para excluir o pedido de ' + nomeClientePedido() + '.'
+    : 'Digite sua senha para cancelar o pedido de ' + nomeClientePedido() + '.'"
+  [textoConfirmar]="acaoConfirmacaoPedido() === 'excluir' ? 'Excluir pedido' : 'Confirmar cancelamento'"
+  [salvando]="salvandoCancelamento()"
   (cancelar)="fecharModalConfirmaCancelamento()" (confirmar)="confirmarCancelamentoComSenha($event)">
 </app-password-confirm-modal>

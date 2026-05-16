@@ -52,24 +52,6 @@ erDiagram
 		TIMESTAMPTZ atualizado_em
 	}
 
-	INSUMOS {
-		UUID id PK
-		VARCHAR nome UK
-		TEXT descricao
-		VARCHAR unidade_medida
-		TIMESTAMPTZ criado_em
-		TIMESTAMPTZ atualizado_em
-	}
-
-	ESTOQUE_INSUMOS {
-		UUID id PK
-		UUID insumo_id FK,UK
-		NUMERIC quantidade_disponivel
-		NUMERIC quantidade_minima
-		TIMESTAMPTZ ultima_atualizacao
-	}
-
 	CLIENTES ||--o{ PEDIDOS : "realiza"
 	PEDIDOS ||--o{ ITENS_PEDIDO : "possui"
 	PRODUTOS ||--o{ ITENS_PEDIDO : "compoe"
-	INSUMOS ||--o| ESTOQUE_INSUMOS : "controla"

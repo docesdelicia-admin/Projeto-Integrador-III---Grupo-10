@@ -194,7 +194,11 @@ export class ProdutosAdminPage implements OnInit {
           : 'Produto cadastrado com sucesso.';
         this.modalAberto.set(false);
         this.toastService.sucesso(mensagem);
-        this.carregarProdutos();
+        this.produtosService.invalidarCacheLista();
+        this.carregandoTabela = true;
+        window.setTimeout(() => {
+          this.carregarProdutos();
+        }, 500);
       },
       error: (error: Error) => {
         this.toastService.erro(error.message);

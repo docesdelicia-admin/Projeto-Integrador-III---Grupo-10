@@ -150,12 +150,17 @@ export class PedidosPage implements OnInit {
 
   readonly modalConfirmaCancelamentoAberto = signal(false);
   readonly salvandoCancelamento = signal(false);
+  readonly acaoConfirmacaoPedido = signal<'excluir' | 'cancelar' | null>(null);
 
   // ── Ações da tabela ─────────────────────────────────────────────────────────
 
   // Reutiliza acaoEditar como "visualizar" pois TabelaComponent expõe esse input
   readonly acaoEditarPedido = (linha: TabelaLinha): void => {
     this.abrirModalVisualizar(linha);
+  };
+
+  readonly acaoExcluirPedido = (linha: TabelaLinha): void => {
+    this.abrirModalConfirmarExclusao(linha);
   };
 
   // ── Lifecycle ───────────────────────────────────────────────────────────────
@@ -236,7 +241,12 @@ export class PedidosPage implements OnInit {
     this.termoBuscaCliente.set('');
     this.resultadosBuscaCliente.set([]);
     this.formNovoCliente.reset({ nome: '', telefone: '', observacoes: '' });
-    this.formPedido.reset({ data_pedido: '', data_entrega: '', status: 'novo', observacoes: '' });
+    this.formPedido.reset({
+      data_pedido: this.formatarParaDatetimeLocal(new Date().toISOString()),
+      data_entrega: '',
+      status: 'novo',
+      observacoes: '',
+    });
     this.modalNovoPedidoAberto.set(true);
   }
 
@@ -376,7 +386,10 @@ export class PedidosPage implements OnInit {
           this.modalNovoPedidoAberto.set(false);
           this.toastService.sucesso('Pedido cadastrado com sucesso.');
           this.cachePedidos.clear(); // Limpa cache ao criar novo pedido
-          this.carregarPedidos(this.filtrosAtuais());
+          this.carregando = true;
+          window.setTimeout(() => {
+            this.carregarPedidos(this.criarFiltrosPadrao());
+          }, 250);
         },
         error: (err: Error) => {
           this.toastService.erro(err.message);
@@ -399,6 +412,20 @@ export class PedidosPage implements OnInit {
     });
 
     this.modalVisualizarAberto.set(true);
+  }
+
+  private abrirModalConfirmarCancelamento(linha: TabelaLinha): void {
+    const pedido = linha as unknown as Pedido;
+    this.pedidoSelecionado.set(pedido);
+    this.acaoConfirmacaoPedido.set('cancelar');
+    this.modalConfirmaCancelamentoAberto.set(true);
+  }
+
+  private abrirModalConfirmarExclusao(linha: TabelaLinha): void {
+    const pedido = linha as unknown as Pedido;
+    this.pedidoSelecionado.set(pedido);
+    this.acaoConfirmacaoPedido.set('excluir');
+    this.modalConfirmaCancelamentoAberto.set(true);
   }
 
   fecharModalVisualizar(): void {
@@ -433,7 +460,11 @@ export class PedidosPage implements OnInit {
           this.modalVisualizarAberto.set(false);
           this.pedidoSelecionado.set(null);
           this.toastService.sucesso('Pedido atualizado com sucesso.');
-          this.carregarPedidos(this.filtrosAtuais());
+          this.cachePedidos.clear();
+          this.carregando = true;
+          window.setTimeout(() => {
+            this.carregarPedidos(this.criarFiltrosPadrao());
+          }, 250);
         },
         error: (err: Error) => {
           this.toastService.erro(err.message);
@@ -450,32 +481,39 @@ export class PedidosPage implements OnInit {
   fecharModalConfirmaCancelamento(): void {
     if (this.salvandoCancelamento()) return;
     this.modalConfirmaCancelamentoAberto.set(false);
+    this.acaoConfirmacaoPedido.set(null);
   }
 
   confirmarCancelamentoComSenha(senha: string): void {
     const pedido = this.pedidoSelecionado();
     const senhaLimpa = senha.trim();
-    if (!pedido?.id || !senhaLimpa) return;
+    const acao = this.acaoConfirmacaoPedido();
+    if (!pedido?.id || !senhaLimpa || !acao) return;
 
     this.salvandoCancelamento.set(true);
 
-    // PedidosService não tem método cancelar próprio — cancela via editar com status
-    this.pedidosService
-      .editar(pedido.id, { status: 'cancelado' })
-      .pipe(finalize(() => this.salvandoCancelamento.set(false)))
-      .subscribe({
-        next: () => {
-          this.modalConfirmaCancelamentoAberto.set(false);
-          this.modalVisualizarAberto.set(false);
-          this.pedidoSelecionado.set(null);
-          this.toastService.sucesso('Pedido cancelado com sucesso.');
-          this.carregarPedidos(this.filtrosAtuais());
-        },
-        error: (err: Error) => {
-          this.toastService.erro(err.message);
-          this.modalConfirmaCancelamentoAberto.set(false);
-        },
-      });
+    const requisicao =
+      acao === 'excluir'
+        ? this.pedidosService.excluir(pedido.id, senhaLimpa)
+        : this.pedidosService.editar(pedido.id, { status: 'cancelado' });
+
+    requisicao.pipe(finalize(() => this.salvandoCancelamento.set(false))).subscribe({
+      next: () => {
+        this.modalConfirmaCancelamentoAberto.set(false);
+        this.modalVisualizarAberto.set(false);
+        this.pedidoSelecionado.set(null);
+        this.acaoConfirmacaoPedido.set(null);
+        this.toastService.sucesso(
+          acao === 'excluir' ? 'Pedido excluido com sucesso.' : 'Pedido cancelado com sucesso.',
+        );
+        this.carregarPedidos(this.criarFiltrosPadrao());
+      },
+      error: (err: Error) => {
+        this.toastService.erro(err.message);
+        this.modalConfirmaCancelamentoAberto.set(false);
+        this.acaoConfirmacaoPedido.set(null);
+      },
+    });
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────

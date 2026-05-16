@@ -1,5 +1,5 @@
 .tabela-wrapper {
-  border: 1px solid #e5c6a9;
+  border: 1px solid rgba(153, 53, 86, 0.15);
   border-radius: 0.9rem;
   overflow-x: auto;
   background: rgba(255, 255, 255, 0.88);
@@ -18,14 +18,14 @@
 .tabela td {
   padding: 0.75rem 0.8rem;
   text-align: left;
-  border-bottom: 1px solid #f0dcc9;
-  color: #5d4028;
+  border-bottom: 1px solid rgba(153, 53, 86, 0.1);
+  color: #2a2a2a;
   vertical-align: middle;
 }
 
 .tabela thead th {
-  background: #fff1e2;
-  color: #4f2a17;
+  background: #fbeaf0;
+  color: #993556;
   font-size: 0.85rem;
   white-space: nowrap;
   position: sticky;
@@ -38,7 +38,7 @@
 }
 
 .tabela tbody tr:hover {
-  background: rgba(255, 244, 231, 0.75);
+  background: rgba(153, 53, 86, 0.08);
 }
 
 .acoes-coluna {
@@ -51,7 +51,7 @@
   text-align: center;
   padding: 1.2rem;
   font-size: 0.9rem;
-  color: #9c7a5c;
+  color: #6a6055;
   font-style: italic;
 }
 
@@ -89,15 +89,15 @@ tr:has(.sem-dados) {
 }
 
 .acao-ver-descricao {
-  background: linear-gradient(135deg, #6a4023, #4f2a17);
+  background: linear-gradient(135deg, #993556, #7a2740);
 }
 
 .acao-editar {
-  background: linear-gradient(135deg, #dd8a3d, #cc5a2b);
+  background: linear-gradient(135deg, #b85a7c, #993556);
 }
 
 .acao-excluir {
-  background: linear-gradient(135deg, #cb4c37, #a52e26);
+  background: linear-gradient(135deg, #c94d5f, #a52e40);
 }
 
 .botao:disabled {
@@ -133,11 +133,11 @@ tr:has(.sem-dados) {
   width: 18px;
   height: 18px;
   border: none;
-  background: #f7ddc3;
+  background: #f4c0d1;
   cursor: pointer;
   border-radius: 6px;
   font-weight: bold;
-  color: #6a4023;
+  color: #993556;
 
   display: flex;
   align-items: center;
@@ -147,7 +147,7 @@ tr:has(.sem-dados) {
 }
 
 .nav:hover {
-  background: #e7c4a3;
+  background: #e8a5bb;
 }
 
 .nav:active {

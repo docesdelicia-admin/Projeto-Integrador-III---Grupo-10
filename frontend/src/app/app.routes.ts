@@ -6,7 +6,6 @@ import { LoginPage } from './pages/login/login.component';
 import { ProdutosAdminPage } from './pages/produtos-admin/produtos-admin.component';
 import { PedidosPage } from './pages/pedidos/pedidos.component';
 import { ClientesPage } from './pages/clientes/clientes.component';
-import { InsumosPage } from './pages/insumos/insumos.component';
 import { UsuariosPage } from './pages/usuarios/usuarios.component';
 import { MinhaContaPage } from './pages/minha-conta/minha-conta.component';
 
@@ -38,11 +37,6 @@ export const routes: Routes = [
   {
     path: 'dashboard/clientes',
     component: ClientesPage,
-    canActivate: [authGuard],
-  },
-  {
-    path: 'dashboard/insumos',
-    component: InsumosPage,
     canActivate: [authGuard],
   },
   {

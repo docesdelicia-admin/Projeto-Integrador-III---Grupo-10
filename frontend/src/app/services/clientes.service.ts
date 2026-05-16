@@ -150,6 +150,10 @@ export class ClientesService {
       );
   }
 
+  invalidarCacheListagem(): void {
+    this.cacheStore.invalidateByPrefix(this.prefixoChave);
+  }
+
   obterClientesEmCache(): Cliente[] {
     const entrada = this.cacheStore.getStale<ListaClientesResponse>(`${this.prefixoChave}all`);
     return entrada?.clientes ?? [];

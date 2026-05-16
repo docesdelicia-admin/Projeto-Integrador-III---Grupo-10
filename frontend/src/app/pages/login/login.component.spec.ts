@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AuthService, LoginResponse } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 import { LoginPage } from './login.component';
 
 describe('LoginPage', () => {
@@ -14,6 +15,11 @@ describe('LoginPage', () => {
   let routerSpy: {
     navigateByUrl: ReturnType<typeof vi.fn>;
   };
+  let toastServiceSpy: {
+    erro: ReturnType<typeof vi.fn>;
+    sucesso: ReturnType<typeof vi.fn>;
+    info: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     AuthServiceSpy = {
@@ -22,12 +28,18 @@ describe('LoginPage', () => {
     routerSpy = {
       navigateByUrl: vi.fn(),
     };
+    toastServiceSpy = {
+      erro: vi.fn(),
+      sucesso: vi.fn(),
+      info: vi.fn(),
+    };
 
     await TestBed.configureTestingModule({
       imports: [LoginPage],
       providers: [
         { provide: AuthService, useValue: AuthServiceSpy as unknown as AuthService },
         { provide: Router, useValue: routerSpy as unknown as Router },
+        { provide: ToastService, useValue: toastServiceSpy as unknown as ToastService },
       ],
     }).compileComponents();
 
@@ -79,6 +91,6 @@ describe('LoginPage', () => {
 
     component.enviarLogin();
 
-    expect(component.mensagemErro).toBe('Credenciais invalidas.');
+    expect(toastServiceSpy.erro).toHaveBeenCalledWith('Credenciais invalidas.');
   });
 });

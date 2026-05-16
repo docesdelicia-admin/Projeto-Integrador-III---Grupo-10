@@ -66,12 +66,19 @@ export class CacheStoreService {
 
   invalidate(key: string): void {
     this.cache.delete(key);
+    this.inFlight.delete(key);
   }
 
   invalidateByPrefix(prefix: string): void {
     for (const key of this.cache.keys()) {
       if (key.startsWith(prefix)) {
         this.cache.delete(key);
+      }
+    }
+
+    for (const key of this.inFlight.keys()) {
+      if (key.startsWith(prefix)) {
+        this.inFlight.delete(key);
       }
     }
   }

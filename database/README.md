@@ -20,9 +20,7 @@ database/
 |  |- 002_tabela_clientes.sql
 |  |- 003_tabela_pedidos.sql
 |  |- 004_tabela_itens_pedido.sql
-|  |- 005_tabela_insumos.sql
-|  |- 006_tabela_estoque_insumos.sql
-|  |- 007_tabela_produtos.sql
+|  |- 005_tabela_produtos.sql
 |- scripts/
 |  |- db-migrate-all.mjs
 |  |- db-run-sql.mjs
@@ -122,30 +120,6 @@ Armazena os produtos disponiveis para venda (ex: bolo no pote, brigadeiro, torta
 - ativo
 - criado_em
 
-### insumos
-
-Tabela responsavel por armazenar os ingredientes ou materiais utilizados na producao dos produtos.
-
-Exemplos de insumos: farinha, leite condensado, chocolate, embalagens, acucar, ovos.
-
-- id (PK)
-- nome
-- descricao
-- unidade_medida (kg, g, unidade, ml, etc)
-- criado_em
-
-### estoque_insumos
-
-Tabela responsavel por controlar a quantidade disponivel de cada insumo.
-
-- id (PK)
-- insumo_id (FK insumos)
-- quantidade_disponivel
-- quantidade_minima
-- ultima_atualizacao
-
-Essa tabela permite acompanhar o estoque de ingredientes utilizados na producao.
-
 ### pedidos
 
 Registra cada pedido realizado.
@@ -178,7 +152,6 @@ Obs:
 - clientes -> pedidos
 - pedidos -> itens_pedido
 - produtos -> itens_pedido
-- insumos -> estoque_insumos
 
 ## Referencias
 

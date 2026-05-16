@@ -59,7 +59,9 @@ export async function listarProdutos(req: VercelRequest, res: VercelResponse) {
 		res.setHeader('CDN-Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
 		res.setHeader('Vercel-CDN-Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
 	} else {
-		res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=86400');
+		res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+		res.setHeader('Pragma', 'no-cache');
+		res.setHeader('Expires', '0');
 	}
 
 	return res.status(200).json({

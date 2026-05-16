@@ -1,17 +1,21 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
 import { HeaderComponent } from './header.component';
+import { SidebarService } from '../../services/sidebar.service';
 
 describe('HeaderComponent', () => {
   let fixture: ComponentFixture<HeaderComponent>;
   let component: HeaderComponent;
+  let sidebarServiceMock: Pick<SidebarService, 'toggle'>;
 
   beforeEach(async () => {
+    sidebarServiceMock = {
+      toggle: vi.fn(),
+    };
+
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
-      providers: [{ provide: ActivatedRoute, useValue: { params: of({}) } }],
+      providers: [{ provide: SidebarService, useValue: sidebarServiceMock }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HeaderComponent);
@@ -29,20 +33,10 @@ describe('HeaderComponent', () => {
     expect(component.titulo).toBe('Meu Titulo');
   });
 
-  it('exibe busca quando exibirBusca étrue', () => {
-    component.exibirBusca = true;
-    expect(component.exibirBusca).toBe(true);
-  });
+  it('chama toggle no servico ao alternar sidebar', () => {
+    component.toggleSidebar();
 
-  it('oculta busca quando exibirBusca éfalse', () => {
-    component.exibirBusca = false;
-    expect(component.exibirBusca).toBe(false);
-  });
-
-  it('usa placeholder customizado para busca', () => {
-    component.exibirBusca = true;
-    component.placeholderBusca = 'Busca customizada';
-    expect(component.placeholderBusca).toBe('Busca customizada');
+    expect(sidebarServiceMock.toggle).toHaveBeenCalledTimes(1);
   });
 
   it('renderiza componente', () => {

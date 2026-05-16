@@ -11,14 +11,6 @@
       "use": "@vercel/node"
     },
     {
-      "src": "insumos/index.ts",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "estoque_insumos/index.ts",
-      "use": "@vercel/node"
-    },
-    {
       "src": "pedidos/index.ts",
       "use": "@vercel/node"
     },

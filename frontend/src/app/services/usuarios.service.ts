@@ -141,6 +141,10 @@ export class UsuariosService {
       );
   }
 
+  invalidarCacheListagem(): void {
+    this.cache.invalidate(this.cacheKeyListagem);
+  }
+
   editarMinhaConta(
     usuarioId: string,
     payload: EditarMinhaContaPayload,

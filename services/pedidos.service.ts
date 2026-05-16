@@ -92,13 +92,13 @@ export async function listarPedidos(req: VercelRequest, res: VercelResponse) {
 	// Filtro por período - data início
 	if (data_inicio && typeof data_inicio === 'string' && data_inicio.trim()) {
 		valores.push(data_inicio.trim());
-		filtros.push(`data_pedido >= $${valores.length}`);
+		filtros.push(`data_pedido >= ($${valores.length})::date`);
 	}
 
 	// Filtro por período - data fim
 	if (data_fim && typeof data_fim === 'string' && data_fim.trim()) {
 		valores.push(data_fim.trim());
-		filtros.push(`data_pedido <= $${valores.length}`);
+		filtros.push(`data_pedido < (($${valores.length})::date + INTERVAL '1 day')`);
 	}
 
 	const whereClause = filtros.length > 0 ? `WHERE ${filtros.join(' AND ')}` : '';
@@ -172,6 +172,10 @@ export async function criarPedido(req: VercelRequest, res: VercelResponse) {
 		const status = body.status ? String(body.status).trim().toLowerCase() : 'novo';
 		const observacoes = body.observacoes ? String(body.observacoes).trim() : null;
 
+		if (dataEntrega && dataEntrega < dataPedido) {
+			return res.status(400).json({ erro: 'Data de entrega nao pode ser menor que a data do pedido.' });
+		}
+
 		// Validar status
 		if (!['novo', 'em_producao', 'entregue', 'cancelado'].includes(status)) {
 			return res.status(400).json({ erro: 'Status invalido. Use: novo, em_producao, entregue, cancelado.' });
@@ -193,6 +197,10 @@ export async function criarPedido(req: VercelRequest, res: VercelResponse) {
 	} catch (error) {
 		if (error instanceof SyntaxError) {
 			return res.status(400).json({ erro: 'Corpo da requisicao invalido.' });
+		}
+
+		if (error instanceof Error && (error as { code?: string }).code === '23514') {
+			return res.status(400).json({ erro: 'Status invalido. Use: novo, em_producao, entregue, cancelado.' });
 		}
 
 		if (error instanceof Error && error.message.includes('foreign key constraint')) {
@@ -237,6 +245,16 @@ export async function editarPedido(req: VercelRequest, res: VercelResponse) {
 			campos.push({ chave: 'data_entrega', valor: dataEntrega });
 		}
 
+		const dataPedidoAtualizada = campos.find((campo) => campo.chave === 'data_pedido')?.valor;
+		const dataEntregaAtualizada = campos.find((campo) => campo.chave === 'data_entrega')?.valor;
+		if (
+			typeof dataPedidoAtualizada === 'string' &&
+			typeof dataEntregaAtualizada === 'string' &&
+			dataEntregaAtualizada < dataPedidoAtualizada
+		) {
+			return res.status(400).json({ erro: 'Data de entrega nao pode ser menor que a data do pedido.' });
+		}
+
 		if (body.status !== undefined) {
 			const status = String(body.status).trim().toLowerCase();
 			if (!['novo', 'em_producao', 'entregue', 'cancelado'].includes(status)) {
@@ -273,6 +291,10 @@ export async function editarPedido(req: VercelRequest, res: VercelResponse) {
 	} catch (error) {
 		if (error instanceof SyntaxError) {
 			return res.status(400).json({ erro: 'Corpo da requisicao invalido.' });
+		}
+
+		if (error instanceof Error && (error as { code?: string }).code === '23514') {
+			return res.status(400).json({ erro: 'Status invalido. Use: novo, em_producao, entregue, cancelado.' });
 		}
 
 		return res.status(500).json({ erro: 'Erro interno ao atualizar pedido.' });

@@ -42,16 +42,22 @@ app-footer {
   transition:
     opacity 120ms ease,
     transform 120ms ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  }
 }
 
 .botao-principal {
-  background: linear-gradient(135deg, #d96f35, #bf3b2b);
+  background: linear-gradient(135deg, #993556, #7a2740);
   color: #fff;
 }
 
 .botao-secundario {
-  background: #f7ddc3;
-  color: #6a4023;
+  border: 1px solid #993556;
+  background: #ffffff;
+  color: #993556;
 }
 
 @media (max-width: 1024px) {
@@ -67,4 +73,9 @@ app-footer {
     width: 100%;
     font-size: 0.9rem;
   }
+}
+
+/* Estilos globais de checkbox */
+input[type='checkbox'] {
+  accent-color: #993556;
 }

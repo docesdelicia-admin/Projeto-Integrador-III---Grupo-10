@@ -201,7 +201,11 @@ export class ClientesPage implements OnInit {
         this.toastService.sucesso(
           this.modoEdicao() ? 'Cliente atualizado com sucesso.' : 'Cliente cadastrado com sucesso.',
         );
-        this.carregarClientes(this.filtrosAtuais());
+        this.clientesService.invalidarCacheListagem();
+        this.carregando = true;
+        window.setTimeout(() => {
+          this.carregarClientes(this.filtrosAtuais());
+        }, 500);
       },
       error: (err: Error) => this.toastService.erro(err.message),
     });

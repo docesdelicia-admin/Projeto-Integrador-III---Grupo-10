@@ -1,15 +1,6 @@
-:host {
-  display: block;
-  min-height: 100dvh;
-  background:
-    radial-gradient(circle at 15% 20%, #ffd6b3 0%, transparent 35%),
-    radial-gradient(circle at 80% 10%, #ffd9e7 0%, transparent 30%),
-    linear-gradient(135deg, #fff6e8 0%, #fffaf4 55%, #ffeede 100%);
-  font-family: 'Poppins', 'Segoe UI', sans-serif;
-}
-
 .login-page {
   display: grid;
+  height: 100vh;
   grid-template-columns: 1.1fr 1fr;
   gap: 2rem;
   padding: 2rem;
@@ -19,12 +10,12 @@
 .form-panel {
   border-radius: 1.5rem;
   padding: 2.25rem;
-  box-shadow: 0 20px 45px rgba(103, 58, 29, 0.12);
+  box-shadow: 0 20px 45px rgba(153, 53, 86, 0.06);
 }
 
 .brand-panel {
-  background: linear-gradient(160deg, #fff0d9 0%, #ffd7ad 100%);
-  color: #5b2f16;
+  background: linear-gradient(160deg, #f4c0d1 0%, #f0a8c0 100%);
+  color: #993556;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -67,7 +58,7 @@
 
 .subtitle {
   margin: 0.5rem 0 1.5rem;
-  color: #6a6055;
+  color: #993556;
 }
 
 form {
@@ -79,10 +70,11 @@ form {
 label {
   font-weight: 600;
   margin-top: 0.35rem;
+  color: #993556;
 }
 
 input {
-  border: 1px solid #dfd3c4;
+  border: 1px solid rgba(153, 53, 86, 0.15);
   border-radius: 0.75rem;
   padding: 0.8rem 0.9rem;
   font-size: 1rem;
@@ -131,13 +123,13 @@ input {
 }
 
 .senha-toggle:hover {
-  background: rgba(217, 111, 53, 0.12);
+  background: rgba(153, 53, 86, 0.12);
 }
 
 input:focus {
   outline: none;
-  border-color: #db8f4c;
-  box-shadow: 0 0 0 3px rgba(219, 143, 76, 0.2);
+  border-color: #993556;
+  box-shadow: 0 0 0 3px rgba(153, 53, 86, 0.2);
 }
 
 .submit-button {
@@ -148,7 +140,7 @@ input:focus {
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  background: linear-gradient(135deg, #d96f35, #bf3b2b);
+  background: linear-gradient(135deg, #993556, #7a2740);
   color: #fff;
   transition:
     transform 0.15s ease,
@@ -166,7 +158,7 @@ input:focus {
 }
 
 .error {
-  color: #bf3b2b;
+  color: #993556;
   min-height: 1.1rem;
 }
 
@@ -180,7 +172,7 @@ input:focus {
 }
 
 .feedback.error {
-  color: #bf3b2b;
+  color: #993556;
 }
 
 @media (max-width: 1024px) {

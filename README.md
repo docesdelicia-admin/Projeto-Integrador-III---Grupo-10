@@ -192,15 +192,13 @@ O arquivo `vercel.json` na raiz ja define o fluxo de deploy para o monorepo:
 - instala dependencias de `frontend` e `api`
 - faz build do Angular em `frontend`
 - publica os arquivos estaticos de `frontend/dist/doces-delicia/browser`
-- expoe apenas os endpoints de API mapeados explicitamente (`/api/auth`, `/api/clientes`, `/api/insumos`, `/api/estoque_insumos`, `/api/pedidos`, `/api/produtos`, `/api/usuarios`)
+- expoe apenas os endpoints de API mapeados explicitamente (`/api/auth`, `/api/clientes`, `/api/pedidos`, `/api/produtos`, `/api/usuarios`)
 
 ## Rotas de API
 
 - `POST /api/auth`: login
 - `GET /api/auth`: validar sessao/token (rota única de auth)
 - `GET /api/clientes`: endpoint protegido
-- `GET /api/insumos`: listar insumos
-- `GET /api/estoque_insumos`: listar estoque de insumos
 - `GET /api/pedidos`: listar pedidos
 - `GET /api/produtos`: listar produtos
 - `GET /api/usuarios`: listar usuarios

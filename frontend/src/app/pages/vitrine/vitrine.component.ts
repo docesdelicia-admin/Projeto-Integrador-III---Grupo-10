@@ -29,9 +29,7 @@ export class VitrinePage implements OnInit {
 
   constructor(private readonly produtosService: ProdutosService) {}
 
-  ngOnInit(): void {
-    this.carregarCategorias();
-  }
+  ngOnInit(): void {}
 
   private carregarCategorias(): void {
     const produtosEmCache = this.produtosService.obterProdutosPublicosEmCache();

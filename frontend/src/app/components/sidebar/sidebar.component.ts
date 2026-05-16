@@ -26,7 +26,6 @@ export class SidebarComponent implements OnInit {
     { label: 'Pedidos', path: '/dashboard/pedidos' },
     { label: 'Produtos', path: '/dashboard/produtos' },
     { label: 'Clientes', path: '/dashboard/clientes' },
-    { label: 'Insumos', path: '/dashboard/insumos' },
     { label: 'Usuarios', path: '/dashboard/usuarios', apenasAdmin: true },
     { label: 'Minha conta', path: '/dashboard/minha-conta' },
   ];

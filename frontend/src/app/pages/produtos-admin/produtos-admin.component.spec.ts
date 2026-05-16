@@ -108,14 +108,20 @@ describe('ProdutosAdminPage', () => {
     expect(component.formProduto.get('ativo')?.value).toBe(true);
   });
 
-  it('limpa mensagens ao abrir modal', () => {
-    component.mensagemErro.set('Erro anterior');
-    component.mensagemSucesso.set('Sucesso anterior');
+  it('limpa estado de arquivos ao abrir modal', () => {
+    component.arquivosSelecionados.set([
+      new File(['conteudo'], 'foto.jpg', { type: 'image/jpeg' }),
+    ]);
+    component.fotosExistentesEdicao.set(['foto-antiga.jpg']);
+    component.previewsNovos.set(['blob:preview']);
+    component.dropzoneAtiva.set(true);
 
     component.abrirModalCadastro();
 
-    expect(component.mensagemErro()).toBe('');
-    expect(component.mensagemSucesso()).toBe('');
+    expect(component.arquivosSelecionados()).toEqual([]);
+    expect(component.fotosExistentesEdicao()).toEqual([]);
+    expect(component.previewsNovos()).toEqual([]);
+    expect(component.dropzoneAtiva()).toBe(false);
   });
 
   it('renderiza componente da tabela', () => {

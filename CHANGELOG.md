@@ -15,10 +15,10 @@ Este formato segue Keep a Changelog e Semantic Versioning.
 
 ### Changed
 - Unificacao da validacao de exclusao em `api/_lib/auth.ts`, combinando autorizacao de admin e confirmacao de senha em um unico helper.
-- Exclusao de produtos, clientes, insumos, pedidos e usuarios passou a usar o helper unificado e exige senha atual no backend.
+- Exclusao de produtos, clientes, pedidos e usuarios passou a usar o helper unificado e exige senha atual no backend.
 - A pagina "Minha Conta" passou a usar o componente reutilizavel de confirmacao por senha.
 - O admin de produtos passou a abrir modal reutilizavel para confirmar exclusao com senha.
-- Vitrine, insumos, pedidos e admin de produtos foram ajustados para Signals e cache em memoria com deduplicacao de requisicoes.
+- Vitrine, pedidos e admin de produtos foram ajustados para Signals e cache em memoria com deduplicacao de requisicoes.
 - READMEs raiz, API, frontend e database foram atualizados para refletir o fluxo final de release e teste.
 
 ### Fixed
