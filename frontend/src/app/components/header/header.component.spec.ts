@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { HeaderComponent } from './header.component';
 import { SidebarService } from '../../services/sidebar.service';
 
@@ -15,7 +16,7 @@ describe('HeaderComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
-      providers: [{ provide: SidebarService, useValue: sidebarServiceMock }],
+      providers: [provideRouter([]), { provide: SidebarService, useValue: sidebarServiceMock }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HeaderComponent);

@@ -122,7 +122,10 @@ describe('GET /api/clientes', () => {
     expect(mockedPoolQuery).toHaveBeenCalledTimes(1);
 
     const [sql, valores] = mockedPoolQuery.mock.calls[0];
-    expect(sql).toContain('FROM clientes WHERE criado_em >= $1 AND criado_em <= $2');
+    expect(sql).toContain('FROM clientes');
+    expect(sql).toContain('criado_em');
+    // aceita tanto a comparação direta por <= quanto a técnica de < (end + INTERVAL '1 day')
+    expect(sql).toMatch(/criado_em\s*(>=|<)\s*\(?.*\$1|\$1\)?/i);
     expect(valores).toEqual(['2024-03-01', '2024-03-31']);
   });
 

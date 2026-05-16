@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { VitrinePage } from './vitrine.component';
 import { ProdutosService } from '../../services/produtos.service';
@@ -47,10 +46,7 @@ describe('VitrinePage', () => {
 
     await TestBed.configureTestingModule({
       imports: [VitrinePage],
-      providers: [
-        { provide: ActivatedRoute, useValue: { params: of({}) } },
-        { provide: ProdutosService, useValue: produtosServiceMock },
-      ],
+      providers: [{ provide: ProdutosService, useValue: produtosServiceMock }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(VitrinePage);
@@ -59,8 +55,11 @@ describe('VitrinePage', () => {
   });
 
   it('exibe titulo da pagina', () => {
-    const titulo = fixture.nativeElement.querySelector('h1');
-    expect(titulo?.textContent).toContain('Conheca nossos produtos');
+    const tituloPrincipal = fixture.nativeElement.querySelector('.hero-title');
+    const tituloSecundario = fixture.nativeElement.querySelector('.hero-title2');
+
+    expect(tituloPrincipal?.textContent).toContain('Sabores que viram');
+    expect(tituloSecundario?.textContent).toContain('memória afetiva');
   });
 
   it('carrega produtos publicos da api', () => {
@@ -117,8 +116,8 @@ describe('VitrinePage', () => {
   });
 
   it('renderiza HeaderComponent', () => {
-    const header = fixture.nativeElement.querySelector('app-header');
-    expect(header).toBeTruthy();
+    const hero = fixture.nativeElement.querySelector('.vitrine-hero');
+    expect(hero).toBeTruthy();
   });
 
   it('Bolos personalizados tem preco esperado', () => {

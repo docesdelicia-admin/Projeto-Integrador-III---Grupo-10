@@ -235,6 +235,16 @@ export class PedidosPage implements OnInit {
 
   // ── Modal novo pedido: navegação de etapas ──────────────────────────────────
 
+  formatarDatetimeLocal(data: Date): string {
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, '0');
+    const hora = String(data.getHours()).padStart(2, '0');
+    const minuto = String(data.getMinutes()).padStart(2, '0');
+
+    return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
+  }
+
   abrirModalNovoPedido(): void {
     this.etapaCriacao.set('escolha');
     this.clienteSelecionado.set(null);
@@ -242,7 +252,7 @@ export class PedidosPage implements OnInit {
     this.resultadosBuscaCliente.set([]);
     this.formNovoCliente.reset({ nome: '', telefone: '', observacoes: '' });
     this.formPedido.reset({
-      data_pedido: this.formatarParaDatetimeLocal(new Date().toISOString()),
+      data_pedido: this.formatarDatetimeLocal(new Date()),
       data_entrega: '',
       status: 'novo',
       observacoes: '',

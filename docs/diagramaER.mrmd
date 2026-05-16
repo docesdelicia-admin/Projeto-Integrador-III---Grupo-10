@@ -19,25 +19,16 @@ erDiagram
 		TIMESTAMPTZ atualizado_em
 	}
 
-	   PEDIDOS {
-		   UUID id PK
-		   UUID cliente_id FK
-		   VARCHAR cliente_nome
-		   TIMESTAMPTZ data_pedido
-		   TIMESTAMPTZ data_entrega
-		   VARCHAR status
-		   TEXT observacoes
-		   TIMESTAMPTZ criado_em
-		   TIMESTAMPTZ atualizado_em
-	   }
-
-	ITENS_PEDIDO {
+	PEDIDOS {
 		UUID id PK
-		UUID pedido_id FK
-		UUID produto_id FK
-		NUMERIC quantidade
-		NUMERIC preco_unitario
+		UUID cliente_id FK
+		VARCHAR cliente_nome
+		TIMESTAMPTZ data_pedido
+		TIMESTAMPTZ data_entrega
+		VARCHAR status
+		TEXT observacoes
 		TIMESTAMPTZ criado_em
+		TIMESTAMPTZ atualizado_em
 	}
 
 	PRODUTOS {
@@ -53,5 +44,3 @@ erDiagram
 	}
 
 	CLIENTES ||--o{ PEDIDOS : "realiza"
-	PEDIDOS ||--o{ ITENS_PEDIDO : "possui"
-	PRODUTOS ||--o{ ITENS_PEDIDO : "compoe"
