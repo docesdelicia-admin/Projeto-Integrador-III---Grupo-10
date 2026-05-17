@@ -1,0 +1,21 @@
+{
+  "name": "Doces Delicia",
+  "short_name": "DocesDelicia",
+  "description": "Doces Delicia no pote — doces artesanais e sobremesas para sua festa.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbeaf0",
+  "theme_color": "#993556",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
